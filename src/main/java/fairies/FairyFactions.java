@@ -1,4 +1,4 @@
-package com.example.examplemod;
+package fairies;
 
 import cpw.mods.fml.common.Mod;
 import cpw.mods.fml.common.Mod.EventHandler;
@@ -13,7 +13,7 @@ import org.apache.logging.log4j.Logger;
 import java.io.File;
 
 @Mod(modid = Version.MOD_ID, version = Version.VERSION)
-public class ExampleMod
+public class FairyFactions
 {
 	// This only works client side
     //static final Minecraft MC = Minecraft.getMinecraft();

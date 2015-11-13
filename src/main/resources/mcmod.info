@@ -1,14 +1,14 @@
 [
 {
-  "modid": "ExampleMod",
-  "name": "Example Mod",
+  "modid": "FairyFactions",
+  "name": "Fairy Factions",
   "description": "",
   "version": "${version}",
   "mcversion": "${mcversion}",
   "url": "",
   "updateUrl": "",
-  "authorList": [""],
-  "credits": "",
+  "authorList": ["allaryin"],
+  "credits": "KodaichiZero",
   "logoFile": "",
   "screenshots": [],
   "dependencies": []
