@@ -6,4 +6,7 @@ public class Version {
 	public static final String	VERSION		= "@VERSION@";
 
 	public static final String	CHANNEL		= MOD_ID;
+	
+	public static final String	PROXY_CLIENT = "fairies.proxy.ClientProxy";
+	public static final String	PROXY_COMMON = "fairies.proxy.CommonProxy";
 }
