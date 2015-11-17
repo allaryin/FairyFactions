@@ -1,4 +1,4 @@
-package net.minecraft.src;
+package fairies.old.client;
 
 import java.util.List;
 import net.minecraft.client.Minecraft;

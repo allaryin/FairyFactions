@@ -1,4 +1,4 @@
-package net.minecraft.src;
+package fairies.old.client;
 import java.io.PrintStream;
 import java.util.List;
 import java.util.Collections;

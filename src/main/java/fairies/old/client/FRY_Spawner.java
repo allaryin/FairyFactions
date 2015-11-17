@@ -1,6 +1,6 @@
 //Credit for the original CustomSpawner.class goes to DrZhark.
 
-package net.minecraft.src;
+package fairies.old.client;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;

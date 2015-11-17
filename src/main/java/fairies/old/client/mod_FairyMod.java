@@ -1,4 +1,4 @@
-package net.minecraft.src;
+package fairies.old.client;
 
 import java.util.Map;
 import java.util.List;

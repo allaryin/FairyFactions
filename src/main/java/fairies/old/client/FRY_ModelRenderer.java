@@ -1,9 +1,9 @@
-package net.minecraft.src;
+package fairies.old.client;
 
 import java.util.List;
 import org.lwjgl.opengl.GL11;
 
-// Referenced classes of package net.minecraft.src:
+// Referenced classes of package fairies.old.client:
 //            ModelBase, PositionTextureVertex, TexturedQuad, GLAllocation,
 //            Tessellator
 

@@ -1,4 +1,4 @@
-package net.minecraft.src;
+package fairies.old.client;
 
 import org.lwjgl.opengl.GL11;
 
