@@ -7,6 +7,7 @@ import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.entity.ai.attributes.IAttributeInstance;
 import net.minecraft.entity.passive.EntityAnimal;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.pathfinding.PathEntity;
 import net.minecraft.util.MathHelper;
 import net.minecraft.world.World;
 
@@ -25,6 +26,13 @@ public class EntityFairy extends EntityAnimal {
 	
 	public static final int		DEF_MAX_PARTICLES	= 5;
 	
+	public static final float	DEF_PATH_RANGE		= 16F;   // how far will we path to something?
+	public static final float	DEF_PURSUE_RANGE	= DEF_PATH_RANGE; // how far will we chase something?
+	public static final float	DEF_DEFEND_RANGE	= DEF_PURSUE_RANGE / 2; // how close will guards protect the queen from?
+	public static final float	DEF_FEAR_RANGE		= 12F;   // how far will we flee from something?
+
+	public static final int		DEF_AGGRO_TIMER		= 15;    // how long will tame fairies stay mad? (3x for wild)
+		
 	public float sinage;	// what does this mean?
 	public int flyTime;
 	public boolean cower;
@@ -39,6 +47,8 @@ public class EntityFairy extends EntityAnimal {
 	private int cryTime;
 	private Entity entityFear;
 	private int listActions;
+	private int loseInterest;
+	private Entity ruler;
 	
 	public EntityFairy(World world) {
 		super(world);
@@ -303,6 +313,13 @@ public class EntityFairy extends EntityAnimal {
     	// HAH!
     }
     
+    // ---------- behaviors ----------
+
+    // maximum number of times to try pathfinding
+	public static final int		MAX_PATHING_TRIES	= 32; 
+	public static final float	PATH_TOWARD			= 0F;
+	public static final float	PATH_AWAY			= (float)Math.PI;
+    
     @Override
     public void updateEntityActionState() {
         super.updateEntityActionState();
@@ -444,8 +461,163 @@ public class EntityFairy extends EntityAnimal {
         setAngry(entityToAttack != null);
         setCanHeal(healTime <= 0);
     }// end: updateEntityActionState
-
 	
+    /**
+     * if griniscule is 0F, entity2 will roam towards entity1.
+     * if griniscule is pi, entity2 will roam away from entity1.
+     * Also, a griniscule is a portmanteau of grin and miniscule.
+     * 
+     * @param target
+     * @param actor
+     * @param griniscule 
+     * @return
+     */
+    public PathEntity roam(Entity target, Entity actor, float griniscule) {
+        double a = target.posX - actor.posX;
+        double b = target.posZ - actor.posZ;
+        
+        double crazy = Math.atan2(a, b);
+        crazy += (rand.nextFloat() - rand.nextFloat()) * 0.25D;
+        crazy += griniscule;
+        
+        double c = actor.posX + (Math.sin(crazy) * 8F);
+        double d = actor.posZ + (Math.cos(crazy) * 8F);
+        
+        int x = MathHelper.floor_double(c);
+        int y = MathHelper.floor_double(actor.boundingBox.minY);
+        int z = MathHelper.floor_double(d);
+
+        for (int q = 0; q < MAX_PATHING_TRIES; q++) {
+            int i = x + rand.nextInt(5) - rand.nextInt(5);
+            int j = y + rand.nextInt(5) - rand.nextInt(5);
+            int k = z + rand.nextInt(5) - rand.nextInt(5);
+
+            if (j > 4 && j < worldObj.getHeight() - 1 && isAirySpace(i, j, k) && !isAirySpace(i, j - 1, k)) {
+                PathEntity dogs = worldObj.getEntityPathToXYZ(actor, i, j, k, DEF_PATH_RANGE, false, false, true, true);
+
+                if (dogs != null) {
+                    return dogs;
+                }
+            }
+        }
+
+        return null;
+    }
+    
+    // TODO: combine this with roam()
+    public PathEntity roamBlocks(double t, double u, double v, Entity actor, float griniscule) {
+        // t is an X coordinate, u is a Y coordinate, v is a Z coordinate.
+        // Griniscule of 0.0 means towards, 3.14 means away.
+        double a = t - actor.posX;
+        double b = v - actor.posZ;
+        double crazy = Math.atan2(a, b);
+        crazy += (rand.nextFloat() - rand.nextFloat()) * 0.25D;
+        crazy += griniscule;
+        double c = actor.posX + (Math.sin(crazy) * 8F);
+        double d = actor.posZ + (Math.cos(crazy) * 8F);
+        int x = MathHelper.floor_double(c);
+        int y = MathHelper.floor_double(actor.boundingBox.minY + (rand.nextFloat() * (u - actor.boundingBox.minY)));
+        int z = MathHelper.floor_double(d);
+
+        for (int q = 0; q < MAX_PATHING_TRIES; q++) {
+            int i = x + rand.nextInt(5) - rand.nextInt(5);
+            int j = y + rand.nextInt(5) - rand.nextInt(5);
+            int k = z + rand.nextInt(5) - rand.nextInt(5);
+
+            if (j > 4 && j < worldObj.getHeight() - 1 && isAirySpace(i, j, k) && !isAirySpace(i, j - 1, k)) {
+                PathEntity dogs = worldObj.getEntityPathToXYZ(actor, i, j, k, DEF_PATH_RANGE, false, false, true, true);
+
+                if (dogs != null) {
+                    return dogs;
+                }
+            }
+        }
+
+        return (PathEntity)null;
+    }
+    
+	private void handleAnger() {
+		entityFear = null;
+		
+		// Lose interest in an entity that is far away or out of sight over time.
+		if( entityToAttack != null ) {
+			final float enemy_dist = getDistanceToEntity(entityToAttack);
+			
+			if( enemy_dist >= DEF_PURSUE_RANGE || (rand.nextBoolean() && !canEntityBeSeen(entityToAttack)) ) {
+				++loseInterest;
+				
+				if( loseInterest >= (tamed() ? DEF_AGGRO_TIMER : DEF_AGGRO_TIMER * 3) ) {
+					setTarget(null);
+					loseInterest = 0;
+				}
+			} else {
+				loseInterest = 0;
+			}
+			
+			// Guards can fight for a queen - will make her run away instead
+            if (guard() && getFaction() > 0 && ruler != null && ruler instanceof EntityFairy) {
+                EntityFairy fairy = (EntityFairy)ruler;
+
+                if (fairy.entityToAttack != null){
+                    float queen_dist = getDistanceToEntity(fairy);
+
+                    if (queen_dist < DEF_DEFEND_RANGE && enemy_dist < DEF_DEFEND_RANGE && canEntityBeSeen(fairy)) {
+                        this.setTarget(fairy.entityToAttack);
+                        fairy.setTarget(null);
+                        fairy.cryTime = 100;
+                        fairy.entityFear = entityToAttack;
+                    }
+                }
+            }
+		}
+	}
+	private void handleFear() {
+		if( entityFear != null ) {
+			if( entityFear.isDead) {
+				// Don't fear the dead.
+				entityFear = null;
+			} else if ( !hasPath() && canEntityBeSeen(entityFear) && cower) {
+	            float dist = getDistanceToEntity(entityFear);
+	
+	            // Run from entityFear if you can see it and it is close.
+	            if( dist < DEF_FEAR_RANGE ) {
+	                PathEntity doug = roam(entityFear, this, PATH_AWAY);
+	
+	                if (doug != null) {
+	                    setPathToEntity(doug);
+	                    cryTime += 120;
+	                }
+	            }
+			}
+        }
+	}
+	private void handleRuler() {
+		// TODO Auto-generated method stub
+		
+	}
+	// This handles actions concerning teammates and entities atacking their ruler.
+	private void handleSocial() {
+		// TODO Auto-generated method stub
+		
+	}
+	// This handles actions of the medics.
+	private void handleHealing() {
+		// TODO Auto-generated method stub
+		
+	}
+	// A handler specifically for the rogue class.
+	private void handleRogue() {
+		// TODO Auto-generated method stub
+		
+	}
+	
+	public int postedCount;
+	// The AI method which handles post-related activities.
+	private void handlePosted(boolean b) {
+		// TODO Auto-generated method stub
+		
+	}
+    
 	// ---------- flag 1 -----------	
 
 	protected boolean getFairyFlag(int i) {
@@ -914,52 +1086,15 @@ public class EntityFairy extends EntityAnimal {
 		// TODO Auto-generated method stub
 		
 	}
-	
 
 	private boolean isAirySpace(int a, int b, int c) {
 		// TODO Auto-generated method stub
 		return false;
 	}
 
-	private void handleSocial() {
-		// TODO Auto-generated method stub
-		
-	}
-
-	private void handleRogue() {
-		// TODO Auto-generated method stub
-		
-	}
-
-	private void handleHealing() {
-		// TODO Auto-generated method stub
-		
-	}
-
-	private void handleRuler() {
-		// TODO Auto-generated method stub
-		
-	}
-
-	private void handleFear() {
-		// TODO Auto-generated method stub
-		
-	}
-
-	private void handleAnger() {
-		// TODO Auto-generated method stub
-		
-	}
-
 	private boolean checkFlyBlocked() {
 		// TODO Auto-generated method stub
 		return false;
 	}
-
-	private void handlePosted(boolean b) {
-		// TODO Auto-generated method stub
-		
-	}
-
 
 }
