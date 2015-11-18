@@ -1,14 +1,40 @@
 package fairies.entity;
 
+import net.minecraft.client.particle.EntitySmokeFX;
 import net.minecraft.entity.EntityAgeable;
+import net.minecraft.entity.EntityLiving;
+import net.minecraft.entity.SharedMonsterAttributes;
+import net.minecraft.entity.ai.attributes.IAttributeInstance;
 import net.minecraft.entity.passive.EntityAnimal;
+import net.minecraft.util.MathHelper;
 import net.minecraft.world.World;
 
 public class EntityFairy extends EntityAnimal {
-		
+	
+	// TODO: put these into config file
+	public static final double	DEF_BASE_HEALTH	= 15.0D;
+	public static final float	DEF_BASE_SPEED	= 0.9F;
+	public static final float	DEF_SCOUT_SPEED	= 1.05F;
+	public static final float	DEF_WITHER_MULT = 0.75F;
+	
+	public static final double	DEF_FLOAT_RATE		= -0.2D; // fall speed
+	public static final double	DEF_FLAP_RATE		= 0.15D; // fly speed
+	public static final double	DEF_SOLO_FLAP_MULT	= 1.25D; // bonus to flight while unburdened
+	public static final double	DEF_LIFTOFF_MULT	= 2.0D;  // bonus to flight when launching
+	
+	public static final int		DEF_MAX_PARTICLES	= 5;
+	
+	public float sinage;	// what does this mean?
+	public int flyTime;
+	public boolean cower;
+	private int postX, postY, postZ;
+	public boolean createGroup;
+	private boolean didHearts;
+	private int particleCount;
+	
 	public EntityFairy(World world) {
 		super(world);
-		this.setHealth(15);
+		this.setSize(0.6F, 0.85F);
 		
 		// fairy-specific init
 		setSkin(rand.nextInt(4));
@@ -16,9 +42,17 @@ public class EntityFairy extends EntityAnimal {
 		setSpecialJob(false);
 		setFaction(0);
 		setFairyName(rand.nextInt(16), rand.nextInt(16));
+		
+		setFlymode(false);
+		this.sinage = rand.nextFloat();
+		this.flyTime = 400 + rand.nextInt(200);
+		this.cower = rand.nextBoolean();
+		this.postX = this.postY = this.postZ = -1;
+		
+		// TODO: Set texture
 	}
 	
-	// DataWatcher objects
+	// DataWatcher object indices
 	protected final static int B_FLAGS		= 17;
 	protected final static int B_TYPE		= 18;	// skin, job, faction
 	protected final static int B_NAME_ORIG	= 19;	// generated original name
@@ -41,9 +75,196 @@ public class EntityFairy extends EntityAnimal {
 		dataWatcher.addObject(I_TOOL,		new Integer(0));
 	}
 	
+	@Override
+    protected void applyEntityAttributes() {
+        super.applyEntityAttributes();
+        this.getEntityAttribute(SharedMonsterAttributes.maxHealth).setBaseValue(DEF_BASE_HEALTH);
+        this.getEntityAttribute(SharedMonsterAttributes.movementSpeed).setBaseValue(DEF_BASE_SPEED);
+        // this.getEntityAttribute(SharedMonsterAttributes.attackDamage).setBaseValue(4.0D);
+        // this.getEntityAttribute(SharedMonsterAttributes.followRange).setBaseValue(10.0D);
+    }
+	
+	@SuppressWarnings("unused")
+	@Override
+	public void onUpdate() {
+		super.onUpdate();
+		
+		if( this.createGroup ) {
+			createGroup = false;
+			int i = MathHelper.floor_double(posX);
+			int j = MathHelper.floor_double(boundingBox.minY) - 1;
+			int k = MathHelper.floor_double(posZ);
+
+			// TODO: FairyGroup.generate()
+			/*
+			if ((new FRY_FairyGroup(8, 10, getFaction())).generate(worldObj, rand, i, j, k))
+            {
+                //This is good.
+            }
+            else
+            {
+                setDead(); //For singleplayer mode
+                //mod_FairyMod.fairyMod.sendFairyDespawn(this);
+            }
+			*/
+		}
+		
+		if( scout() ) {
+			this.getEntityAttribute(SharedMonsterAttributes.movementSpeed).setBaseValue(DEF_SCOUT_SPEED);
+		} else {
+			this.getEntityAttribute(SharedMonsterAttributes.movementSpeed).setBaseValue(DEF_BASE_SPEED);
+		}
+		
+		if( withered() ) {
+			IAttributeInstance speed = this.getEntityAttribute(SharedMonsterAttributes.movementSpeed);
+			speed.setBaseValue(speed.getAttributeValue() * DEF_WITHER_MULT);
+		}
+		
+		if( !worldObj.isRemote ) {
+			updateWithering();
+			setHealth(getHealth());
+			setFairyClimbing(flymode() && canFlap() && hasPath() && isCollidedHorizontally);
+			if( isSitting() && (ridingEntity != null || !onGround) ) {
+				setSitting(false);
+			}
+			
+			setPosted(postY > -1);
+		}
+		
+		if( getHealth() > 0.0F ) {
+			// wing animations
+			if( !this.onGround ) {
+				sinage += 0.75F;
+			} else {
+				sinage += 0.15F;
+			}
+			
+			if( sinage > Math.PI * 2F) {
+				sinage -= Math.PI * 2F;
+			}
+			
+			if( flymode() ) {
+				if( !liftOff() && ridingEntity != null && !ridingEntity.onGround && ridingEntity instanceof EntityLiving ) {
+					ridingEntity.fallDistance = 0F;
+					
+					if( ridingEntity.motionY < DEF_FLOAT_RATE ) {
+						ridingEntity.motionY = DEF_FLOAT_RATE;
+					}
+					
+					// TODO: research how to find this now
+					final boolean isJumping = false; // ((EntityLiving)ridingEntity).isJumping
+					if( isJumping && ridingEntity.motionY < DEF_FLAP_RATE && canFlap() ) {
+						ridingEntity.motionY = DEF_FLAP_RATE;
+					}
+				} else {
+					if( motionY < DEF_FLOAT_RATE ) {
+						motionY = DEF_FLOAT_RATE;
+					}
+					
+					if( canFlap() && checkGroundBelow() && motionY < 0D ) {
+						motionY = DEF_FLOAT_RATE * DEF_SOLO_FLAP_MULT;
+					}
+					
+					if( liftOff() && ridingEntity != null ) {
+						ridingEntity.fallDistance = 0F;
+						motionY = ridingEntity.motionY = DEF_FLAP_RATE * DEF_LIFTOFF_MULT;
+					}
+				}
+			}
+			
+			if( hearts() != didHearts ) {
+				didHearts = !didHearts;
+				showHeartsOrSmokeFX(tamed());
+			}
+			
+			++particleCount;
+			if( particleCount >= DEF_MAX_PARTICLES ) {
+				particleCount = rand.nextInt(DEF_MAX_PARTICLES >> 1);
+				
+				if( angry() || (crying() && queen()) ) {
+					// anger smoke, queens don't cry :P
+					worldObj.spawnParticle("smoke", posX, boundingBox.maxY, posZ, 0D, 0D, 0D);
+				} else if( crying() ) {
+					// crying effect
+					worldObj.spawnParticle("splash", posX, boundingBox.maxY, posZ, 0D, 0D, 0D);
+				}
+				
+				if( liftOff() ) {
+					// liftoff effect below feet
+					worldObj.spawnParticle("explode", posX, boundingBox.minY, posZ, 0D, 0D, 0D);
+				}
+				
+				if( withered() || (rogue() && canHeal()) ) {
+					// TODO: more proxying
+					/*
+					 * Offload to proxy for client-side rendering
+					 *
+					double a = posX - 0.2D + (0.4D * rand.nextDouble());
+					double b = posY + 0.45D + (0.15D * rand.nextDouble());
+					double c = posZ - 0.2D + (0.4D * rand.nextDouble());
+					EntitySmokeFX smoke = new EntitySmokeFX(worldObj, a,b,c, 0D, 0D, 0D);
+					a = 0.3D + (0.15D * rand.nextDouble());
+					b = 0.5D + (0.2D * rand.nextDouble());
+					c = 0.3D + (0.15D * rand.nextDouble());
+					smoke.setRBGColorF((float)a, (float)b, (float)c);
+					MC.effectRenderer.addEffect(smoke);
+					 */
+				}
+				
+				if( nameEnabled() && tamed() && !rulerName().isEmpty() ) {
+					// TODO: proxy display rename gui
+				}
+			}
+			
+			processSwinging();
+		}
+		
+		
+	}
+	
 	// ---------- flag 1 -----------
 	
-    protected boolean getFairyFlag(int i) {
+    private void processSwinging() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	private String rulerName() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	private boolean checkGroundBelow() {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	private void showHeartsOrSmokeFX(boolean tamed) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	private void setSitting(boolean b) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	private boolean isSitting() {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	private void setFairyClimbing(boolean b) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	private void updateWithering() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	protected boolean getFairyFlag(int i) {
     	return (dataWatcher.getWatchableObjectByte(B_FLAGS) & (1 << i)) != 0;
     }
     protected void setFairyFlag(int i, boolean flag) {
