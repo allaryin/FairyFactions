@@ -43,6 +43,85 @@ public class EntityFairy extends EntityAnimal {
 	
 	// ---------- flag 1 -----------
 	
+    protected boolean getFairyFlag(int i) {
+    	return (dataWatcher.getWatchableObjectByte(B_FLAGS) & (1 << i)) != 0;
+    }
+    protected void setFairyFlag(int i, boolean flag) {
+    	byte byte0 = dataWatcher.getWatchableObjectByte(B_FLAGS);
+    	if( flag ) {
+    		byte0 |= 1 << i;
+    	} else {
+    		byte0 &= ~(1 << i);
+    	}
+		dataWatcher.updateObject(B_FLAGS2, Byte.valueOf(byte0));
+    }
+    
+    public static final int FLAG_ARM_SWING	= 0;
+    public static final int FLAG_FLY_MODE	= 1;
+    public static final int FLAG_CAN_FLAP	= 2;
+    public static final int FLAG_TAMED		= 3;
+    public static final int FLAG_ANGRY		= 4;
+    public static final int FLAG_CRYING		= 5;
+    public static final int FLAG_LIFTOFF	= 6;
+    public static final int FLAG_HEARTS		= 7;
+    
+    public boolean getArmSwing() {
+        return getFairyFlag(FLAG_ARM_SWING);
+    }
+    protected void armSwing(boolean flag) {
+        setFairyFlag(FLAG_ARM_SWING, flag);
+        setTempItem(0);
+    }
+
+    public boolean flymode() {
+        return getFairyFlag(FLAG_FLY_MODE);
+    }
+    protected void setFlymode(boolean flag) {
+        setFairyFlag(FLAG_FLY_MODE, flag);
+    }
+
+    public boolean canFlap() {
+        return getFairyFlag(FLAG_CAN_FLAP);
+    }
+    protected void setCanFlap(boolean flag) {
+        setFairyFlag(FLAG_CAN_FLAP, flag);
+    }
+
+    public boolean tamed() {
+        return getFairyFlag(FLAG_TAMED);
+    }
+    protected void setTamed(boolean flag) {
+        setFairyFlag(FLAG_TAMED, flag);
+    }
+
+    public boolean angry() {
+        return getFairyFlag(FLAG_ANGRY);
+    }
+    protected void setAngry(boolean flag) {
+        setFairyFlag(FLAG_ANGRY, flag);
+    }
+
+    public boolean crying() {
+        return getFairyFlag(FLAG_CRYING);
+    }
+    protected void setCrying(boolean flag) {
+        setFairyFlag(FLAG_CRYING, flag);
+    }
+
+    public boolean liftOff() {
+        return getFairyFlag(FLAG_LIFTOFF);
+    }
+    protected void setLiftOff(boolean flag) {
+        setFairyFlag(FLAG_LIFTOFF, flag);
+    }
+
+    public boolean hearts() {
+        return getFairyFlag(FLAG_HEARTS);
+    }
+    protected void setHearts(boolean flag) {
+        setFairyFlag(FLAG_HEARTS, flag);
+    }
+    
 	public static final int MAX_SKIN	= 3;
 	public static final int MAX_JOB		= 3;
 	public static final int MAX_FACTION	= 15;
@@ -82,6 +161,33 @@ public class EntityFairy extends EntityAnimal {
         dataWatcher.updateObject(B_FLAGS, Byte.valueOf(byte0));
     }
     
+	protected static final int NJOB_NORMAL	= 0;
+	protected static final int NJOB_GUARD	= 1;
+	protected static final int NJOB_SCOUT	= 2;
+	protected static final int NJOB_MEDIC	= 3;
+	protected static final int SJOB_QUEEN	= 0;
+	protected static final int SJOB_ROGUE	= 1;
+    
+    public boolean normal() {
+    	return getJob() == NJOB_NORMAL && !specialJob();
+    }
+    public boolean guard() {
+    	return getJob() == NJOB_GUARD && !specialJob();
+    }
+    public boolean scout() {
+    	return getJob() == NJOB_SCOUT && !specialJob();
+    }
+    public boolean medic() {
+    	return getJob() == NJOB_MEDIC && !specialJob();
+    }
+    
+    public boolean queen() {
+    	return getJob() == SJOB_QUEEN && specialJob();
+    }
+    public boolean rogue() {
+    	return getJob() == SJOB_ROGUE && specialJob();
+    }
+    
     protected int getFaction() {
     	return (dataWatcher.getWatchableObjectByte(B_FLAGS) >> 4) & 0x0f;
     }
@@ -118,50 +224,12 @@ public class EntityFairy extends EntityAnimal {
         dataWatcher.updateObject(B_NAME_ORIG, Byte.valueOf(byte0));
     }
 
-    public int getFairyName1() {
+    public int getNamePrefix() {
         return (byte)dataWatcher.getWatchableObjectByte(B_NAME_ORIG) & 0x0f;
     }
-    public int getFairyName2() {
+    public int getNameSuffix() {
         return (byte)(dataWatcher.getWatchableObjectByte(B_NAME_ORIG) >> 4) & 0x0f;
     }
-
-    private static final String name1[] = {
-        "Silly",
-        "Fire",
-        "Twinkle",
-        "Bouncy",
-        "Speedy",
-        "Wiggle",
-        "Fluffy",
-        "Cloudy",
-        "Floppy",
-        "Ginger",
-        "Sugar",
-        "Winky",
-        "Giggle",
-        "Cutie",
-        "Sunny",
-        "Honey"
-    };
-
-    private static final String name2[] = {
-        "puff",
-        "poof",
-        "butt",
-        "munch",
-        "star",
-        "bird",
-        "wing",
-        "shine",
-        "snap",
-        "kins",
-        "bee",
-        "chime",
-        "button",
-        "bun",
-        "heart",
-        "boo"
-    };
     
     public String getActualName(int prefix, int suffix) {
     	final String custom = "";//getCustomName();
@@ -171,7 +239,50 @@ public class EntityFairy extends EntityAnimal {
     	if( prefix < 0 || prefix > MAX_NAMEIDX || suffix < 0 || suffix > MAX_NAMEIDX ) {
     		return "Error-name";
     	} else {
-    		return name1[prefix] + "-" + name2[suffix];
+    		return name_prefixes[prefix] + "-" + name_suffixes[suffix];
+    	}
+    }
+    
+    public String getQueenName(int prefix, int suffix, int faction) {
+    	if( faction < 0 || faction > MAX_FACTION )
+    		return "Queen Error-faction";
+
+    	return faction_colors[faction] + "Queen " + getActualName(prefix, suffix);
+    }
+
+    public String getFactionName(int faction) {
+    	if( faction < 0 || faction > MAX_FACTION )
+    		return "Error-faction";
+
+    	return faction_colors[faction] + faction_names[faction];
+    }
+    
+    public String getDisplayName() {
+    	if( getFaction() != 0 ) {
+    		if( queen() ) {
+    			return getQueenName(getNamePrefix(), getNameSuffix(), getFaction());
+    		} else {
+    			return getFactionName(getFaction());
+    		}
+    	} else if( tamed() ) {
+    		String woosh = getActualName(getNamePrefix(), getNameSuffix());
+
+            if( queen() ) {
+                woosh = "Queen " + woosh;
+            }
+
+            /**
+             * TODO: Escape out to proxy for this.
+             * 
+            if (ModLoader.getMinecraftInstance().thePlayer.username.equals(rulerName()))
+            {
+                woosh = (posted() ? "�a" : "�c") + "@�f" + woosh + (posted() ? "�a" : "�c") + "@";
+            }
+            */
+
+            return woosh;
+    	} else {
+    		return null;
     	}
     }
     
@@ -256,11 +367,105 @@ public class EntityFairy extends EntityAnimal {
     }
     
     // ----------
+    
+    // Custom name of the fairy, enabled by paper.
+    public String getCustomName() {
+        return dataWatcher.getWatchableObjectString(S_NAME_REAL);
+    }
+    public void setCustomName(String s) {
+        dataWatcher.updateObject(S_NAME_REAL, s);
+    }
+
+    // A temporary item shown while arm is swinging, related to jobs.
+    public int getTempItem() {
+        return dataWatcher.getWatchableObjectInt(I_TOOL);
+    }
+    public void setTempItem(int i) {
+        dataWatcher.updateObject(I_TOOL, i);
+    }
+    
+    // ----------
 
 	// no baby fairies for now
 	@Override
 	public EntityAgeable createChild(EntityAgeable parent) {
 		return null;
 	}
+
+    private static final String name_prefixes[] = {
+        "Silly",
+        "Fire",
+        "Twinkle",
+        "Bouncy",
+        "Speedy",
+        "Wiggle",
+        "Fluffy",
+        "Cloudy",
+        "Floppy",
+        "Ginger",
+        "Sugar",
+        "Winky",
+        "Giggle",
+        "Cutie",
+        "Sunny",
+        "Honey"
+    };
+
+    private static final String name_suffixes[] = {
+        "puff",
+        "poof",
+        "butt",
+        "munch",
+        "star",
+        "bird",
+        "wing",
+        "shine",
+        "snap",
+        "kins",
+        "bee",
+        "chime",
+        "button",
+        "bun",
+        "heart",
+        "boo"
+    };
+
+    private static final String faction_colors[] = {
+        "�0",
+        "�1",
+        "�2",
+        "�3",
+        "�4",
+        "�5",
+        "�6",
+        "�7",
+        "�8",
+        "�9",
+        "�a",
+        "�b",
+        "�c",
+        "�d",
+        "�e",
+        "�f"
+    };
+        
+    private static final String faction_names[] = {
+        "no queen",
+        "<Aviary Army>",
+        "<Bantam Brawlers>",
+        "<Charging Cherubs>",
+        "<Dainty Demons>",
+        "<Enigmatic Escorts>",
+        "<Floating Fury>",
+        "<Graceful Gliders>",
+        "<Hardy Handmaids>",
+        "<Iron Imps>",
+        "<Opulent Order>",
+        "<Kute Killers>",
+        "<Lethal Ladies>",
+        "<Maiden Militia>",
+        "<Nimble Nymphs>",
+        "<Petite Pugilists>"
+    };
 
 }
