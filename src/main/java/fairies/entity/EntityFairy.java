@@ -1,8 +1,11 @@
 package fairies.entity;
 
+import java.util.List;
+
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityAgeable;
 import net.minecraft.entity.EntityLiving;
+import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.entity.ai.attributes.IAttributeInstance;
 import net.minecraft.entity.passive.EntityAnimal;
@@ -33,22 +36,29 @@ public class EntityFairy extends EntityAnimal {
 
 	public static final int		DEF_AGGRO_TIMER		= 15;    // how long will tame fairies stay mad? (3x for wild)
 		
-	public float sinage;	// what does this mean?
-	public int flyTime;
-	public boolean cower;
-	private int postX, postY, postZ;
-	public boolean createGroup;
+	private float sinage;				// what does this mean?
+	private int postX, postY, postZ;	// where is our sign?
+	
+	private boolean cower;
+	private boolean createGroup;
 	private boolean didHearts;
-	private int particleCount;
 	private boolean wasFishing;
-	private Entity fishEntity;
 	private boolean flyBlocked;
+	private int snowballin;
+	
+	private int particleCount;
+	
+	private int flyTime;
 	private int healTime;
 	private int cryTime;
-	private Entity entityFear;
 	private int listActions;
 	private int loseInterest;
-	private Entity ruler;
+	private int loseTeam;
+	
+	private EntityLivingBase ruler;
+	private EntityLivingBase entityHeal;
+	private Entity entityFear;
+	private Entity fishEntity;
 	
 	public EntityFairy(World world) {
 		super(world);
@@ -535,6 +545,16 @@ public class EntityFairy extends EntityAnimal {
 
         return (PathEntity)null;
     }
+
+	private boolean canTeleportToRuler(EntityPlayer ruler2) {
+		// TODO: change criteria for this
+		// TODO Auto-generated method stub
+		return false;
+	}
+	private void teleportToRuler(EntityLivingBase ruler2) {
+		// TODO Auto-generated method stub
+		
+	}
     
 	private void handleAnger() {
 		entityFear = null;
@@ -592,9 +612,170 @@ public class EntityFairy extends EntityAnimal {
         }
 	}
 	private void handleRuler() {
+		// TODO: create constants for all of these ranges and time limits
+		
+        if (ruler != null)   {
+            if (ruler.getHealth() <= 0 || ruler.isDead) {
+            	// get rid of that ruler.
+                ruler = null;
+            }
+        }
+
+        if (ruler == null) {
+        	// Looking for a queen to follow.
+            if (!tamed() && !queen())   {
+                double d = 40D;
+
+                if (getFaction() == 0) {
+                    d = 16D;
+                }
+
+                List list = worldObj.getEntitiesWithinAABB(EntityFairy.class, boundingBox.expand(d, d, d));
+
+                for (int j = 0; j < list.size(); j++) {
+                	EntityFairy fairy = (EntityFairy)list.get(j);
+
+                    if (fairy != this && fairy.getHealth() > 0 && fairy.queen())   {
+                        if (getFaction() > 0 && fairy.getFaction() == this.getFaction()) {
+                        	// Fairy finds the queen of its faction, fairly standard.
+                            ruler = fairy;
+                            break;
+                        } else if (getFaction() == 0 && fairy.getFaction() > 0 && canEntityBeSeen(fairy)) {
+                        	// A factionless fairy may find a new ruler on its own.
+                            ruler = fairy;
+                            setFaction(fairy.getFaction());
+                            break;
+                        }
+                    }
+                }
+            } else if (getFaction() == 0 && tamed()) {
+            	// Looking for a player to follow.
+                List list = worldObj.getEntitiesWithinAABB(EntityPlayer.class, boundingBox.expand(16D, 16D, 16D));
+
+                for (int j = 0; j < list.size(); j++) {
+                    EntityPlayer player = (EntityPlayer)list.get(j);
+                    
+                    // TODO: do correct player identification
+                    if (player.getHealth() > 0 && player.getDisplayName().equals(rulerName()) && canEntityBeSeen(player)) {
+                        ruler = player;
+                        break;
+                    }
+                }
+            }
+        }
+
+        // This makes fairies walk towards their ruler.
+        if (ruler != null && !hasPath() && !posted()) {
+            float dist = getDistanceToEntity(ruler);
+
+            // Guards and Queens walk closer to the player (Medic healing?)
+            if ((guard() || queen()) && canEntityBeSeen(ruler) && dist > 5F && dist < 16F) {
+                PathEntity path = worldObj.getPathEntityToEntity(this, ruler, 16F, false, false, true, true);
+
+                if (path != null) {
+                    setPathToEntity(path);
+                }
+            } else {
+                if (scout() && ruler instanceof EntityFairy)   {
+                	// Scouts stay way out there on the perimeter.
+                    if (dist < 12F) {
+                        PathEntity doug = roam(ruler, this, (float)Math.PI);
+
+                        if (doug != null) {
+                            setPathToEntity(doug);
+                        }
+                    } else if (dist > 24F) {
+                        PathEntity doug = roam(ruler, this, 0F);
+
+                        if (doug != null) {
+                            setPathToEntity(doug);
+                        }
+                    }
+                } else {
+                	// Regular fairies stay moderately close.
+                    if (dist > 16F && ruler instanceof EntityPlayer && canTeleportToRuler((EntityPlayer)ruler)) {
+                    	// Can teleport to the owning player if he has an ender eye or an ender pearl.
+                        teleportToRuler(ruler); 
+                    } else if (dist > (ruler instanceof EntityFairy ? 12F : 6F)) {
+                        PathEntity doug = roam(ruler, this, 0F);
+
+                        if (doug != null) {
+                            setPathToEntity(doug);
+                        }
+                    }
+                }
+            }
+        }
+
+        if (snowballin > 0 && attackTime <= 0 && ruler != null && entityToAttack == null && entityFear == null && cryTime == 0) {
+            float dist = getDistanceToEntity(ruler);
+
+            if (dist < 10F && canEntityBeSeen(ruler)) {
+                tossSnowball(ruler);
+            } else if (!hasPath() && dist < 16F) {
+                PathEntity doug = roam(ruler, this, 0F);
+
+                if (doug != null) {
+                    setPathToEntity(doug);
+                }
+            }
+        }
+
+        if (getFaction() > 0) {
+        	// This is a method for making sure that fairies eventually realize they're alone
+            boolean flag = false;
+
+            if (!queen() && (ruler == null || getDistanceToEntity(ruler) > 40F)) {
+            	// If a follower has lost its leader
+                flag = true;
+            } else if (queen()) {
+            	// If a leader has lost her followers
+                flag = true;
+                List list = worldObj.getEntitiesWithinAABB(EntityFairy.class, boundingBox.expand(40D, 40D, 40D));
+
+                for (int j = 0; j < list.size(); j++) {
+                	EntityFairy fairy = (EntityFairy)list.get(j);
+
+                    if (fairy != this && fairy.sameTeam(this) && fairy.getHealth() > 0) {
+                        flag = false;
+                        break;
+                    }
+                }
+            } else if (ruler != null && ruler instanceof EntityFairy) {
+            	//If a fairy queen was tamed in peaceful mode
+            	EntityFairy fairy = (EntityFairy)ruler;
+
+                if (!sameTeam(fairy)) {
+                    flag = true;
+
+                    if (loseTeam < 65) {
+                        loseTeam = 65 + rand.nextInt(8);
+                    }
+                }
+            }
+
+            if (flag) {
+            	// Takes a while for it to take effect.
+                ++loseTeam; 
+
+                if (loseTeam >= 75) {
+                    ruler = null;
+                    disband();
+                    loseTeam = 0;
+                    cryTime = 0;
+                    setPathToEntity((PathEntity)null);
+                }
+            } else {
+                loseTeam = 0;
+            }
+        }
+	}
+
+	private void tossSnowball(EntityLivingBase ruler2) {
 		// TODO Auto-generated method stub
 		
 	}
+
 	// This handles actions concerning teammates and entities atacking their ruler.
 	private void handleSocial() {
 		// TODO Auto-generated method stub
@@ -1095,6 +1276,16 @@ public class EntityFairy extends EntityAnimal {
 	private boolean checkFlyBlocked() {
 		// TODO Auto-generated method stub
 		return false;
+	}
+
+	private boolean sameTeam(EntityFairy fairy) {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	private void disband() {
+		// TODO Auto-generated method stub
+		
 	}
 
 }
