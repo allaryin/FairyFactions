@@ -222,47 +222,7 @@ public class EntityFairy extends EntityAnimal {
 		
 	}
 	
-	// ---------- flag 1 -----------
-	
-    private void processSwinging() {
-		// TODO Auto-generated method stub
-		
-	}
-
-	private String rulerName() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	private boolean checkGroundBelow() {
-		// TODO Auto-generated method stub
-		return false;
-	}
-
-	private void showHeartsOrSmokeFX(boolean tamed) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	private void setSitting(boolean b) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	private boolean isSitting() {
-		// TODO Auto-generated method stub
-		return false;
-	}
-
-	private void setFairyClimbing(boolean b) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	private void updateWithering() {
-		// TODO Auto-generated method stub
-		
-	}
+	// ---------- flag 1 -----------	
 
 	protected boolean getFairyFlag(int i) {
     	return (dataWatcher.getWatchableObjectByte(B_FLAGS) & (1 << i)) != 0;
@@ -688,5 +648,47 @@ public class EntityFairy extends EntityAnimal {
         "<Nimble Nymphs>",
         "<Petite Pugilists>"
     };
+
+    // ---------- stubs ----------
+    
+    private void processSwinging() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	private String rulerName() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	private boolean checkGroundBelow() {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	private void showHeartsOrSmokeFX(boolean tamed) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	private void setSitting(boolean b) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	private boolean isSitting() {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	private void setFairyClimbing(boolean b) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	private void updateWithering() {
+		// TODO Auto-generated method stub
+		
+	}
 
 }
