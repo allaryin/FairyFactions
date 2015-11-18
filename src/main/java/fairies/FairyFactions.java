@@ -7,9 +7,12 @@ import cpw.mods.fml.common.SidedProxy;
 import cpw.mods.fml.common.event.FMLInitializationEvent;
 import cpw.mods.fml.common.event.FMLPostInitializationEvent;
 import cpw.mods.fml.common.event.FMLPreInitializationEvent;
+import fairies.entity.EntityFairy;
 import fairies.event.FairyEventListener;
 import fairies.proxy.CommonProxy;
 import net.minecraft.client.Minecraft;
+import net.minecraft.entity.EntityList;
+import net.minecraft.entity.EnumCreatureType;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.config.Configuration;
 import org.apache.logging.log4j.LogManager;
@@ -28,6 +31,8 @@ public class FairyFactions {
 
     static File          BaseDir;
     static Configuration Config;
+
+	private Spawner fairySpawner;
 
     @EventHandler
     public void preInit(FMLPreInitializationEvent event) {
@@ -60,6 +65,15 @@ public class FairyFactions {
 
     @EventHandler
     public void postInit(FMLPostInitializationEvent event) {
-    	proxy.preInit();
+    	fairySpawner = new Spawner();
+    	final int maxNum = 18;
+    	final int freqNum = 8;
+    	fairySpawner.setMaxAnimals(maxNum);
+    	fairySpawner.AddCustomSpawn(EntityFairy.class, freqNum, EnumCreatureType.creature);
+    	// TODO: register egg
+    	// TODO: register entity localization
+    	LOGGER.debug("Spawner is a modified version of CustomSpawner, created by DrZhark.");
+    	
+    	proxy.postInit();
     }
 }

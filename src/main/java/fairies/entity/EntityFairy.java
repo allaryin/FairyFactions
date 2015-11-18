@@ -323,6 +323,11 @@ public class EntityFairy extends EntityAnimal {
     	// HAH!
     }
     
+    @Override
+    public boolean canDespawn() {
+        return ruler == null && !tamed();
+    }
+    
     // ---------- behaviors ----------
 
     // maximum number of times to try pathfinding
