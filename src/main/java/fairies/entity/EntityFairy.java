@@ -1,11 +1,12 @@
 package fairies.entity;
 
-import net.minecraft.client.particle.EntitySmokeFX;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityAgeable;
 import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.entity.ai.attributes.IAttributeInstance;
 import net.minecraft.entity.passive.EntityAnimal;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.MathHelper;
 import net.minecraft.world.World;
 
@@ -31,6 +32,13 @@ public class EntityFairy extends EntityAnimal {
 	public boolean createGroup;
 	private boolean didHearts;
 	private int particleCount;
+	private boolean wasFishing;
+	private Entity fishEntity;
+	private boolean flyBlocked;
+	private int healTime;
+	private int cryTime;
+	private Entity entityFear;
+	private int listActions;
 	
 	public EntityFairy(World world) {
 		super(world);
@@ -218,9 +226,225 @@ public class EntityFairy extends EntityAnimal {
 			
 			processSwinging();
 		}
-		
-		
+	}// end: onUpdate
+	
+	@Override
+	public float getEyeHeight() {
+		if( !worldObj.isRemote && this.onGround && rand.nextBoolean() ) {
+			int a = MathHelper.floor_double(posX);
+			int b = MathHelper.floor_double(boundingBox.minY);
+			int c = MathHelper.floor_double(posZ);
+			
+			if( isAirySpace(a,b,c) && isAirySpace(a,b+1,c) ) {
+				return height * 1.375F;
+			}
+		}
+		return super.getEyeHeight();
 	}
+	
+	@Override
+	public boolean isEntityInsideOpaqueBlock() {
+		for( int i = 0; i < 8; ++i ) {
+			float f = ((float)((i >> 0) % 2) - 0.5F) * width * 0.8F;
+            float f1 = ((float)((i >> 1) % 2) - 0.5F) * 0.1F;
+            float f2 = ((float)((i >> 2) % 2) - 0.5F) * width * 0.8F;
+            int j = MathHelper.floor_double(posX + (double)f);
+            int k = MathHelper.floor_double(posY + (double)super.getEyeHeight() + (double)f1);
+            int l = MathHelper.floor_double(posZ + (double)f2);
+
+            if (worldObj.getBlock(j, k, l).isNormalCube()) {
+                return true;
+            }
+		}
+		return false;
+	}
+	
+	// Fixes the head shaking glitch.
+    @Override
+    public void faceEntity(Entity entity, float f, float f1) {
+        double d = entity.posX - posX;
+        double d2 = entity.posZ - posZ;
+        double d1;
+
+        if (entity instanceof EntityLiving) {
+            EntityLiving entityliving = (EntityLiving)entity;
+            d1 = (posY + (double)(height * 0.85F)) - (entityliving.posY + (double)entityliving.getEyeHeight());
+        } else {
+            d1 = (entity.boundingBox.minY + entity.boundingBox.maxY) / 2D - (posY + (double)(height * 0.85F));
+        }
+
+        double d3 = MathHelper.sqrt_double(d * d + d2 * d2);
+        float f2 = (float)((Math.atan2(d2, d) * 180D) / Math.PI) - 90F;
+        float f3 = (float)(-((Math.atan2(d1, d3) * 180D) / Math.PI));
+        rotationPitch = -updateRotation(rotationPitch, f3, f1);
+        rotationYaw = updateRotation(rotationYaw, f2, f);
+    }
+    
+    // Had to redo this because it is private.
+    private float updateRotation(float f, float f1, float f2) {
+        float f3;
+
+        for (f3 = f1 - f; f3 < -180F; f3 += 360F) { }
+        for (; f3 >= 180F; f3 -= 360F) { }
+
+        if (f3 > f2) {
+            f3 = f2;
+        }
+
+        if (f3 < -f2) {
+            f3 = -f2;
+        }
+
+        return f + f3;
+    }
+    
+    @Override
+    protected void fall(float f) {
+    	// HAH!
+    }
+    
+    @Override
+    public void updateEntityActionState() {
+        super.updateEntityActionState();
+
+        if (wasFishing) {
+            wasFishing = false;
+
+            if (isSitting() && fishEntity == null) {
+                setSitting(false);
+            }
+        }
+
+        if (isSitting()) {
+            handlePosted(false);
+            return;
+        }
+
+        flyBlocked = checkFlyBlocked();
+
+        if (flyTime > 0) {
+            --flyTime;
+        }
+
+        boolean liftFlag = false;
+
+        if (flymode()) {
+            fallDistance = 0F;
+
+            if (ridingEntity != null) {
+                if (entityToAttack != null && ridingEntity == entityToAttack) {
+                    flyTime = 200;
+                    liftFlag = true;
+
+                    if ((attackTime <= 0) || flyBlocked) {
+                        attackTime = 0;
+                        attackEntity(ridingEntity, 0F);
+                        liftFlag = false;
+                    }
+                } else if (tamed()) {
+                    if (ridingEntity.onGround || ridingEntity.isInWater()) {
+                        flyTime = (queen() || scout() ? 60 : 40);
+
+                        if (withered()) {
+                            flyTime -= 10;
+                        }
+                    }
+                }
+            }
+
+            if (flyTime <= 0 || (flyBlocked && (ridingEntity == null || (entityToAttack != null && ridingEntity == entityToAttack)))) {
+                setCanFlap(false);
+            } else {
+                setCanFlap(true);
+            }
+
+            if (ridingEntity == null && (onGround || inWater)) {
+                setFlymode(false);
+                flyTime = 400 + rand.nextInt(200);
+
+                // Scouts are less likely to want to walk.
+                if (scout()) {
+                    flyTime /= 3;
+                }
+            }
+        } else {
+            if (flyTime <= 0 && !flyBlocked) {
+                jump();
+                setFlymode(true);
+                setCanFlap(true);
+                flyTime = 400 + rand.nextInt(200);
+
+                //Scouts are more likely to want to fly.
+                if (scout())  {
+                    flyTime *= 3;
+                }
+            }
+
+            if (ridingEntity != null && !flymode()) {
+                setFlymode(true);
+                setCanFlap(true);
+            }
+
+            if (!flymode() && !onGround && fallDistance >= 0.5F && ridingEntity == null) {
+                setFlymode(true);
+                setCanFlap(true);
+                flyTime = 400 + rand.nextInt(200);
+            }
+        }
+
+        setLiftOff(liftFlag);
+
+        if (healTime > 0) {
+            --healTime;
+        }
+
+        if (cryTime > 0) {
+            --cryTime;
+
+            if (cryTime <= 0) {
+                entityFear = null;
+            }
+
+            if (cryTime > 600) {
+                cryTime = 600;
+            }
+        }
+
+        ++listActions;
+
+        if (listActions >= 8) {
+            listActions = rand.nextInt(3);
+
+            if (angry()) {
+                handleAnger();
+            } else if (crying()) {
+                handleFear();
+            } else {
+                handleRuler();
+
+                if (medic()) {
+                    handleHealing();
+                } else if (rogue()) {
+                    handleRogue();
+                } else {
+                    handleSocial();
+                }
+
+                handlePosted(true);
+            }
+        }
+
+        if (worldObj.difficultySetting.getDifficultyId() <= 0 && entityToAttack != null && entityToAttack instanceof EntityPlayer) {
+            entityFear = entityToAttack;
+            cryTime = Math.max(cryTime, 100);
+            setTarget((Entity)null);
+        }
+
+        setCrying(cryTime > 0);
+        setAngry(entityToAttack != null);
+        setCanHeal(healTime <= 0);
+    }// end: updateEntityActionState
+
 	
 	// ---------- flag 1 -----------	
 
@@ -690,5 +914,52 @@ public class EntityFairy extends EntityAnimal {
 		// TODO Auto-generated method stub
 		
 	}
+	
+
+	private boolean isAirySpace(int a, int b, int c) {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	private void handleSocial() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	private void handleRogue() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	private void handleHealing() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	private void handleRuler() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	private void handleFear() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	private void handleAnger() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	private boolean checkFlyBlocked() {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	private void handlePosted(boolean b) {
+		// TODO Auto-generated method stub
+		
+	}
+
 
 }
