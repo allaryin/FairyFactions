@@ -1,18 +1,30 @@
 package fairies.entity;
 
+import java.util.Collections;
 import java.util.List;
 
+import fairies.ai.FairyJob;
+import net.minecraft.block.Block;
+import net.minecraft.block.BlockSign;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityAgeable;
+import net.minecraft.entity.EntityCreature;
 import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.entity.ai.attributes.IAttributeInstance;
+import net.minecraft.entity.item.EntityTNTPrimed;
+import net.minecraft.entity.monster.EntityCreeper;
 import net.minecraft.entity.passive.EntityAnimal;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.item.Item;
 import net.minecraft.pathfinding.PathEntity;
+import net.minecraft.tileentity.TileEntity;
+import net.minecraft.tileentity.TileEntitySign;
 import net.minecraft.util.MathHelper;
 import net.minecraft.world.World;
+import net.minecraft.world.chunk.Chunk;
+import net.minecraft.world.chunk.EmptyChunk;
 
 public class EntityFairy extends EntityAnimal {
 	
@@ -41,7 +53,7 @@ public class EntityFairy extends EntityAnimal {
 	
 	private boolean cower;
 	private boolean createGroup;
-	private boolean didHearts;
+	public boolean didHearts;
 	private boolean wasFishing;
 	private boolean flyBlocked;
 	private int snowballin;
@@ -73,7 +85,7 @@ public class EntityFairy extends EntityAnimal {
 		
 		setFlymode(false);
 		this.sinage = rand.nextFloat();
-		this.flyTime = 400 + rand.nextInt(200);
+		this.setFlyTime( 400 + rand.nextInt(200) );
 		this.cower = rand.nextBoolean();
 		this.postX = this.postY = this.postZ = -1;
 		
@@ -272,7 +284,7 @@ public class EntityFairy extends EntityAnimal {
             int k = MathHelper.floor_double(posY + (double)super.getEyeHeight() + (double)f1);
             int l = MathHelper.floor_double(posZ + (double)f2);
 
-            if (worldObj.getBlock(j, k, l).isNormalCube()) {
+            if (worldObj.getBlock(j, k, l).isBlockNormalCube()) {
                 return true;
             }
 		}
@@ -354,8 +366,8 @@ public class EntityFairy extends EntityAnimal {
 
         flyBlocked = checkFlyBlocked();
 
-        if (flyTime > 0) {
-            --flyTime;
+        if (getFlyTime() > 0) {
+            setFlyTime( getFlyTime() - 1 );
         }
 
         boolean liftFlag = false;
@@ -365,7 +377,7 @@ public class EntityFairy extends EntityAnimal {
 
             if (ridingEntity != null) {
                 if (entityToAttack != null && ridingEntity == entityToAttack) {
-                    flyTime = 200;
+                    setFlyTime( 200 );
                     liftFlag = true;
 
                     if ((attackTime <= 0) || flyBlocked) {
@@ -375,16 +387,16 @@ public class EntityFairy extends EntityAnimal {
                     }
                 } else if (tamed()) {
                     if (ridingEntity.onGround || ridingEntity.isInWater()) {
-                        flyTime = (queen() || scout() ? 60 : 40);
+                        setFlyTime( (queen() || scout() ? 60 : 40) );
 
                         if (withered()) {
-                            flyTime -= 10;
+                            setFlyTime( getFlyTime() - 10 );
                         }
                     }
                 }
             }
 
-            if (flyTime <= 0 || (flyBlocked && (ridingEntity == null || (entityToAttack != null && ridingEntity == entityToAttack)))) {
+            if (getFlyTime() <= 0 || (flyBlocked && (ridingEntity == null || (entityToAttack != null && ridingEntity == entityToAttack)))) {
                 setCanFlap(false);
             } else {
                 setCanFlap(true);
@@ -392,23 +404,23 @@ public class EntityFairy extends EntityAnimal {
 
             if (ridingEntity == null && (onGround || inWater)) {
                 setFlymode(false);
-                flyTime = 400 + rand.nextInt(200);
+                setFlyTime( 400 + rand.nextInt(200) );
 
                 // Scouts are less likely to want to walk.
                 if (scout()) {
-                    flyTime /= 3;
+                    setFlyTime( getFlyTime() / 3 );
                 }
             }
         } else {
-            if (flyTime <= 0 && !flyBlocked) {
+            if (getFlyTime() <= 0 && !flyBlocked) {
                 jump();
                 setFlymode(true);
                 setCanFlap(true);
-                flyTime = 400 + rand.nextInt(200);
+                setFlyTime( 400 + rand.nextInt(200) );
 
                 //Scouts are more likely to want to fly.
                 if (scout())  {
-                    flyTime *= 3;
+                    setFlyTime( getFlyTime() * 3 );
                 }
             }
 
@@ -420,7 +432,7 @@ public class EntityFairy extends EntityAnimal {
             if (!flymode() && !onGround && fallDistance >= 0.5F && ridingEntity == null) {
                 setFlymode(true);
                 setCanFlap(true);
-                flyTime = 400 + rand.nextInt(200);
+                setFlyTime( 400 + rand.nextInt(200) );
             }
         }
 
@@ -430,15 +442,15 @@ public class EntityFairy extends EntityAnimal {
             --healTime;
         }
 
-        if (cryTime > 0) {
-            --cryTime;
+        if (getCryTime() > 0) {
+            setCryTime( getCryTime() - 1 );
 
-            if (cryTime <= 0) {
-                entityFear = null;
+            if (getCryTime() <= 0) {
+                setEntityFear( null );
             }
 
-            if (cryTime > 600) {
-                cryTime = 600;
+            if (getCryTime() > 600) {
+                setCryTime( 600 );
             }
         }
 
@@ -467,12 +479,12 @@ public class EntityFairy extends EntityAnimal {
         }
 
         if (worldObj.difficultySetting.getDifficultyId() <= 0 && entityToAttack != null && entityToAttack instanceof EntityPlayer) {
-            entityFear = entityToAttack;
-            cryTime = Math.max(cryTime, 100);
+            setEntityFear( entityToAttack );
+            setCryTime( Math.max(getCryTime(), 100) );
             setTarget((Entity)null);
         }
 
-        setCrying(cryTime > 0);
+        setCrying(getCryTime() > 0);
         setAngry(entityToAttack != null);
         setCanHeal(healTime <= 0);
     }// end: updateEntityActionState
@@ -562,7 +574,7 @@ public class EntityFairy extends EntityAnimal {
 	}
     
 	private void handleAnger() {
-		entityFear = null;
+		setEntityFear( null );
 		
 		// Lose interest in an entity that is far away or out of sight over time.
 		if( entityToAttack != null ) {
@@ -589,28 +601,28 @@ public class EntityFairy extends EntityAnimal {
                     if (queen_dist < DEF_DEFEND_RANGE && enemy_dist < DEF_DEFEND_RANGE && canEntityBeSeen(fairy)) {
                         this.setTarget(fairy.entityToAttack);
                         fairy.setTarget(null);
-                        fairy.cryTime = 100;
-                        fairy.entityFear = entityToAttack;
+                        fairy.setCryTime( 100 );
+                        fairy.setEntityFear( entityToAttack );
                     }
                 }
             }
 		}
 	}
 	private void handleFear() {
-		if( entityFear != null ) {
-			if( entityFear.isDead) {
+		if( getEntityFear() != null ) {
+			if( getEntityFear().isDead) {
 				// Don't fear the dead.
-				entityFear = null;
-			} else if ( !hasPath() && canEntityBeSeen(entityFear) && cower) {
-	            float dist = getDistanceToEntity(entityFear);
+				setEntityFear( null );
+			} else if ( !hasPath() && canEntityBeSeen(getEntityFear()) && cower) {
+	            float dist = getDistanceToEntity(getEntityFear());
 	
 	            // Run from entityFear if you can see it and it is close.
 	            if( dist < DEF_FEAR_RANGE ) {
-	                PathEntity doug = roam(entityFear, this, PATH_AWAY);
+	                PathEntity doug = roam(getEntityFear(), this, PATH_AWAY);
 	
 	                if (doug != null) {
 	                    setPathToEntity(doug);
-	                    cryTime += 120;
+	                    setCryTime( getCryTime() + 120 );
 	                }
 	            }
 			}
@@ -712,7 +724,7 @@ public class EntityFairy extends EntityAnimal {
             }
         }
 
-        if (snowballin > 0 && attackTime <= 0 && ruler != null && entityToAttack == null && entityFear == null && cryTime == 0) {
+        if (snowballin > 0 && attackTime <= 0 && ruler != null && entityToAttack == null && getEntityFear() == null && getCryTime() == 0) {
             float dist = getDistanceToEntity(ruler);
 
             if (dist < 10F && canEntityBeSeen(ruler)) {
@@ -767,7 +779,7 @@ public class EntityFairy extends EntityAnimal {
                     ruler = null;
                     disband();
                     loseTeam = 0;
-                    cryTime = 0;
+                    setCryTime( 0 );
                     setPathToEntity((PathEntity)null);
                 }
             } else {
@@ -783,25 +795,432 @@ public class EntityFairy extends EntityAnimal {
 
 	// This handles actions concerning teammates and entities atacking their ruler.
 	private void handleSocial() {
-		// TODO Auto-generated method stub
-		
+		if ( rand.nextBoolean()) {
+			return;
+		}
+
+		List list = worldObj.getEntitiesWithinAABBExcludingEntity( this, boundingBox.expand( 16D, 16D, 16D ) );
+		Collections.shuffle( list, rand );
+
+		for ( int j = 0; j < list.size(); j++ ) {
+			Entity entity = (Entity) list.get( j );
+
+			if ( canEntityBeSeen( entity ) && !entity.isDead ) {
+				if ( (ruler != null || queen()) && entity instanceof EntityFairy && sameTeam( (EntityFairy) entity ) ) {
+					EntityFairy fairy = (EntityFairy) list.get( j );
+
+					if ( fairy.getHealth() > 0 ) {
+						Entity scary = (Entity) null;
+
+						if ( fairy.getEntityFear() != null ) {
+							scary = fairy.getEntityFear();
+						} else if ( fairy.entityToAttack != null ) {
+							scary = fairy.entityToAttack;
+						}
+
+						if ( scary != null ) {
+							float dist = getDistanceToEntity( scary );
+
+							if ( dist > 16F || !canEntityBeSeen( scary ) ) {
+								scary = null;
+							}
+						}
+
+						if ( scary != null ) {
+							if ( cower ) {
+								if ( fairy.entityToAttack == scary && canEntityBeSeen( scary ) ) {
+									setCryTime( 120 );
+									this.setEntityFear( scary );
+									PathEntity doug = roam( entity, this, (float) Math.PI );
+
+									if ( doug != null ) {
+										setPathToEntity( doug );
+									}
+
+									break;
+								} else if ( fairy.getCryTime() > 60 ) {
+									setCryTime( Math.max( fairy.getCryTime() - 60, 0 ) );
+									this.setEntityFear( scary );
+									PathEntity doug = roam( entity, this, (float) Math.PI );
+
+									if ( doug != null ) {
+										setPathToEntity( doug );
+									}
+
+									break;
+								}
+							} else {
+								this.setTarget( (Entity) scary );
+								break;
+							}
+						}
+					}
+				} else if ( ruler != null && (guard() || queen()) && entity instanceof EntityCreature
+						&& !(entity instanceof EntityCreeper)
+						&& (!(entity instanceof EntityAnimal) || (!peacefulAnimal( (EntityAnimal) entity ))) ) {
+					// Guards proactivley seeking holstile enemies. Will add
+					// slimes? Maybe dunno.
+					EntityCreature creature = (EntityCreature) entity;
+
+					if ( creature.getHealth() > 0 && creature.getEntityToAttack() != null && creature.getEntityToAttack() == ruler ) {
+						this.setTarget( (Entity) creature );
+						break;
+					}
+				} else if ( entity instanceof EntityTNTPrimed && !hasPath() ) {
+					// Running away from lit TNT.
+					float dist = getDistanceToEntity( entity );
+
+					if ( dist < 8F ) {
+						PathEntity doug = roam( entity, this, (float) Math.PI );
+
+						if ( doug != null ) {
+							setPathToEntity( doug );
+
+							if ( !flymode() ) {
+								setFlymode( true );
+								jump();
+								setFlyTime( 100 );
+							}
+
+							break;
+						}
+					}
+				}
+			}
+		}
 	}
+
+	public boolean peacefulAnimal( EntityAnimal entity ) {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
 	// This handles actions of the medics.
 	private void handleHealing() {
+		if ( healTime > 0 ) {
+			return;
+		}
+
+		if ( entityHeal != null ) {
+			if ( entityHeal.getHealth() <= 0 || entityHeal.isDead ) {
+				entityHeal = null;
+			} else if ( !hasPath() ) {
+				PathEntity doug = worldObj.getPathEntityToEntity( this, entityHeal, 16F, false, false, true, true );
+
+				if ( doug != null ) {
+					setPathToEntity( doug );
+				} else {
+					entityHeal = null;
+				}
+			} else {
+				float g = getDistanceToEntity( entityHeal );
+
+				if ( g < 2.5F && canEntityBeSeen( entityHeal ) ) {
+					healThatAss( entityHeal );
+					entityHeal = null;
+				}
+			}
+		}
+
+		if ( entityHeal == null && healTime <= 0 ) {
+			List list = worldObj.getEntitiesWithinAABBExcludingEntity( this, boundingBox.expand( 16D, 16D, 16D ) );
+
+			for ( int j = 0; j < list.size(); j++ ) {
+				Entity entity = (Entity) list.get( j );
+
+				if ( canEntityBeSeen( entity ) && !entity.isDead ) {
+					if ( entity instanceof EntityFairy ) {
+						EntityFairy fairy = (EntityFairy) list.get( j );
+
+						if ( fairy.getHealth() > 0 && sameTeam( fairy ) && fairy.getHealth() < fairy.getMaxHealth() ) {
+							this.entityHeal = fairy;
+							PathEntity doug = worldObj.getPathEntityToEntity( this, entityHeal, 16F, false, false, true,
+									true );
+
+							if ( doug != null ) {
+								setPathToEntity( doug );
+							}
+
+							break;
+						}
+					} else if ( entity instanceof EntityLiving && ruler != null && ((EntityLiving) entity) == ruler ) {
+						if ( ruler.getHealth() > 0 && ruler.getHealth() < ruler.getMaxHealth() ) {
+							this.entityHeal = ruler;
+							PathEntity doug = worldObj.getPathEntityToEntity( this, entityHeal, 16F, false, false, true,
+									true );
+
+							if ( doug != null ) {
+								setPathToEntity( doug );
+							}
+
+							break;
+						}
+					}
+				}
+			}
+
+			if ( entityHeal == null && getHealth() < getMaxHealth() ) {
+				healThatAss( this );
+			}
+		}
+	}
+	private void healThatAss( EntityLivingBase entityHeal2 ) {
 		// TODO Auto-generated method stub
 		
 	}
+
 	// A handler specifically for the rogue class.
 	private void handleRogue() {
-		// TODO Auto-generated method stub
-		
+		if ( rand.nextBoolean() ) {
+			return;
+		}
+
+		List list = worldObj.getEntitiesWithinAABBExcludingEntity( this, boundingBox.expand( 16D, 16D, 16D ) );
+		Collections.shuffle( list, rand );
+
+		for ( int j = 0; j < list.size(); j++ ) {
+			Entity entity = (Entity) list.get( j );
+
+			if ( canEntityBeSeen( entity ) && !entity.isDead ) {
+				if ( (ruler != null || queen()) && entity instanceof EntityFairy
+						&& sameTeam( (EntityFairy) entity ) ) {
+					EntityFairy fairy = (EntityFairy) list.get( j );
+
+					if ( fairy.getHealth() > 0 ) {
+						Entity scary = (Entity) null;
+
+						if ( fairy.getEntityFear() != null ) {
+							scary = fairy.getEntityFear();
+						} else if ( fairy.entityToAttack != null ) {
+							scary = fairy.entityToAttack;
+						}
+
+						if ( scary != null ) {
+							float dist = getDistanceToEntity( scary );
+
+							if ( dist > 16F || !canEntityBeSeen( scary ) ) {
+								scary = null;
+							}
+						}
+
+						if ( scary != null ) {
+							if ( canHeal() ) {
+								if ( fairy.entityToAttack == scary && canEntityBeSeen( scary ) ) {
+									setCryTime( 120 );
+									this.setEntityFear( scary );
+									PathEntity doug = roam( entity, this, (float) Math.PI );
+
+									if ( doug != null ) {
+										setPathToEntity( doug );
+									}
+
+									break;
+								} else if ( fairy.getCryTime() > 60 ) {
+									setCryTime( Math.max( fairy.getCryTime() - 60, 0 ) );
+									this.setEntityFear( scary );
+									PathEntity doug = roam( entity, this, (float) Math.PI );
+
+									if ( doug != null ) {
+										setPathToEntity( doug );
+									}
+
+									break;
+								}
+							} else {
+								this.setTarget( (Entity) scary );
+								break;
+							}
+						}
+					}
+				} else if ( ruler != null && canHeal() && entity instanceof EntityCreature
+						&& !(entity instanceof EntityCreeper)
+						&& (!(entity instanceof EntityAnimal) || (!peacefulAnimal( (EntityAnimal) entity ))) ) {
+					EntityCreature creature = (EntityCreature) entity;
+
+					if ( creature.getHealth() > 0 && creature.getEntityToAttack() != null && creature.getEntityToAttack() == ruler ) {
+						this.setTarget( (Entity) creature );
+						break;
+					}
+				} else if ( entity instanceof EntityTNTPrimed && !hasPath() ) {
+					// Running away from lit TNT.
+					float dist = getDistanceToEntity( entity );
+
+					if ( dist < 8F ) {
+						PathEntity doug = roam( entity, this, (float) Math.PI );
+
+						if ( doug != null ) {
+							setPathToEntity( doug );
+
+							if ( !flymode() ) {
+								setFlymode( true );
+								jump();
+								setFlyTime( 100 );
+							}
+
+							break;
+						}
+					}
+				}
+			}
+		}
 	}
 	
 	public int postedCount;
+	private boolean flag;
+	public boolean didSwing;
+	public int witherTime;
+
 	// The AI method which handles post-related activities.
+	@SuppressWarnings( "unused" )
 	private void handlePosted(boolean b) {
+		if ( !tamed() || getFaction() > 0 || postedCount <= (posted() ? 2 : 5) ) {
+			postedCount++;
+			return; // Avoid processing too often or when not necessary.
+		}
+
+		postedCount = 0;
+		boolean farFlag = false;
+
+		if ( postY > -1 ) {
+			if ( ridingEntity != null && ruler != null && ridingEntity == ruler ) {
+				abandonPost();
+				return; // When a the player takes a tamed fairy away, it
+						// automatically cancels the post.
+			}
+
+			// Check to seeif the chunk is loaded.
+			Chunk chunk = worldObj.getChunkFromBlockCoords( postX, postZ );
+
+			if ( chunk != null && !(chunk instanceof EmptyChunk) ) {
+				Block block = worldObj.getBlock( postX, postY, postZ );
+
+				if ( block == null || !(block instanceof BlockSign) ) {
+					// If the saved position is not a sign block.
+					abandonPost();
+				} else {
+					TileEntity tileentity = worldObj.getTileEntity( postX, postY, postZ );
+					if ( tileentity == null || !(tileentity instanceof TileEntitySign) ) {
+						// Make sure the tile entity is right
+						abandonPost();
+					} else {
+						TileEntitySign sign = (TileEntitySign) tileentity;
+						if ( !mySign( sign ) ) {
+							// Make sure the name still matches
+							abandonPost();
+						} else if ( canRoamFar( sign ) ) {
+							farFlag = true;
+						}
+					}
+				}
+			}
+		} else {
+			// Try to find a post. The ruler has to be nearby for it to work.
+			if ( ruler != null && (ridingEntity == null || ridingEntity != ruler)
+					&& getDistanceSqToEntity( ruler ) <= 64F && canEntityBeSeen( ruler ) ) {
+				// Gets the fairy's relative position
+				int aa = MathHelper.floor_double( posX );
+				int bb = MathHelper.floor_double( boundingBox.minY );
+				int cc = MathHelper.floor_double( posZ );
+				
+				for ( int i = 0; i < 245; i++ ) {
+					int x = -3 + (i % 7); // Look around randomly.
+					int y = -2 + (i / 49);
+					int z = -3 + ((i / 7) % 7);
+
+					if ( Math.abs( x ) == 3 && Math.abs( z ) == 3 ) {
+						continue;
+					}
+
+					x += aa;
+					y += bb;
+					z += cc;
+
+					if ( y >= 0 && y < worldObj.getHeight() ) {
+						Block block = worldObj.getBlock( x, y, z );
+
+						if ( block instanceof BlockSign ) {
+							TileEntity tileentity = worldObj.getTileEntity( x, y, z );
+
+							if ( tileentity != null && tileentity instanceof TileEntitySign ) {
+								TileEntitySign sign = (TileEntitySign) tileentity;
+
+								if ( mySign( sign ) ) {
+									postX = x;
+									postY = y;
+									postZ = z;
+									setPosted( true );
+									break;
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+
+		if ( !flag ) // Processes fishing, then returns, if sitting.
+		{
+			if ( fishEntity != null ) {
+				// TODO: re-enable fishEntity
+				if ( /*fishEntity.gotBite()*/ false ) {
+					castRod();
+					attackTime = 10;
+				} else if ( rand.nextFloat() < 0.1F ) {
+					// TODO: handle packet
+					/*
+					mod_FairyMod.setPrivateValueBoth( EntityLiving.class, this, "currentTarget", "ay", fishEntity );
+					*/
+					numTicksToChaseTarget = 10 + this.rand.nextInt( 20 );
+				}
+			} else if ( rand.nextInt( 2 ) == 0 ) {
+				new FairyJob( this ).sittingFishing( worldObj );
+			}
+
+			return;
+		}
+
+		if ( posted() && !hasPath() && !angry() && !crying() ) {
+			double aa = (double) postX + 0.5D;
+			double bb = (double) postY + 0.5D;
+			double cc = (double) postZ + 0.5D;
+			double dd = posX - aa;
+			double ee = boundingBox.minY - bb;
+			double ff = posZ - cc;
+			double gg = Math.sqrt( (dd * dd) + (ee * ee) + (ff * ff) );
+
+			if ( gg >= (farFlag ? 12D : 6D) ) {
+				PathEntity doug = roamBlocks( aa, bb, cc, this, 0F );
+
+				if ( doug != null ) {
+					setPathToEntity( doug );
+				}
+			}
+		}
+
+		if ( posted() ) {
+			new FairyJob( this ).discover( worldObj );
+		}
+	}
+
+	public void castRod() {
 		// TODO Auto-generated method stub
 		
+	}
+
+	private boolean canRoamFar( TileEntitySign sign ) {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	private boolean mySign( TileEntitySign sign ) {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	// Leave a post.
+	public void abandonPost() {
+		postX = postY = postZ = -1;
+		setPosted( false );
 	}
     
 	// ---------- flag 1 -----------	
@@ -831,9 +1250,9 @@ public class EntityFairy extends EntityAnimal {
     public boolean getArmSwing() {
         return getFairyFlag(FLAG_ARM_SWING);
     }
-    protected void armSwing(boolean flag) {
+    public void armSwing(boolean flag) {
         setFairyFlag(FLAG_ARM_SWING, flag);
-        setTempItem(0);
+        setTempItem(null);
     }
 
     public boolean flymode() {
@@ -881,7 +1300,7 @@ public class EntityFairy extends EntityAnimal {
     public boolean hearts() {
         return getFairyFlag(FLAG_HEARTS);
     }
-    protected void setHearts(boolean flag) {
+    public void setHearts(boolean flag) {
         setFairyFlag(FLAG_HEARTS, flag);
     }
     
@@ -1143,8 +1562,9 @@ public class EntityFairy extends EntityAnimal {
     public int getTempItem() {
         return dataWatcher.getWatchableObjectInt(I_TOOL);
     }
-    public void setTempItem(int i) {
-        dataWatcher.updateObject(I_TOOL, i);
+    public void setTempItem(Item item) {
+    	// TODO: store as item id
+        dataWatcher.updateObject(I_TOOL, item);
     }
     
     // ----------
@@ -1273,7 +1693,7 @@ public class EntityFairy extends EntityAnimal {
 		
 	}
 
-	private boolean isAirySpace(int a, int b, int c) {
+	public boolean isAirySpace(int a, int b, int c) {
 		// TODO Auto-generated method stub
 		return false;
 	}
@@ -1291,6 +1711,35 @@ public class EntityFairy extends EntityAnimal {
 	private void disband() {
 		// TODO Auto-generated method stub
 		
+	}
+
+	public Entity getEntityFear() {
+		return entityFear;
+	}
+
+	public void setEntityFear( Entity entityFear ) {
+		this.entityFear = entityFear;
+	}
+
+	public int getCryTime() {
+		return cryTime;
+	}
+
+	public void setCryTime( int cryTime ) {
+		this.cryTime = cryTime;
+	}
+
+	public boolean acceptableFoods( Item item ) {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	public int getFlyTime() {
+		return flyTime;
+	}
+
+	public void setFlyTime( int flyTime ) {
+		this.flyTime = flyTime;
 	}
 
 }

@@ -22,16 +22,14 @@ import java.io.File;
 public class FairyFactions {
 
 	@SidedProxy(clientSide = Version.PROXY_CLIENT, serverSide = Version.PROXY_COMMON)
-	public static CommonProxy	proxy;
+	public static CommonProxy		proxy;
 
-	static final Logger			LOGGER	= LogManager.getFormatterLogger(Version.MOD_ID);
-	// static final Boolean DEV = Boolean.parseBoolean(
-	// System.getProperty("development", "false") );
+	public static final Logger		LOGGER	= LogManager.getFormatterLogger(Version.MOD_ID);
 
-	static File					BaseDir;
-	static Configuration		Config;
+	private File					BaseDir;
+	private static Configuration	Config;
 
-	private Spawner				fairySpawner;
+	private Spawner					fairySpawner;
 
 	@EventHandler
 	public void preInit(FMLPreInitializationEvent event) {
