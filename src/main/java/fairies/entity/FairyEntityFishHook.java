@@ -517,8 +517,7 @@ public class FairyEntityFishHook extends Entity
         {
             this.angler.setFishEntity(null);
             this.angler.setSitting(false);
-            this.angler.setTempItem(0);
-            //this.angler.tempItem = null;
+            this.angler.setTempItem(null);
         }
     }
 }
