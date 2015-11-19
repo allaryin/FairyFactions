@@ -12,6 +12,7 @@ import net.minecraft.entity.passive.EntityAnimal;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.pathfinding.PathEntity;
 import net.minecraft.util.MathHelper;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.World;
 
 public class EntityFairy extends EntityAnimal {
@@ -36,7 +37,7 @@ public class EntityFairy extends EntityAnimal {
 
 	public static final int		DEF_AGGRO_TIMER		= 15;    // how long will tame fairies stay mad? (3x for wild)
 		
-	private float sinage;				// what does this mean?
+	public float sinage;				// what does this mean?
 	private int postX, postY, postZ;	// where is our sign?
 	
 	private boolean cower;
@@ -885,7 +886,7 @@ public class EntityFairy extends EntityAnimal {
 	public static final int MAX_FACTION	= 15;
 	public static final int MAX_NAMEIDX = 15;
 	
-	protected int getSkin() {
+	public int getSkin() {
 		return dataWatcher.getWatchableObjectByte(B_FLAGS) & 0x03;
 	}
 	protected void setSkin(int skin) {
@@ -902,7 +903,7 @@ public class EntityFairy extends EntityAnimal {
 		dataWatcher.updateObject(B_FLAGS, Byte.valueOf(byte0));
 	}
 	
-	protected int getJob() {
+	public int getJob() {
 		return (dataWatcher.getWatchableObjectByte(B_FLAGS) >> 2) & 0x03;
 	}
     protected void setJob(int job) {
@@ -1286,6 +1287,11 @@ public class EntityFairy extends EntityAnimal {
 	private void disband() {
 		// TODO Auto-generated method stub
 		
+	}
+
+	public ResourceLocation getTexture(int skin) {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 }
