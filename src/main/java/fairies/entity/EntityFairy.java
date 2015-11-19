@@ -59,7 +59,7 @@ public class EntityFairy extends EntityAnimal {
 	private EntityLivingBase ruler;
 	private EntityLivingBase entityHeal;
 	private Entity entityFear;
-	private Entity fishEntity;
+	public Entity fishEntity;
 	
 	public EntityFairy(World world) {
 		super(world);
@@ -338,7 +338,7 @@ public class EntityFairy extends EntityAnimal {
         if (wasFishing) {
             wasFishing = false;
 
-            if (isSitting() && fishEntity == null) {
+            if (isSitting() && getFishEntity() == null) {
                 setSitting(false);
             }
         }
@@ -430,7 +430,7 @@ public class EntityFairy extends EntityAnimal {
             --cryTime;
 
             if (cryTime <= 0) {
-                entityFear = null;
+                setEntityFear(null);
             }
 
             if (cryTime > 600) {
@@ -463,7 +463,7 @@ public class EntityFairy extends EntityAnimal {
         }
 
         if (worldObj.difficultySetting.getDifficultyId() <= 0 && entityToAttack != null && entityToAttack instanceof EntityPlayer) {
-            entityFear = entityToAttack;
+            setEntityFear(entityToAttack);
             cryTime = Math.max(cryTime, 100);
             setTarget((Entity)null);
         }
@@ -558,7 +558,7 @@ public class EntityFairy extends EntityAnimal {
 	}
     
 	private void handleAnger() {
-		entityFear = null;
+		setEntityFear(null);
 		
 		// Lose interest in an entity that is far away or out of sight over time.
 		if( entityToAttack != null ) {
@@ -586,23 +586,23 @@ public class EntityFairy extends EntityAnimal {
                         this.setTarget(fairy.entityToAttack);
                         fairy.setTarget(null);
                         fairy.cryTime = 100;
-                        fairy.entityFear = entityToAttack;
+                        fairy.setEntityFear(entityToAttack);
                     }
                 }
             }
 		}
 	}
 	private void handleFear() {
-		if( entityFear != null ) {
-			if( entityFear.isDead) {
+		if( getEntityFear() != null ) {
+			if( getEntityFear().isDead) {
 				// Don't fear the dead.
-				entityFear = null;
-			} else if ( !hasPath() && canEntityBeSeen(entityFear) && cower) {
-	            float dist = getDistanceToEntity(entityFear);
+				setEntityFear(null);
+			} else if ( !hasPath() && canEntityBeSeen(getEntityFear()) && cower) {
+	            float dist = getDistanceToEntity(getEntityFear());
 	
 	            // Run from entityFear if you can see it and it is close.
 	            if( dist < DEF_FEAR_RANGE ) {
-	                PathEntity doug = roam(entityFear, this, PATH_AWAY);
+	                PathEntity doug = roam(getEntityFear(), this, PATH_AWAY);
 	
 	                if (doug != null) {
 	                    setPathToEntity(doug);
@@ -708,7 +708,7 @@ public class EntityFairy extends EntityAnimal {
             }
         }
 
-        if (snowballin > 0 && attackTime <= 0 && ruler != null && entityToAttack == null && entityFear == null && cryTime == 0) {
+        if (snowballin > 0 && attackTime <= 0 && ruler != null && entityToAttack == null && getEntityFear() == null && cryTime == 0) {
             float dist = getDistanceToEntity(ruler);
 
             if (dist < 10F && canEntityBeSeen(ruler)) {
@@ -1249,12 +1249,12 @@ public class EntityFairy extends EntityAnimal {
 		
 	}
 
-	private void setSitting(boolean b) {
+	public void setSitting(boolean b) {
 		// TODO Auto-generated method stub
 		
 	}
 
-	private boolean isSitting() {
+	public boolean isSitting() {
 		// TODO Auto-generated method stub
 		return false;
 	}
@@ -1292,6 +1292,22 @@ public class EntityFairy extends EntityAnimal {
 	public ResourceLocation getTexture(int skin) {
 		// TODO Auto-generated method stub
 		return null;
+	}
+
+	public Entity getFishEntity() {
+		return fishEntity;
+	}
+
+	public void setFishEntity(Entity fishEntity) {
+		this.fishEntity = fishEntity;
+	}
+
+	public Entity getEntityFear() {
+		return entityFear;
+	}
+
+	public void setEntityFear(Entity entityFear) {
+		this.entityFear = entityFear;
 	}
 
 }
