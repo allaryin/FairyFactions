@@ -1,6 +1,6 @@
 //Credit for the original CustomSpawner.class goes to DrZhark.
 
-package fairies;
+package fairies.world;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;

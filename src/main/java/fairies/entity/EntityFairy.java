@@ -87,7 +87,7 @@ public class EntityFairy extends EntityAnimal {
 		setFlymode(false);
 		this.sinage = rand.nextFloat();
 		this.setFlyTime( 400 + rand.nextInt(200) );
-		this.cower = rand.nextBoolean();
+		this.setCower(rand.nextBoolean());
 		this.postX = this.postY = this.postZ = -1;
 		
 		// TODO: Set texture
@@ -614,7 +614,7 @@ public class EntityFairy extends EntityAnimal {
 			if( getEntityFear().isDead) {
 				// Don't fear the dead.
 				setEntityFear(null);
-			} else if ( !hasPath() && canEntityBeSeen(getEntityFear()) && cower) {
+			} else if ( !hasPath() && canEntityBeSeen(getEntityFear()) && willCower()) {
 	            float dist = getDistanceToEntity(getEntityFear());
 	
 	            // Run from entityFear if you can see it and it is close.
@@ -828,7 +828,7 @@ public class EntityFairy extends EntityAnimal {
 						}
 
 						if ( scary != null ) {
-							if ( cower ) {
+							if ( willCower() ) {
 								if ( fairy.entityToAttack == scary && canEntityBeSeen( scary ) ) {
 									setCryTime( 120 );
 									this.setEntityFear( scary );
@@ -1330,7 +1330,7 @@ public class EntityFairy extends EntityAnimal {
 	public int getJob() {
 		return (dataWatcher.getWatchableObjectByte(B_FLAGS) >> 2) & 0x03;
 	}
-    protected void setJob(int job) {
+    public void setJob(int job) {
 		if( job < 0 ) {
 			job = 0;
 		} else if ( job > MAX_JOB ) {
@@ -1374,7 +1374,7 @@ public class EntityFairy extends EntityAnimal {
     protected int getFaction() {
     	return (dataWatcher.getWatchableObjectByte(B_FLAGS) >> 4) & 0x0f;
     }
-    protected void setFaction(int faction) {
+    public void setFaction(int faction) {
 		if( faction < 0 ) {
 			faction = 0;
 		} else if ( faction > MAX_FACTION ) {
@@ -1754,6 +1754,14 @@ public class EntityFairy extends EntityAnimal {
 
 	public void setFlyTime( int flyTime ) {
 		this.flyTime = flyTime;
+	}
+
+	public boolean willCower() {
+		return cower;
+	}
+
+	public void setCower(boolean cower) {
+		this.cower = cower;
 	}
 
 }
