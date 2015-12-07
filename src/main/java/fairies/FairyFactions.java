@@ -3,6 +3,7 @@ package fairies;
 import cpw.mods.fml.common.FMLCommonHandler;
 import cpw.mods.fml.common.Mod;
 import cpw.mods.fml.common.Mod.EventHandler;
+import cpw.mods.fml.common.Mod.Instance;
 import cpw.mods.fml.common.SidedProxy;
 import cpw.mods.fml.common.event.FMLInitializationEvent;
 import cpw.mods.fml.common.event.FMLPostInitializationEvent;
@@ -20,6 +21,9 @@ import java.io.File;
 
 @Mod(modid = Version.MOD_ID, version = Version.VERSION)
 public class FairyFactions {
+	
+	@Instance
+	public static FairyFactions		INSTANCE;
 
 	@SidedProxy(clientSide = Version.PROXY_CLIENT, serverSide = Version.PROXY_COMMON)
 	public static CommonProxy		proxy;
@@ -53,7 +57,7 @@ public class FairyFactions {
 
 		proxy.initEntities();
 		LOGGER.debug("Registered entities");
-
+		
 		proxy.initGUI();
 		LOGGER.debug("Registered GUI");
 
