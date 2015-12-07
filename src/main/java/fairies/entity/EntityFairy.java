@@ -22,6 +22,7 @@ import net.minecraft.pathfinding.PathEntity;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.tileentity.TileEntitySign;
 import net.minecraft.util.MathHelper;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.World;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.chunk.EmptyChunk;
@@ -48,7 +49,7 @@ public class EntityFairy extends EntityAnimal {
 
 	public static final int		DEF_AGGRO_TIMER		= 15;    // how long will tame fairies stay mad? (3x for wild)
 		
-	private float sinage;				// what does this mean?
+	public float sinage;				// what does this mean?
 	private int postX, postY, postZ;	// where is our sign?
 	
 	private boolean cower;
@@ -70,7 +71,7 @@ public class EntityFairy extends EntityAnimal {
 	private EntityLivingBase ruler;
 	private EntityLivingBase entityHeal;
 	private Entity entityFear;
-	private Entity fishEntity;
+	public Entity fishEntity;
 	
 	public EntityFairy(World world) {
 		super(world);
@@ -86,7 +87,7 @@ public class EntityFairy extends EntityAnimal {
 		setFlymode(false);
 		this.sinage = rand.nextFloat();
 		this.setFlyTime( 400 + rand.nextInt(200) );
-		this.cower = rand.nextBoolean();
+		this.setCower(rand.nextBoolean());
 		this.postX = this.postY = this.postZ = -1;
 		
 		// TODO: Set texture
@@ -354,7 +355,7 @@ public class EntityFairy extends EntityAnimal {
         if (wasFishing) {
             wasFishing = false;
 
-            if (isSitting() && fishEntity == null) {
+            if (isSitting() && getFishEntity() == null) {
                 setSitting(false);
             }
         }
@@ -442,11 +443,11 @@ public class EntityFairy extends EntityAnimal {
             --healTime;
         }
 
-        if (getCryTime() > 0) {
-            setCryTime( getCryTime() - 1 );
+        if (cryTime > 0) {
+            --cryTime;
 
-            if (getCryTime() <= 0) {
-                setEntityFear( null );
+            if (cryTime <= 0) {
+                entityFear = null;
             }
 
             if (getCryTime() > 600) {
@@ -479,7 +480,7 @@ public class EntityFairy extends EntityAnimal {
         }
 
         if (worldObj.difficultySetting.getDifficultyId() <= 0 && entityToAttack != null && entityToAttack instanceof EntityPlayer) {
-            setEntityFear( entityToAttack );
+            setEntityFear(entityToAttack);
             setCryTime( Math.max(getCryTime(), 100) );
             setTarget((Entity)null);
         }
@@ -574,7 +575,7 @@ public class EntityFairy extends EntityAnimal {
 	}
     
 	private void handleAnger() {
-		setEntityFear( null );
+		setEntityFear(null);
 		
 		// Lose interest in an entity that is far away or out of sight over time.
 		if( entityToAttack != null ) {
@@ -602,7 +603,7 @@ public class EntityFairy extends EntityAnimal {
                         this.setTarget(fairy.entityToAttack);
                         fairy.setTarget(null);
                         fairy.setCryTime( 100 );
-                        fairy.setEntityFear( entityToAttack );
+                        fairy.setEntityFear(entityToAttack);
                     }
                 }
             }
@@ -612,8 +613,8 @@ public class EntityFairy extends EntityAnimal {
 		if( getEntityFear() != null ) {
 			if( getEntityFear().isDead) {
 				// Don't fear the dead.
-				setEntityFear( null );
-			} else if ( !hasPath() && canEntityBeSeen(getEntityFear()) && cower) {
+				setEntityFear(null);
+			} else if ( !hasPath() && canEntityBeSeen(getEntityFear()) && willCower()) {
 	            float dist = getDistanceToEntity(getEntityFear());
 	
 	            // Run from entityFear if you can see it and it is close.
@@ -724,7 +725,7 @@ public class EntityFairy extends EntityAnimal {
             }
         }
 
-        if (snowballin > 0 && attackTime <= 0 && ruler != null && entityToAttack == null && getEntityFear() == null && getCryTime() == 0) {
+        if (snowballin > 0 && attackTime <= 0 && ruler != null && entityToAttack == null && entityFear == null && cryTime == 0) {
             float dist = getDistanceToEntity(ruler);
 
             if (dist < 10F && canEntityBeSeen(ruler)) {
@@ -827,7 +828,7 @@ public class EntityFairy extends EntityAnimal {
 						}
 
 						if ( scary != null ) {
-							if ( cower ) {
+							if ( willCower() ) {
 								if ( fairy.entityToAttack == scary && canEntityBeSeen( scary ) ) {
 									setCryTime( 120 );
 									this.setEntityFear( scary );
@@ -1309,7 +1310,7 @@ public class EntityFairy extends EntityAnimal {
 	public static final int MAX_FACTION	= 15;
 	public static final int MAX_NAMEIDX = 15;
 	
-	protected int getSkin() {
+	public int getSkin() {
 		return dataWatcher.getWatchableObjectByte(B_FLAGS) & 0x03;
 	}
 	protected void setSkin(int skin) {
@@ -1326,10 +1327,10 @@ public class EntityFairy extends EntityAnimal {
 		dataWatcher.updateObject(B_FLAGS, Byte.valueOf(byte0));
 	}
 	
-	protected int getJob() {
+	public int getJob() {
 		return (dataWatcher.getWatchableObjectByte(B_FLAGS) >> 2) & 0x03;
 	}
-    protected void setJob(int job) {
+    public void setJob(int job) {
 		if( job < 0 ) {
 			job = 0;
 		} else if ( job > MAX_JOB ) {
@@ -1373,7 +1374,7 @@ public class EntityFairy extends EntityAnimal {
     protected int getFaction() {
     	return (dataWatcher.getWatchableObjectByte(B_FLAGS) >> 4) & 0x0f;
     }
-    protected void setFaction(int faction) {
+    public void setFaction(int faction) {
 		if( faction < 0 ) {
 			faction = 0;
 		} else if ( faction > MAX_FACTION ) {
@@ -1673,12 +1674,12 @@ public class EntityFairy extends EntityAnimal {
 		
 	}
 
-	private void setSitting(boolean b) {
+	public void setSitting(boolean b) {
 		// TODO Auto-generated method stub
 		
 	}
 
-	private boolean isSitting() {
+	public boolean isSitting() {
 		// TODO Auto-generated method stub
 		return false;
 	}
@@ -1713,6 +1714,19 @@ public class EntityFairy extends EntityAnimal {
 		
 	}
 
+	public ResourceLocation getTexture(int skin) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	public Entity getFishEntity() {
+		return fishEntity;
+	}
+
+	public void setFishEntity(Entity fishEntity) {
+		this.fishEntity = fishEntity;
+	}
+
 	public Entity getEntityFear() {
 		return entityFear;
 	}
@@ -1740,6 +1754,14 @@ public class EntityFairy extends EntityAnimal {
 
 	public void setFlyTime( int flyTime ) {
 		this.flyTime = flyTime;
+	}
+
+	public boolean willCower() {
+		return cower;
+	}
+
+	public void setCower(boolean cower) {
+		this.cower = cower;
 	}
 
 }

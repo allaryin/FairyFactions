@@ -32,4 +32,9 @@ public class CommonProxy {
 		
 	}
 
+	public void sendFairyRename(String s1) {
+		// TODO Auto-generated method stub
+		
+	}
+
 }

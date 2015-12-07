@@ -11,6 +11,7 @@ import cpw.mods.fml.common.event.FMLPreInitializationEvent;
 import fairies.entity.EntityFairy;
 import fairies.event.FairyEventListener;
 import fairies.proxy.CommonProxy;
+import fairies.world.Spawner;
 import net.minecraft.entity.EnumCreatureType;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.config.Configuration;
