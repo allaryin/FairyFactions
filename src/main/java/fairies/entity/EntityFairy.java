@@ -10,6 +10,7 @@ import fairies.ai.FairyJob;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockSign;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityAgeable;
 import net.minecraft.entity.EntityCreature;
 import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.EntityLivingBase;
@@ -29,7 +30,7 @@ import net.minecraft.world.World;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.chunk.EmptyChunk;
 
-public class EntityFairy extends EntityCreature {
+public class EntityFairy extends EntityAnimal {
 	
 	// TODO: put these into config file
 	public static final double	DEF_BASE_HEALTH	= 15.0D;
@@ -1775,6 +1776,12 @@ public class EntityFairy extends EntityCreature {
 
 	public void setCower(boolean cower) {
 		this.cower = cower;
+	}
+
+	@Override
+	public EntityAgeable createChild(EntityAgeable p_90011_1_) {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 }
