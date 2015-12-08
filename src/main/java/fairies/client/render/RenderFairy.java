@@ -1,7 +1,12 @@
 package fairies.client.render;
 
+import java.util.Map;
+
 import org.lwjgl.opengl.GL11;
 
+import com.google.common.collect.Maps;
+
+import fairies.Version;
 import fairies.entity.EntityFairy;
 import net.minecraft.block.Block;
 import net.minecraft.client.Minecraft;
@@ -19,6 +24,20 @@ import net.minecraft.util.StringUtils;
 
 public class RenderFairy extends RenderLiving
 {
+	/**
+	 * TODO: Move into a more appropriate utility class.
+	 */
+	protected static final Map<String, ResourceLocation> resMap = Maps.newHashMap();
+	protected static ResourceLocation getRes(String key) {
+		if( !resMap.containsKey(key) ) {
+			final ResourceLocation res = new ResourceLocation(Version.ASSET_PREFIX, "textures/entities/"+key+".png");
+			resMap.put(key, res);
+			return res;
+		} else {
+			return resMap.get(key);
+		}
+	}
+	
     public RenderFairy(ModelFairy modelfairy, float f)
     {
         super(modelfairy, f);
@@ -104,6 +123,7 @@ public class RenderFairy extends RenderLiving
             GL11.glPopMatrix();
         }
     }
+    
 
     protected int setFairyBrightness(EntityFairy fairy, int i, float f)
     {
@@ -115,16 +135,16 @@ public class RenderFairy extends RenderLiving
             {
                 if (fairy.getSkin() > 1)
                 {
-                    // TODO: bindTexture("/fairy/fairyWithered3.png");
+                	bindTexture(getRes("fairyWithered3"));
                 }
                 else
                 {
-                    // TODO: bindTexture("/fairy/fairyWithered2.png");
+                	bindTexture(getRes("fairyWithered2"));
                 }
             }
             else
             {
-                // TODO: bindTexture("/fairy/fairyWithered1.png");
+            	bindTexture(getRes("fairyWithered1"));
             }
 
             setRenderPassModel(fairyModel4);
@@ -166,7 +186,7 @@ public class RenderFairy extends RenderLiving
             if (fairy.rogue())
             {
                 setRenderPassModel(fairyModel5);
-                // TODO: bindTexture("/fairy/fairyProps2.png");
+                bindTexture(getRes("fairyProps2"));
                 fairyModel5.flymode = fairy.flymode();
                 fairyModel5.retract = 0F;
                 fairyModel5.isSneak = fairy.isSneaking();
@@ -177,7 +197,7 @@ public class RenderFairy extends RenderLiving
             else
             {
                 setRenderPassModel(fairyModel2);
-                // TODO: bindTexture("/fairy/fairyProps.png");
+                bindTexture(getRes("fairyProps"));
                 fairyModel2.flymode = fairy.flymode();
                 fairyModel2.jobType = fairy.getJob() - 1;
                 fairyModel2.isSneak = fairy.isSneaking();

@@ -1714,6 +1714,11 @@ public class EntityFairy extends EntityAnimal {
 		
 	}
 
+	/**
+	 * TODO: cache results similar to RenderFairy's lookup
+	 * @param skin which type of fairy is this?
+	 * @return
+	 */
 	@SideOnly(Side.CLIENT)
 	public ResourceLocation getTexture(int skin) {
 		final String texturePath;

@@ -13,6 +13,8 @@ import net.minecraft.util.Vec3;
 
 public class RenderFish extends Render
 {
+	protected static final ResourceLocation texture = new ResourceLocation("textures/particle/particles.png");
+	
     /**
      * Actually renders the fishing line and hook
      */
@@ -24,7 +26,7 @@ public class RenderFish extends Render
         GL11.glScalef(0.5F, 0.5F, 0.5F);
         byte var10 = 1;
         byte var11 = 2;
-        // TODO: this.bindTexture("/particles.png");
+        this.bindTexture(texture);
         Tessellator var12 = Tessellator.instance;
         float var13 = (float)(var10 * 8 + 0) / 128.0F;
         float var14 = (float)(var10 * 8 + 8) / 128.0F;
@@ -108,7 +110,6 @@ public class RenderFish extends Render
 
 	@Override
 	protected ResourceLocation getEntityTexture(Entity p_110775_1_) {
-		// TODO Auto-generated method stub
-		return null;
+		return texture;
 	}
 }
