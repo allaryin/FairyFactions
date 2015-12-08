@@ -1530,7 +1530,7 @@ public class EntityFairy extends EntityAnimal {
     protected static final int FLAG2_CLIMBING		= 4;
     protected static final int FLAG2_POSTED			= 5;
     protected static final int FLAG2_WITHERED		= 6;
-    protected static final int FLAG3_HAIR_TYPE		= 7;
+    protected static final int FLAG2_HAIR_TYPE		= 7;
     
     protected boolean getFairyFlagTwo(int i) {
     	return (dataWatcher.getWatchableObjectByte(B_FLAGS2) & (1 << i)) != 0;
@@ -1595,10 +1595,10 @@ public class EntityFairy extends EntityAnimal {
     }
     
     public boolean hairType() {
-    	return getFairyFlagTwo(FLAG3_HAIR_TYPE);
+    	return getFairyFlagTwo(FLAG2_HAIR_TYPE);
     }
     public void setHairType(boolean flag) {
-    	setFairyFlagTwo(FLAG3_HAIR_TYPE, flag);
+    	setFairyFlagTwo(FLAG2_HAIR_TYPE, flag);
     }
     
     // ----------
