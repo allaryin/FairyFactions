@@ -19,7 +19,13 @@ import net.minecraft.entity.ai.attributes.IAttributeInstance;
 import net.minecraft.entity.item.EntityTNTPrimed;
 import net.minecraft.entity.monster.EntityCreeper;
 import net.minecraft.entity.passive.EntityAnimal;
+import net.minecraft.entity.passive.EntityChicken;
+import net.minecraft.entity.passive.EntityCow;
+import net.minecraft.entity.passive.EntityMooshroom;
+import net.minecraft.entity.passive.EntityPig;
+import net.minecraft.entity.passive.EntitySheep;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.projectile.EntitySnowball;
 import net.minecraft.item.Item;
 import net.minecraft.pathfinding.PathEntity;
 import net.minecraft.tileentity.TileEntity;
@@ -569,7 +575,6 @@ public class EntityFairy extends EntityAnimal {
 
 	private boolean canTeleportToRuler(EntityPlayer ruler2) {
 		// TODO: change criteria for this
-		// TODO Auto-generated method stub
 		return false;
 	}
 	private void teleportToRuler(EntityLivingBase ruler2) {
@@ -792,9 +797,23 @@ public class EntityFairy extends EntityAnimal {
         }
 	}
 
-	private void tossSnowball(EntityLivingBase ruler2) {
-		// TODO Auto-generated method stub
-		
+	private void tossSnowball(EntityLivingBase attackTarget) {
+        EntitySnowball entitysnowball = new EntitySnowball(worldObj, this);
+        double d = attackTarget.posX - this.posX;
+        double d1 = (attackTarget.posY + (double)attackTarget.getEyeHeight()) - 1.1000000238418579D - entitysnowball.posY;
+        double d2 = attackTarget.posZ - this.posZ;
+        float f = MathHelper.sqrt_double(d * d + d2 * d2) * 0.2F;
+        entitysnowball.setThrowableHeading(d, d1 + (double)f, d2, 1.6F, 12F);
+        worldObj.playSoundAtEntity(this, "random.bow", 1.0F, 1.0F / (this.getRNG().nextFloat() * 0.4F + 0.8F));
+        worldObj.spawnEntityInWorld(entitysnowball);
+        attackTime = 30;
+        armSwing(!didSwing);
+        faceEntity(attackTarget, 180F, 180F);
+        snowballin -= 1;
+
+        if (snowballin < 0) {
+            snowballin = 0;
+        }		
 	}
 
 	// This handles actions concerning teammates and entities atacking their ruler.
@@ -894,9 +913,13 @@ public class EntityFairy extends EntityAnimal {
 		}
 	}
 
-	public boolean peacefulAnimal( EntityAnimal entity ) {
-		// TODO Auto-generated method stub
-		return false;
+	public boolean peacefulAnimal( EntityAnimal animal ) {
+        Class thing = animal.getClass();
+        return thing == EntityPig.class ||
+                thing == EntityCow.class ||
+                thing == EntityChicken.class ||
+                thing == EntitySheep.class ||
+                thing == EntityMooshroom.class;
 	}
 
 	// This handles actions of the medics.
