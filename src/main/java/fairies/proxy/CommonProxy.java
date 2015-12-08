@@ -1,5 +1,10 @@
 package fairies.proxy;
 
+import cpw.mods.fml.common.registry.EntityRegistry;
+import fairies.FairyFactions;
+import fairies.entity.EntityFairy;
+import fairies.entity.FairyEntityFishHook;
+
 public class CommonProxy {
 
 	public void initChannel() {
@@ -8,8 +13,9 @@ public class CommonProxy {
 	}
 
 	public void initEntities() {
-		// TODO Auto-generated method stub
-		
+		EntityRegistry.registerGlobalEntityID( EntityFairy.class, "Fairy", EntityRegistry.findGlobalUniqueEntityId() );
+		// defaults reference vanilla's EntityFishhook
+		EntityRegistry.registerModEntity( FairyEntityFishHook.class, "FairyFishhook", EntityRegistry.findGlobalUniqueEntityId(), FairyFactions.INSTANCE, 64, 4, true );
 	}
 
 	public void initGUI() {

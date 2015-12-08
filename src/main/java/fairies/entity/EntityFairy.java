@@ -255,7 +255,7 @@ public class EntityFairy extends EntityAnimal {
 					 */
 				}
 				
-				if( nameEnabled() && tamed() && !rulerName().isEmpty() ) {
+				if( nameEnabled() && tamed() && hasRuler() ) {
 					// TODO: proxy display rename gui
 				}
 			}
@@ -1662,6 +1662,9 @@ public class EntityFairy extends EntityAnimal {
 		
 	}
 
+    public boolean hasRuler() {
+    	return ruler != null && rulerName() != null;
+    }
 	private String rulerName() {
 		// TODO Auto-generated method stub
 		return null;
