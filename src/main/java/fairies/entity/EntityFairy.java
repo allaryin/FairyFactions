@@ -25,12 +25,16 @@ import net.minecraft.entity.passive.EntityMooshroom;
 import net.minecraft.entity.passive.EntityPig;
 import net.minecraft.entity.passive.EntitySheep;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.projectile.EntityPotion;
 import net.minecraft.entity.projectile.EntitySnowball;
+import net.minecraft.init.Items;
 import net.minecraft.item.Item;
+import net.minecraft.item.ItemStack;
 import net.minecraft.pathfinding.PathEntity;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.tileentity.TileEntitySign;
 import net.minecraft.util.MathHelper;
+import net.minecraft.util.MovingObjectPosition;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.World;
 import net.minecraft.world.chunk.Chunk;
@@ -991,9 +995,24 @@ public class EntityFairy extends EntityAnimal {
 			}
 		}
 	}
-	private void healThatAss( EntityLivingBase entityHeal2 ) {
-		// TODO Auto-generated method stub
-		
+	
+    public static final ItemStack healPotion = new ItemStack(Items.potionitem, 1, 16389);
+    public static final ItemStack restPotion = new ItemStack(Items.potionitem, 1, 16385);
+
+    public ItemStack handPotion() {
+        return (rarePotion() ? restPotion : healPotion);
+    }
+	private void healThatAss( EntityLivingBase guy ) {
+        armSwing(!didSwing); //Swings arm and heals the specified person.
+        EntityPotion potion = new EntityPotion(worldObj, this, handPotion().getItemDamage());
+        worldObj.spawnEntityInWorld(potion);
+        
+        // TODO: reflectiony impact invocation
+        // potion.onImpact(new MovingObjectPosition(guy));
+                
+        setPathToEntity((PathEntity)null);
+        healTime = 200;
+        setRarePotion(rand.nextInt(4) == 0);
 	}
 
 	// A handler specifically for the rogue class.
