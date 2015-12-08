@@ -1,8 +1,11 @@
 package fairies.entity;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.Collections;
 import java.util.List;
 
+import cpw.mods.fml.relauncher.ReflectionHelper;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import fairies.Version;
@@ -84,7 +87,7 @@ public class EntityFairy extends EntityAnimal {
 	private EntityLivingBase ruler;
 	private EntityLivingBase entityHeal;
 	private Entity entityFear;
-	public Entity fishEntity;
+	public FairyEntityFishHook fishEntity;
 	
 	public EntityFairy(World world) {
 		super(world);
@@ -1002,14 +1005,20 @@ public class EntityFairy extends EntityAnimal {
     public ItemStack handPotion() {
         return (rarePotion() ? restPotion : healPotion);
     }
+    // TODO: fix childish method name :P
 	private void healThatAss( EntityLivingBase guy ) {
         armSwing(!didSwing); //Swings arm and heals the specified person.
         EntityPotion potion = new EntityPotion(worldObj, this, handPotion().getItemDamage());
         worldObj.spawnEntityInWorld(potion);
         
-        // TODO: reflectiony impact invocation
         // potion.onImpact(new MovingObjectPosition(guy));
-                
+        try {
+            final Method onImpact = ReflectionHelper.findMethod(EntityPotion.class, potion, new String[]{ "onImpact" }, MovingObjectPosition.class);
+			onImpact.invoke(potion, new MovingObjectPosition(guy));
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+        
         setPathToEntity((PathEntity)null);
         healTime = 200;
         setRarePotion(rand.nextInt(4) == 0);
@@ -1117,7 +1126,6 @@ public class EntityFairy extends EntityAnimal {
 	public int witherTime;
 
 	// The AI method which handles post-related activities.
-	@SuppressWarnings( "unused" )
 	private void handlePosted(boolean b) {
 		if ( !tamed() || getFaction() > 0 || postedCount <= (posted() ? 2 : 5) ) {
 			postedCount++;
@@ -1207,8 +1215,7 @@ public class EntityFairy extends EntityAnimal {
 		if ( !flag ) // Processes fishing, then returns, if sitting.
 		{
 			if ( fishEntity != null ) {
-				// TODO: re-enable fishEntity
-				if ( /*fishEntity.gotBite()*/ false ) {
+				if ( fishEntity.gotBite() ) {
 					castRod();
 					attackTime = 10;
 				} else if ( rand.nextFloat() < 0.1F ) {
@@ -1605,12 +1612,11 @@ public class EntityFairy extends EntityAnimal {
     }
 
     // A temporary item shown while arm is swinging, related to jobs.
-    public int getTempItem() {
-        return dataWatcher.getWatchableObjectInt(I_TOOL);
+    public Item getTempItem() {
+        return Item.getItemById( dataWatcher.getWatchableObjectInt(I_TOOL) );
     }
     public void setTempItem(Item item) {
-    	// TODO: store as item id
-        dataWatcher.updateObject(I_TOOL, item);
+        dataWatcher.updateObject(I_TOOL, Item.getIdFromItem(item));
     }
     
     // ----------
@@ -1784,7 +1790,7 @@ public class EntityFairy extends EntityAnimal {
 		return fishEntity;
 	}
 
-	public void setFishEntity(Entity fishEntity) {
+	public void setFishEntity(FairyEntityFishHook fishEntity) {
 		this.fishEntity = fishEntity;
 	}
 
