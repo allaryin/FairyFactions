@@ -1724,7 +1724,7 @@ public class EntityFairy extends EntityAnimal {
 	public ResourceLocation getTexture(int skin) {
 		final String texturePath;
         if (getCustomName().equals("Steve")) {
-            texturePath = "notFairy.png";
+            texturePath = "textures/entities/notFairy.png";
         } else {
         	final int idx;
 	        if (skin < 0) {
@@ -1734,9 +1734,9 @@ public class EntityFairy extends EntityAnimal {
 	        } else {
 	        	idx = skin + 1;
 	        }
-	        texturePath = "fairy/fairy" + (queen() ? "q" : "") + idx + ".png";
+	        texturePath = "textures/entities/fairy" + (queen() ? "q" : "") + idx + ".png";
         }
-		return new ResourceLocation(Version.TEXTURE_ENTITY+texturePath);
+		return new ResourceLocation(Version.ASSET_PREFIX, texturePath);
 	}
 
 	public Entity getFishEntity() {
