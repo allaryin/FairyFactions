@@ -271,9 +271,9 @@ public class RenderFairy extends RenderLiving
     }
     
 	@Override
-	protected ResourceLocation getEntityTexture(Entity p_110775_1_) {
-		// TODO Auto-generated method stub
-		return null;
+	protected ResourceLocation getEntityTexture(Entity entity) {
+		final EntityFairy fairy = (EntityFairy)entity;
+		return fairy.getTexture(fairy.getSkin());
 	}
 
     protected ModelFairy fairyModel, fairyModel4; //Body and withered overlay
