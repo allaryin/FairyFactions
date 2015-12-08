@@ -14,7 +14,8 @@ public class CommonProxy {
 
 	public void initEntities() {
 		EntityRegistry.registerGlobalEntityID( EntityFairy.class, "Fairy", EntityRegistry.findGlobalUniqueEntityId() );
-		// defaults reference vanilla's EntityFishhook
+		// TODO: create a spawn egg
+		
 		EntityRegistry.registerModEntity( FairyEntityFishHook.class, "FairyFishhook", EntityRegistry.findGlobalUniqueEntityId(), FairyFactions.INSTANCE, 64, 4, true );
 	}
 
