@@ -3,6 +3,9 @@ package fairies.entity;
 import java.util.Collections;
 import java.util.List;
 
+import cpw.mods.fml.relauncher.Side;
+import cpw.mods.fml.relauncher.SideOnly;
+import fairies.Version;
 import fairies.ai.FairyJob;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockSign;
@@ -1714,9 +1717,23 @@ public class EntityFairy extends EntityAnimal {
 		
 	}
 
+	@SideOnly(Side.CLIENT)
 	public ResourceLocation getTexture(int skin) {
-		// TODO Auto-generated method stub
-		return null;
+		final String texturePath;
+        if (getCustomName().equals("Steve")) {
+            texturePath = "notFairy.png";
+        } else {
+        	final int idx;
+	        if (skin < 0) {
+	            idx = 1;
+	        } else if (skin > 3) {
+	            idx = 4;
+	        } else {
+	        	idx = skin + 1;
+	        }
+	        texturePath = "fairy/fairy" + (queen() ? "q" : "") + idx + ".png";
+        }
+		return new ResourceLocation(Version.TEXTURE_ENTITY+texturePath);
 	}
 
 	public Entity getFishEntity() {

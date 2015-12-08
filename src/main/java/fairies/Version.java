@@ -9,4 +9,7 @@ public class Version {
 	
 	public static final String	PROXY_CLIENT = "fairies.proxy.ClientProxy";
 	public static final String	PROXY_COMMON = "fairies.proxy.CommonProxy";
+	
+	public static final String	ASSET_PREFIX = "fairyfactions";
+	public static final String	TEXTURE_ENTITY = ASSET_PREFIX+":textures/entity/";
 }
