@@ -3,14 +3,17 @@ package fairies.ai;
 import java.util.ArrayList;
 import java.util.List;
 
+import cpw.mods.fml.relauncher.ReflectionHelper;
 import fairies.entity.EntityFairy;
 import net.minecraft.block.Block;
+import net.minecraft.entity.EntityCreature;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.passive.EntityAnimal;
 import net.minecraft.entity.passive.EntitySheep;
 import net.minecraft.init.Blocks;
 import net.minecraft.init.Items;
 import net.minecraft.item.Item;
+import net.minecraft.item.ItemDye;
 import net.minecraft.item.ItemStack;
 import net.minecraft.pathfinding.PathEntity;
 import net.minecraft.tileentity.TileEntity;
@@ -18,6 +21,7 @@ import net.minecraft.tileentity.TileEntityChest;
 import net.minecraft.util.MathHelper;
 import net.minecraft.util.Vec3;
 import net.minecraft.world.World;
+import net.minecraftforge.common.IPlantable;
 
 public class FairyJob {
 	public FairyJob( final EntityFairy entityfairy ) {
@@ -103,8 +107,7 @@ public class FairyJob {
 		for ( int i = 0; i < list.size(); i++ ) {
 			final EntityAnimal entity1 = (EntityAnimal) list.get( i );
 
-			// TODO: find this out
-			final int fleeingTick = 0;
+			final int fleeingTick = ReflectionHelper.getPrivateValue(EntityCreature.class, entity1, "fleeingTick");
 			if ( fairy.peacefulAnimal( entity1 ) && fairy.canEntityBeSeen( entity1 ) && entity1.getHealth() > 0
 					&& entity1.getEntityToAttack() == null && fleeingTick <= 0 && !entity1.isInLove()
 					&& entity1.getGrowingAge() == 0 ) {
@@ -138,10 +141,9 @@ public class FairyJob {
 		for ( int i = 0; i < list.size(); i++ ) {
 			final EntitySheep entity1 = (EntitySheep) list.get( i );
 
-			// TODO: get this correctly
-			final int fleeing = 0;
+			final int fleeingTick = ReflectionHelper.getPrivateValue(EntityCreature.class, entity1, "fleeingTick");
 			if ( fairy.canEntityBeSeen( entity1 ) && entity1.getHealth() > 0 && entity1.getEntityToAttack() == null
-					&& fleeing <= 0 && entity1.getGrowingAge() >= 0 && !entity1.getSheared() ) {
+					&& fleeingTick <= 0 && entity1.getGrowingAge() >= 0 && !entity1.getSheared() ) {
 				list2.add( entity1 );
 			}
 		}
@@ -338,6 +340,8 @@ public class FairyJob {
 		/**
 		 * TODO: Actually plant seeds correctly, we have interfaces for this
 		 * now. This has the benefit of actually planting non-wheat seeds too...
+		 * 
+		 * This can be a bit messy, so will actually defer cleanup until after release.
 		 */
 
 		for ( int a = 0; a < 3; a++ ) {
@@ -348,10 +352,10 @@ public class FairyJob {
 				world.playSoundEffect( x + 0.5F, y + 0.5F, z + 0.5F, block.stepSound.getBreakSound(),
 						(block.stepSound.getVolume() + 1.0F) / 2.0F, block.stepSound.getPitch() * 0.8F );
 				world.setBlock( x, y + 1, z, block );
+				stack.stackSize--;
+				
 				fairy.armSwing( !fairy.didSwing );
 				fairy.setTempItem( stack.getItem() );
-				stack.stackSize--;
-
 				fairy.attackTime = 1;
 
 				if ( fairy.flymode() && fairy.getFlyTime() > 0 ) {
@@ -370,10 +374,6 @@ public class FairyJob {
 
 	// Use bonemeal to speed up wheat growth
 	private boolean onBonemealUse( final ItemStack stack, int x, final int y, int z, final World world ) {
-		/**
-		 * TODO: actually call applyBonemeal instead
-		 */
-
 		for ( int a = 0; a < 3; a++ ) {
 			final Block i = world.getBlock( x, y + 1, z );
 			final int j = world.getBlockMetadata( x, y + 1, z );
@@ -382,11 +382,11 @@ public class FairyJob {
 				final Block block = Blocks.wheat;
 				world.playSoundEffect( x + 0.5F, y + 0.5F, z + 0.5F, block.stepSound.getBreakSound(),
 						(block.stepSound.getVolume() + 1.0F) / 2.0F, block.stepSound.getPitch() * 0.8F );
-				world.setBlockMetadataWithNotify( x, y + 1, z, 7, 2 );
+
+				ItemDye.applyBonemeal(stack, world, x, y, z, null);
+
 				fairy.armSwing( !fairy.didSwing );
 				fairy.setTempItem( stack.getItem() );
-				stack.stackSize--;
-
 				fairy.attackTime = 1;
 
 				if ( fairy.flymode() && fairy.getFlyTime() > 0 ) {
@@ -501,9 +501,7 @@ public class FairyJob {
 			final EntityAnimal entity = (EntityAnimal) animals.get( i );
 
 			if ( fairy.getDistanceToEntity( entity ) < 3F ) {
-				// TODO: do this correctly
-				// mod_FairyMod.setPrivateValueBoth(EntityAnimal.class, entity,
-				// "inLove", "a", 600);
+				ReflectionHelper.setPrivateValue(EntityAnimal.class, entity, 600, "inLove");			
 				count++;
 				stack.stackSize--;
 			}
@@ -809,7 +807,6 @@ public class FairyJob {
 
 	// Is the item a wheat seed?
 	private boolean isSeedItem( final Item item ) {
-
 		return item == Items.wheat_seeds;
 	}
 
@@ -851,8 +848,8 @@ public class FairyJob {
 	}
 
 	private boolean isFlower( final Item item ) {
-		// TODO: do.
-		return false;
+		// NB: Let's just hope that iplantables are sufficient for this for now
+		return item instanceof IPlantable;
 	}
 
 	// Items worth picking up
