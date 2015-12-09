@@ -49,11 +49,13 @@ public class FairyFactions {
 
 	@EventHandler
 	public void init(FMLInitializationEvent event) {
-		MinecraftForge.EVENT_BUS.register(new FairyEventListener());
+		FairyEventListener listener = new FairyEventListener();
+		MinecraftForge.EVENT_BUS.register(listener);
+		
 		FMLCommonHandler.instance().bus().register(this);
 		LOGGER.debug("Registered events");
 
-		proxy.initChannel();
+		proxy.initChannel(listener);
 		LOGGER.debug("Registered channel");
 
 		proxy.initEntities();
