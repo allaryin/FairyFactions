@@ -19,6 +19,7 @@ import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.entity.ai.attributes.IAttributeInstance;
+import net.minecraft.entity.item.EntityMinecart;
 import net.minecraft.entity.item.EntityTNTPrimed;
 import net.minecraft.entity.monster.EntityCreeper;
 import net.minecraft.entity.passive.EntityAnimal;
@@ -39,6 +40,7 @@ import net.minecraft.tileentity.TileEntitySign;
 import net.minecraft.util.MathHelper;
 import net.minecraft.util.MovingObjectPosition;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.world.EnumDifficulty;
 import net.minecraft.world.World;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.chunk.EmptyChunk;
@@ -1638,6 +1640,16 @@ public class EntityFairy extends EntityAnimal {
     
     // ----------
     
+    public boolean hasRuler() {
+    	return ruler != null && rulerName() != null;
+    }
+	public String rulerName() {
+		return dataWatcher.getWatchableObjectString(S_OWNER);
+	}
+	public void setRulerName(String s) {
+		dataWatcher.updateObject( S_OWNER, s);
+	}
+    
     // Custom name of the fairy, enabled by paper.
     public String getCustomName() {
         return dataWatcher.getWatchableObjectString(S_NAME_REAL);
@@ -1767,14 +1779,6 @@ public class EntityFairy extends EntityAnimal {
 		}
 	}
 
-    public boolean hasRuler() {
-    	return ruler != null && rulerName() != null;
-    }
-	private String rulerName() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
 	private boolean checkGroundBelow() {
 		// TODO Auto-generated method stub
 		return false;
@@ -1819,10 +1823,347 @@ public class EntityFairy extends EntityAnimal {
 		// TODO Auto-generated method stub
 		return false;
 	}
+	
+	@Override
+	public boolean interact( EntityPlayer player ) {
+		if ( !worldObj.isRemote
+				&& (ridingEntity == null || ridingEntity == player || ridingEntity instanceof EntityMinecart) ) {
+			ItemStack stack = player.inventory.getCurrentItem();
+
+			if ( tamed() && player.getDisplayName().equals( rulerName() ) ) {
+				if ( stack != null && getHealth() < getMaxHealth() && acceptableFoods( stack.getItem() )
+						&& stack.stackSize > 0 ) {
+					stack.stackSize--;
+
+					if ( stack.stackSize <= 0 ) {
+						player.inventory.setInventorySlotContents( player.inventory.currentItem, null );
+					}
+
+					setHearts( !hearts() );
+
+					if ( stack.getItem() == Items.sugar ) {
+						heal( 5 );
+					} else {
+						heal( 99 );
+
+						if ( stack.getItem() == Items.speckled_melon ) {
+							setWithered( false );
+							witherTime = 0;
+						}
+					}
+
+					return true;
+				} else if ( stack != null && haircutItem( stack.getItem() ) && stack.stackSize > 0 && !rogue() ) {
+					setHairType( !hairType() );
+					return true;
+				} else if ( stack != null && ridingEntity == null && !isSitting() && vileSubstance( stack.getItem() )
+						&& stack.stackSize > 0 ) {
+					dropItem( stack.getItem(), 1 );
+					stack.stackSize--;
+
+					if ( stack.stackSize <= 0 ) {
+						player.inventory.setInventorySlotContents( player.inventory.currentItem, null );
+					}
+
+					disband();
+					return true;
+				} else if ( onGround && stack != null && namingItem( stack.getItem() ) && stack.stackSize > 0 ) {
+					stack.stackSize--;
+
+					if ( stack.stackSize <= 0 ) {
+						player.inventory.setInventorySlotContents( player.inventory.currentItem, null );
+					}
+
+					setSitting( true );
+					setNameEnabled( true );
+					isJumping = false;
+					setPathToEntity( (PathEntity) null );
+					setTarget( (Entity) null );
+					entityFear = null;
+				} else {
+					if ( isSitting() ) {
+						if ( stack != null && realFreshOysterBars( stack.getItem() ) && stack.stackSize > 0 ) {
+							hydraFairy();
+						} else {
+							setSitting( false );
+						}
+
+						return true;
+					} else if ( player.isSneaking() ) {
+						if ( flymode() || !onGround ) {
+							flyTime = 0;
+						} else {
+							setSitting( true );
+							isJumping = false;
+							setPathToEntity( (PathEntity) null );
+							setTarget( (Entity) null );
+							entityFear = null;
+						}
+					} else if ( stack == null || !snowballItem( stack.getItem() ) ) {
+						mountEntity( player );
+						setFlymode( true );
+						flyTime = 200;
+						setCanFlap( true );
+						return true;
+					}
+				}
+			} else {
+				if ( (getFaction() == 0 || worldObj.difficultySetting == EnumDifficulty.PEACEFUL) && !((queen() || posted()) && tamed())
+						&& !crying() && !angry() && stack != null && acceptableFoods( stack.getItem() )
+						&& stack.stackSize > 0 ) {
+					stack.stackSize--;
+
+					if ( stack.stackSize <= 0 ) {
+						player.inventory.setInventorySlotContents( player.inventory.currentItem, null );
+					}
+
+					if ( stack.getItem() != Items.sugar || rand.nextInt( 4 ) == 0 ) {
+						if ( stack.getItem() == Items.sugar ) {
+							heal( 5 );
+						} else {
+							heal( 99 );
+						}
+
+						tameMe( player );
+						return true;
+					} else {
+						setHearts( !hearts() );
+						return true;
+					}
+				} else if ( !tamed() ) {
+					setHearts( !hearts() );
+				}
+
+				tameFailMessage( player );
+				return true;
+			}
+		}
+
+		return super.interact( player );
+	}
+
+	// Foods that can be used for taming
+	public boolean acceptableFoods( Item i ) {
+		if ( i == Items.speckled_melon ) {
+			return true;
+		} else if ( tamed() || !queen() ) {
+			return i == Items.apple || i == Items.melon || i == Items.sugar
+					|| i == Items.cake || i == Items.cookie;
+		}
+
+		return false;
+	}
+	// Things used for disbanding
+	public boolean vileSubstance( Item i ) {
+		return i == Items.slime_ball || i == Items.rotten_flesh || i == Items.spider_eye
+				|| i == Items.fermented_spider_eye;
+	}
+
+	// The quickest way to Daphne
+	public boolean realFreshOysterBars( Item i ) {
+		return i == Items.magma_cream;
+	}
+
+	// Item used to rename a fairy, paper
+	public boolean namingItem( Item i ) {
+		return i == Items.paper;
+	}
+
+	// Is the item a snowball or not.
+	public boolean snowballItem( Item i ) {
+		return i == Items.snowball;
+	}
+
+	// Can the item give a haircut.
+	public boolean haircutItem( Item i ) {
+		return i == Items.shears;
+	}
 
 	private void disband() {
-		// TODO Auto-generated method stub
-		
+		setRulerName( "" );
+		setFaction( 0 );
+		setHearts( !didHearts );
+		cryTime = 200;
+		setTamed( false );
+		setCustomName( "" );
+		abandonPost();
+		snowballin = 0;
+
+		if ( ruler != null ) {
+			PathEntity doug = roam( ruler, this, (float) Math.PI );
+
+			if ( doug != null ) {
+				setPathToEntity( doug );
+			}
+
+			if ( ruler instanceof EntityPlayer ) {
+				//
+				String s = getActualName( getNamePrefix(), getNameSuffix() ) + " ";
+
+				if ( queen() ) {
+					s = "Queen " + s;
+				}
+
+				int i = rand.nextInt( 6 );
+
+				if ( queen() && i < 3 ) {
+					s += "was greatly offended by your offering.";
+				} else if ( queen() ) {
+					s += "called you a 'dirty peasant' and stormed out.";
+				} else if ( i == 0 ) {
+					s += "threw it on the ground and had a fit.";
+				} else if ( i == 1 ) {
+					s += "called you a 'poopy-head' and ran away.";
+				} else if ( i == 2 ) {
+					s += "would rather die than eat that gross thing.";
+				} else if ( i == 3 ) {
+					s += "decided not to be your friend anymore.";
+				} else if ( i == 4 ) {
+					s += "gave you a dirty look and headed off.";
+				} else {
+					s += "says that's the grossest thing she's ever seen.";
+				}
+
+				// mod_FairyMod.fairyMod.sendDisband(player, "* §9" + s);
+				// TODO: ModLoader.getMinecraftInstance().ingameGUI.addChatMessage( "* §9" + s );
+			}
+		}
+
+		ruler = null;
+	}
+	
+	public void tameMe( EntityPlayer player ) {
+		if ( player == null ) {
+			return;
+		}
+
+		setFaction( 0 );
+		setTamed( true );
+		setRulerName( player.getDisplayName() );
+		setHearts( !hearts() );
+		abandonPost();
+		snowballin = 0;
+		ruler = player;
+
+		if ( scout() ) {
+			cower = false;
+		}
+
+		String f = getActualName( getNamePrefix(), getNameSuffix() ) + " ";
+
+		if ( queen() ) {
+			f = "Queen " + f;
+		}
+
+		String s = f;
+		int i = rand.nextInt( 6 );
+
+		if ( queen() && i < 2 ) {
+			s += "reluctantly joined your party.";
+		} else if ( queen() && i > 3 ) {
+			s += "sighed and became your follower.";
+		} else if ( queen() ) {
+			s += "really enjoys eating glistering melons.";
+		} else if ( i == 0 ) {
+			s += "was kind of lonely without a leader.";
+		} else if ( i == 1 ) {
+			s += "shrugged and decided to follow you.";
+		} else if ( i == 2 ) {
+			s += "put the past behind her and joined you.";
+		} else if ( i == 3 ) {
+			s += "was easily persuaded by that yummy snack.";
+		} else if ( i == 4 ) {
+			s += "introduced herself properly to you.";
+		} else {
+			s += "ate that snack like there was no tomorrow.";
+		}
+
+		// mod_FairyMod.fairyMod.sendDisband(newRuler, "* §a" + s);
+		// TODO: ModLoader.getMinecraftInstance().ingameGUI.addChatMessage( "* §a" + s );
+	}
+	
+	// Don't let that spider bite you, spider bite hurt.
+	public void hydraFairy() 
+	{
+		double a = (boundingBox.minX + boundingBox.maxX) / 2D;
+		double b = (boundingBox.minY + (double) yOffset) - (double) ySize;
+		double c = (boundingBox.minZ + boundingBox.maxZ) / 2D;
+		motionX = 0D;
+		motionY = -0.1D;
+		motionZ = 0D;
+		// Anthony stopped to tie his shoe, and they all went marching on.
+		isJumping = false; 
+		moveForward = 0F;
+		moveStrafing = 0F;
+		setPathToEntity( (PathEntity) null );
+		setSitting( true );
+		onGround = true;
+		List list = worldObj.getEntitiesWithinAABB( EntityFairy.class, boundingBox.expand( 80D, 80D, 80D ) );
+
+		for ( int j = 0; j < list.size(); j++ ) {
+			EntityFairy fairy = (EntityFairy) list.get( j );
+
+			if ( fairy != this && fairy.getHealth() > 0 && sameTeam( fairy ) && fairy.ridingEntity == null
+					&& fairy.riddenByEntity == null ) {
+				fairy.setTarget( (Entity) null );
+				fairy.cryTime = 0;
+				fairy.entityFear = null;
+				// I'll pay top dollar for that Gidrovlicheskiy in the window.
+				fairy.setPosition( a, b, c ); 
+				fairy.motionX = 0D;
+				fairy.motionY = -0.1D;
+				fairy.motionZ = 0D;
+				fairy.isJumping = false;
+				fairy.moveForward = 0F;
+				fairy.moveStrafing = 0F;
+				fairy.setPathToEntity( (PathEntity) null );
+				fairy.setSitting( true );
+				fairy.onGround = true;
+				// It feels like I'm floating but I'm not
+				fairy.setFlymode( false ); 
+			}
+		}
+	}
+	
+	public void tameFailMessage( EntityPlayer player ) {
+		String s = "You can't ";
+
+		if ( angry() ) {
+			s += "tame this fairy because she's angry right now.";
+		} else if ( crying() ) {
+			s += "tame this fairy because she's upset right now.";
+		} else if ( getFaction() > 0 ) {
+			if ( queen() ) {
+				s += "tame a fairy queen until you defeat her minions.";
+			} else {
+				s += "tame this fairy until you defeat her queen.";
+			}
+		} else if ( tamed() && queen() ) {
+			s += "steal a fairy queen owned by someone else.";
+		} else if ( posted() ) {
+			s += "steal a fairy who's assigned to a post";
+		} else {
+			ItemStack stack = (ItemStack) null;
+
+			if ( player.inventory != null ) {
+				stack = player.inventory.getCurrentItem();
+			}
+
+			if ( stack != null && stack.stackSize > 0 && stack.getItem() == Items.glowstone_dust ) {
+				s += "seriously be trying to feed a fairy something that resembles its own guts.";
+			} else if ( queen() ) {
+				s += "tame a fairy queen without a slice of speckled melon.";
+			} else {
+				s += "tame a fairy without a sweet-tasting snack.";
+			}
+		}
+
+		// if(player instanceof EntityPlayerMP) {
+		// EntityPlayerMP playerMP = (EntityPlayerMP)player;
+		// mod_FairyMod.fairyMod.sendDisband(playerMP, "* §9" + s);
+		// }
+		// TODO: ModLoader.getMinecraftInstance().ingameGUI.addChatMessage("*
+		// §9" + s);
 	}
 
 	/**
@@ -1871,11 +2212,6 @@ public class EntityFairy extends EntityAnimal {
 
 	public void setCryTime( int cryTime ) {
 		this.cryTime = cryTime;
-	}
-
-	public boolean acceptableFoods( Item item ) {
-		// TODO Auto-generated method stub
-		return false;
 	}
 
 	public int getFlyTime() {
