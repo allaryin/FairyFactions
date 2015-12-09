@@ -1001,6 +1001,7 @@ public class EntityFairy extends EntityAnimal {
 	
     public static final ItemStack healPotion = new ItemStack(Items.potionitem, 1, 16389);
     public static final ItemStack restPotion = new ItemStack(Items.potionitem, 1, 16385);
+    public static final ItemStack fishingStick = new ItemStack(Items.stick, 1);
 
     public ItemStack handPotion() {
         return (rarePotion() ? restPotion : healPotion);
@@ -1124,6 +1125,8 @@ public class EntityFairy extends EntityAnimal {
 	private boolean flag;
 	public boolean didSwing;
 	public int witherTime;
+	private ItemStack tempItem;
+	private boolean isSwinging;
 
 	// The AI method which handles post-related activities.
 	private void handlePosted(boolean b) {
@@ -1256,18 +1259,50 @@ public class EntityFairy extends EntityAnimal {
 	}
 
 	public void castRod() {
-		// TODO Auto-generated method stub
-		
+		if ( fishEntity != null ) {
+			fishEntity.catchFish();
+			armSwing( !didSwing );
+			setSitting( false );
+		} else {
+			worldObj.playSoundAtEntity( this, "random.bow", 0.5F, 0.4F / (rand.nextFloat() * 0.4F + 0.8F) );
+			FairyEntityFishHook hook = new FairyEntityFishHook( worldObj, this );
+			worldObj.spawnEntityInWorld( hook );
+			armSwing( !didSwing );
+			setTempItem( Items.stick );
+			setSitting( true );
+			isJumping = false;
+			setPathToEntity( (PathEntity) null );
+			setTarget( (Entity) null );
+			entityFear = null;
+		}
 	}
 
+	private boolean signContains( TileEntitySign sign, String str ) {
+		// If the sign's text is messed up or something
+		if ( sign.signText == null ) {
+			return false;
+		}
+
+		// makes the subsequence
+		final CharSequence mySeq = str.subSequence( 0, str.length() - 1 );
+
+		// loops through for all sign lines
+		for ( int i = 0; i < sign.signText.length; i++ ) {
+			// name just has to be included in full on one of the lines.
+			if ( sign.signText[i].contains( mySeq ) ) {
+				return true;
+			}
+		}
+
+		return false;		
+	}
 	private boolean canRoamFar( TileEntitySign sign ) {
-		// TODO Auto-generated method stub
-		return false;
+		return signContains( sign, "~f" );
 	}
-
 	private boolean mySign( TileEntitySign sign ) {
-		// TODO Auto-generated method stub
-		return false;
+		// Converts actual name
+		final String actualName = getActualName( getNamePrefix(), getNameSuffix() );
+		return signContains( sign, actualName );
 	}
 
 	// Leave a post.
@@ -1697,11 +1732,39 @@ public class EntityFairy extends EntityAnimal {
         "<Petite Pugilists>"
     };
 
-    // ---------- stubs ----------
-    
-    private void processSwinging() {
-		// TODO Auto-generated method stub
-		
+	// ---------- stubs ----------
+
+	private void processSwinging() {
+		if ( getArmSwing() != didSwing ) {
+			didSwing = !didSwing;
+			// if(!isSwinging || swingProgressInt >= 3 || swingProgressInt < 0)
+			// {
+			swingProgressInt = -1;
+			isSwinging = true;
+			tempItem = null;
+			// }
+		}
+
+		if ( isSwinging ) {
+			swingProgressInt++;
+
+			if ( swingProgressInt >= 6 ) {
+				swingProgressInt = 0;
+				isSwinging = false;
+
+				if ( tempItem != null && tempItem != fishingStick ) {
+					tempItem = null;
+				}
+			} else if ( tempItem == null && getTempItem() != null ) {
+				tempItem = new ItemStack( getTempItem(), 1, 0 );
+			}
+		}
+
+		swingProgress = (float) swingProgressInt / 6F;
+
+		if ( !isSitting() && tempItem != null && tempItem == fishingStick ) {
+			tempItem = null;
+		}
 	}
 
     public boolean hasRuler() {
