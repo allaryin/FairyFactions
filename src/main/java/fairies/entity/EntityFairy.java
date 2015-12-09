@@ -12,6 +12,7 @@ import fairies.Version;
 import fairies.ai.FairyJob;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockSign;
+import net.minecraft.block.material.Material;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityAgeable;
 import net.minecraft.entity.EntityCreature;
@@ -31,6 +32,7 @@ import net.minecraft.entity.passive.EntitySheep;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.projectile.EntityPotion;
 import net.minecraft.entity.projectile.EntitySnowball;
+import net.minecraft.init.Blocks;
 import net.minecraft.init.Items;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -1780,47 +1782,139 @@ public class EntityFairy extends EntityAnimal {
 	}
 
 	private boolean checkGroundBelow() {
-		// TODO Auto-generated method stub
+		int a = MathHelper.floor_double( posX );
+		int b = MathHelper.floor_double( boundingBox.minY );
+		int b1 = MathHelper.floor_double( boundingBox.minY - 0.5D );
+		int c = MathHelper.floor_double( posZ );
+
+		if ( !isAirySpace( a, b - 1, c ) || !isAirySpace( a, b1 - 1, c ) ) {
+			return true;
+		}
+
 		return false;
 	}
 
-	private void showHeartsOrSmokeFX(boolean tamed) {
-		// TODO Auto-generated method stub
-		
+	private void showHeartsOrSmokeFX( boolean flag ) {
+		final String s = (flag ? "heart" : "smoke");
+
+		for ( int i = 0; i < 7; i++ ) {
+			double d = rand.nextGaussian() * 0.02D;
+			double d1 = rand.nextGaussian() * 0.02D;
+			double d2 = rand.nextGaussian() * 0.02D;
+			worldObj.spawnParticle( s, (posX + (double) (rand.nextFloat() * width * 2.0F)) - (double) width,
+					posY + 0.5D + (double) (rand.nextFloat() * height),
+					(posZ + (double) (rand.nextFloat() * width * 2.0F)) - (double) width, d, d1, d2 );
+		}
 	}
 
-	public void setSitting(boolean b) {
-		// TODO Auto-generated method stub
-		
+	public static final int FLAG_SITTING = 1;
+	public void setSitting( boolean flag ) {
+		setFlag( FLAG_SITTING, flag );
 	}
-
 	public boolean isSitting() {
-		// TODO Auto-generated method stub
-		return false;
+		return getFlag( FLAG_SITTING );
 	}
 
-	private void setFairyClimbing(boolean b) {
-		// TODO Auto-generated method stub
-		
+	protected void setFairyClimbing(boolean flag) {
+		setClimbing(flag);
 	}
 
 	private void updateWithering() {
-		// TODO Auto-generated method stub
-		
+		if ( rogue() ) {
+			return;
+		}
+
+		witherTime++;
+
+		if ( withered() ) {
+			// Deplete Health Very Quickly.
+			if ( witherTime >= 8 ) {
+				witherTime = 0;
+
+				if ( getHealth() > 1 ) {
+					heal( -1 );
+				}
+
+				if ( worldObj.isDaytime() ) {
+					int a = MathHelper.floor_double( posX );
+					int b = MathHelper.floor_double( boundingBox.minY );
+					int c = MathHelper.floor_double( posZ );
+					float f = getBrightness( 1.0F );
+
+					if ( f > 0.5F && worldObj.canBlockSeeTheSky( a, b, c )
+							&& rand.nextFloat() * 5F < (f - 0.4F) * 2.0F ) {
+						setWithered( false );
+
+						if ( tamed() ) {
+							setHearts( !didHearts );
+						}
+
+						witherTime = 0;
+						return;
+					}
+				}
+			}
+
+			setWithered( true );
+		} else {
+			if ( witherTime % 10 == 0 ) {
+				int a = MathHelper.floor_double( posX );
+				int b = MathHelper.floor_double( boundingBox.minY );
+				int c = MathHelper.floor_double( posZ );
+				float f = getBrightness( 1.0F );
+
+				if ( f > 0.05F || worldObj.canBlockSeeTheSky( a, b, c ) ) {
+					witherTime = rand.nextInt( 3 );
+				} else if ( witherTime >= 900 ) {
+					setWithered( true );
+					witherTime = 0;
+					return;
+				}
+			}
+
+			setWithered( false );
+		}
 	}
 
-	public boolean isAirySpace(int a, int b, int c) {
-		// TODO Auto-generated method stub
+	public boolean isAirySpace( int a, int b, int c ) {
+		if ( b < 0 || b >= worldObj.getHeight() ) {
+			return false;
+		}
+
+		Block block = worldObj.getBlock( a, b, c );
+		if ( block == null || block == Blocks.air )
+			return true;
+
+		Material matt = block.getMaterial();
+
+		if ( matt == null || matt == Material.air || matt == Material.plants || matt == Material.vine
+				|| matt == Material.fire || matt == Material.circuits || matt == Material.snow ) {
+			return true;
+		}
+
 		return false;
 	}
 
 	private boolean checkFlyBlocked() {
-		// TODO Auto-generated method stub
+		int a = MathHelper.floor_double( posX );
+		int b = MathHelper.floor_double( boundingBox.minY );
+		int c = MathHelper.floor_double( posZ );
+
+		if ( !isAirySpace( a, b + 1, c ) || !isAirySpace( a, b + 2, c ) ) {
+			return true;
+		}
+
 		return false;
 	}
 
-	private boolean sameTeam(EntityFairy fairy) {
-		// TODO Auto-generated method stub
+	// Checks to see if a fairy is their comrade.
+	private boolean sameTeam( EntityFairy fairy ) {
+		if ( tamed() ) {
+			return fairy.tamed() && fairy.getFaction() == 0 && fairy.rulerName().equals( this.rulerName() );
+		} else if ( getFaction() > 0 ) {
+			return fairy.getFaction() == this.getFaction();
+		}
+
 		return false;
 	}
 	
