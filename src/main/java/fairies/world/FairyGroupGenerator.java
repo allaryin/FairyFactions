@@ -12,19 +12,19 @@ import net.minecraft.world.World;
 
 public class FairyGroupGenerator
 {
-    public FairyGroupGenerator(int i, int j, final int k)
+    public FairyGroupGenerator(int min, int max, final int faction)
     {
-        if (j < i)
+        if (max < min)
         {
-            final int p = j;
-            j = i;
-            i = p;
+            final int p = max;
+            max = min;
+            min = p;
         }
 
-        minSize = i;
-        maxSize = j;
-        faction = k;
-        radius = 8;
+        this.minSize = min;
+        this.maxSize = max;
+        this.faction = faction;
+        this.radius = 8;
     }
 
     public boolean generate(final World world, final Random rand, final int i, final int j, final int k)

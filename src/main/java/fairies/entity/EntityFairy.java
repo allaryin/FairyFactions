@@ -11,6 +11,7 @@ import cpw.mods.fml.relauncher.SideOnly;
 import fairies.FairyFactions;
 import fairies.Version;
 import fairies.ai.FairyJob;
+import fairies.world.FairyGroupGenerator;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockSign;
 import net.minecraft.block.material.Material;
@@ -111,8 +112,6 @@ public class EntityFairy extends EntityAnimal {
 		this.setFlyTime( 400 + rand.nextInt(200) );
 		this.setCower(rand.nextBoolean());
 		this.postX = this.postY = this.postZ = -1;
-		
-		// TODO: Set texture
 	}
 	
 	// DataWatcher object indices
@@ -158,18 +157,17 @@ public class EntityFairy extends EntityAnimal {
 			int j = MathHelper.floor_double(boundingBox.minY) - 1;
 			int k = MathHelper.floor_double(posZ);
 
-			// TODO: FairyGroup.generate()
-			/*
-			if ((new FRY_FairyGroup(8, 10, getFaction())).generate(worldObj, rand, i, j, k))
-            {
-                //This is good.
-            }
-            else
-            {
+			// TODO: move group sizes into config
+			final FairyGroupGenerator group = new FairyGroupGenerator(8, 10, getFaction());
+			if( group.generate( worldObj, rand, i, j, k ) ) {
+				// This is good.
+			} else {
+				// TODO: issue a kill
+				/*
                 setDead(); //For singleplayer mode
                 //mod_FairyMod.fairyMod.sendFairyDespawn(this);
-            }
-			*/
+                 */
+			}			
 		}
 		
 		if( scout() ) {
@@ -1215,9 +1213,9 @@ public class EntityFairy extends EntityAnimal {
 					z += cc;
 
 					if ( y >= 0 && y < worldObj.getHeight() ) {
-						Block block = worldObj.getBlock( x, y, z );
+						final Block block = worldObj.getBlock( x, y, z );
 
-						if ( block instanceof BlockSign ) {
+						if ( block == Blocks.standing_sign || block == Blocks.wall_sign ) {
 							TileEntity tileentity = worldObj.getTileEntity( x, y, z );
 
 							if ( tileentity != null && tileentity instanceof TileEntitySign ) {
@@ -1576,6 +1574,10 @@ public class EntityFairy extends EntityAnimal {
     	} else {
     		return null;
     	}
+    }
+    
+    public String toString() {
+    	return getActualName(getNamePrefix(), getNameSuffix());
     }
     
     // ---------- flag 2 ----------
@@ -2192,6 +2194,8 @@ public class EntityFairy extends EntityAnimal {
 		if( player instanceof EntityPlayerMP ) {
 			FairyFactions.proxy.sendChat( (EntityPlayerMP)player, "* §9" + s );
 		}
+		
+		FairyFactions.LOGGER.info( "tameMe: "+rulerName()+": "+this );
 	}
 	
 	// Don't let that spider bite you, spider bite hurt.
