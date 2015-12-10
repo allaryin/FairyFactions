@@ -8,6 +8,7 @@ import java.util.List;
 import cpw.mods.fml.relauncher.ReflectionHelper;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
+import fairies.FairyFactions;
 import fairies.Version;
 import fairies.ai.FairyJob;
 import net.minecraft.block.Block;
@@ -30,6 +31,7 @@ import net.minecraft.entity.passive.EntityMooshroom;
 import net.minecraft.entity.passive.EntityPig;
 import net.minecraft.entity.passive.EntitySheep;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.entity.projectile.EntityPotion;
 import net.minecraft.entity.projectile.EntitySnowball;
 import net.minecraft.init.Blocks;
@@ -584,13 +586,29 @@ public class EntityFairy extends EntityAnimal {
         return (PathEntity)null;
     }
 
-	private boolean canTeleportToRuler(EntityPlayer ruler2) {
-		// TODO: change criteria for this
-		return false;
+	private boolean canTeleportToRuler( EntityPlayer player ) {
+		return player.inventory != null
+				&& (player.inventory.hasItem( Items.ender_pearl ) || player.inventory.hasItem( Items.ender_eye ));
 	}
-	private void teleportToRuler(EntityLivingBase ruler2) {
-		// TODO Auto-generated method stub
-		
+
+	// Can teleport to the ruler if he has an enderman drop in his inventory.
+	private void teleportToRuler( EntityLivingBase entity ) {
+		int i = MathHelper.floor_double( entity.posX ) - 2;
+		int j = MathHelper.floor_double( entity.posZ ) - 2;
+		int k = MathHelper.floor_double( entity.boundingBox.minY );
+
+		for ( int l = 0; l <= 4; l++ ) {
+			for ( int i1 = 0; i1 <= 4; i1++ ) {
+				if ( (l < 1 || i1 < 1 || l > 3 || i1 > 3) && worldObj.getBlock( i + l, k - 1, j + i1 ).isNormalCube()
+						&& !worldObj.getBlock( i + l, k, j + i1 ).isNormalCube()
+						&& !worldObj.getBlock( i + l, k + 1, j + i1 ).isNormalCube()
+						&& isAirySpace( i + l, k, j + i1 ) ) {
+					setLocationAndAngles( (float) (i + l) + 0.5F, k, (float) (j + i1) + 0.5F, rotationYaw,
+							rotationPitch );
+					return;
+				}
+			}
+		}
 	}
     
 	private void handleAnger() {
@@ -2118,8 +2136,7 @@ public class EntityFairy extends EntityAnimal {
 					s += "says that's the grossest thing she's ever seen.";
 				}
 
-				// mod_FairyMod.fairyMod.sendDisband(player, "* §9" + s);
-				// TODO: ModLoader.getMinecraftInstance().ingameGUI.addChatMessage( "* §9" + s );
+				FairyFactions.proxy.sendChat( (EntityPlayerMP)ruler, "* §9" + s );
 			}
 		}
 
@@ -2172,8 +2189,9 @@ public class EntityFairy extends EntityAnimal {
 			s += "ate that snack like there was no tomorrow.";
 		}
 
-		// mod_FairyMod.fairyMod.sendDisband(newRuler, "* §a" + s);
-		// TODO: ModLoader.getMinecraftInstance().ingameGUI.addChatMessage( "* §a" + s );
+		if( player instanceof EntityPlayerMP ) {
+			FairyFactions.proxy.sendChat( (EntityPlayerMP)player, "* §9" + s );
+		}
 	}
 	
 	// Don't let that spider bite you, spider bite hurt.
@@ -2252,12 +2270,9 @@ public class EntityFairy extends EntityAnimal {
 			}
 		}
 
-		// if(player instanceof EntityPlayerMP) {
-		// EntityPlayerMP playerMP = (EntityPlayerMP)player;
-		// mod_FairyMod.fairyMod.sendDisband(playerMP, "* §9" + s);
-		// }
-		// TODO: ModLoader.getMinecraftInstance().ingameGUI.addChatMessage("*
-		// §9" + s);
+		if( player instanceof EntityPlayerMP ) {
+			FairyFactions.proxy.sendChat( (EntityPlayerMP)player, "* §9" + s );
+		}
 	}
 
 	/**
@@ -2326,7 +2341,7 @@ public class EntityFairy extends EntityAnimal {
 
 	@Override
 	public EntityAgeable createChild(EntityAgeable p_90011_1_) {
-		// TODO Auto-generated method stub
+		// No fairy breeding.
 		return null;
 	}
 

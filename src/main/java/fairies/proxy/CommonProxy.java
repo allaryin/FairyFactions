@@ -11,6 +11,8 @@ import fairies.entity.EntityFairy;
 import fairies.entity.FairyEntityFishHook;
 import fairies.event.FairyEventListener;
 import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.network.play.server.S02PacketChat;
+import net.minecraft.util.ChatComponentText;
 
 public class CommonProxy {
 	
@@ -40,6 +42,11 @@ public class CommonProxy {
 	}
 	
 	////////// packet handling
+
+	public void sendChat( EntityPlayerMP player, String s ) {
+		if ( player != null && !s.isEmpty() )
+			player.playerNetServerHandler.sendPacket( new S02PacketChat( new ChatComponentText( s ) ) );
+	}
 	
 	public void sendToClient(FMLProxyPacket packet, EntityPlayerMP player) {
 		eventChannel.sendTo( packet, player );
