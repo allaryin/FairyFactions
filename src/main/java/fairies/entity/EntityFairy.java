@@ -162,11 +162,10 @@ public class EntityFairy extends EntityAnimal {
 			if( group.generate( worldObj, rand, i, j, k ) ) {
 				// This is good.
 			} else {
-				// TODO: issue a kill
-				/*
-                setDead(); //For singleplayer mode
-                //mod_FairyMod.fairyMod.sendFairyDespawn(this);
-                 */
+				// issue a kill
+				if( !worldObj.isRemote ) {
+					FairyFactions.proxy.sendFairyDespawn(this);
+				}
 			}			
 		}
 		
@@ -2138,7 +2137,7 @@ public class EntityFairy extends EntityAnimal {
 					s += "says that's the grossest thing she's ever seen.";
 				}
 
-				FairyFactions.proxy.sendChat( (EntityPlayerMP)ruler, "* §9" + s );
+				FairyFactions.proxy.sendChat( (EntityPlayerMP)ruler, "* ï¿½9" + s );
 			}
 		}
 
@@ -2192,7 +2191,7 @@ public class EntityFairy extends EntityAnimal {
 		}
 
 		if( player instanceof EntityPlayerMP ) {
-			FairyFactions.proxy.sendChat( (EntityPlayerMP)player, "* §9" + s );
+			FairyFactions.proxy.sendChat( (EntityPlayerMP)player, "* ï¿½9" + s );
 		}
 		
 		FairyFactions.LOGGER.info( "tameMe: "+rulerName()+": "+this );
@@ -2275,7 +2274,7 @@ public class EntityFairy extends EntityAnimal {
 		}
 
 		if( player instanceof EntityPlayerMP ) {
-			FairyFactions.proxy.sendChat( (EntityPlayerMP)player, "* §9" + s );
+			FairyFactions.proxy.sendChat( (EntityPlayerMP)player, "* ï¿½9" + s );
 		}
 	}
 
