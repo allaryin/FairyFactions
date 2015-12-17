@@ -39,6 +39,7 @@ import net.minecraft.init.Blocks;
 import net.minecraft.init.Items;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.pathfinding.PathEntity;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.tileentity.TileEntitySign;
@@ -72,30 +73,37 @@ public class EntityFairy extends EntityAnimal {
 
 	public static final int		DEF_AGGRO_TIMER		= 15;    // how long will tame fairies stay mad? (3x for wild)
 		
-	public float sinage;				// what does this mean?
-	private int postX, postY, postZ;	// where is our sign?
-	
 	private boolean cower;
-	private boolean createGroup;
 	public boolean didHearts;
+	public boolean didSwing;
 	private boolean wasFishing;
-	private boolean flyBlocked;
 	private int snowballin;
-	
-	private int particleCount;
 	
 	private int flyTime;
 	private int healTime;
 	private int cryTime;
-	private int listActions;
 	private int loseInterest;
 	private int loseTeam;
 	
+	private int postX, postY, postZ;	// where is our sign?
+
 	private EntityLivingBase ruler;
 	private EntityLivingBase entityHeal;
 	private Entity entityFear;
 	public FairyEntityFishHook fishEntity;
-	
+
+	// non-persistent fields
+	public float sinage;				// what does this mean?
+	private boolean flag;				// flagged for what, precisely?
+	private boolean createGroup;
+	private int listActions;
+	public int postedCount;
+	public int witherTime;
+	private ItemStack tempItem;
+	private boolean isSwinging;
+	private int particleCount;
+	private boolean flyBlocked;
+
 	public EntityFairy(World world) {
 		super(world);
 		this.setSize(0.6F, 0.85F);
@@ -135,6 +143,71 @@ public class EntityFairy extends EntityAnimal {
 		dataWatcher.addObject(S_OWNER,		"");
 		dataWatcher.addObject(S_NAME_REAL,	"");
 		dataWatcher.addObject(I_TOOL,		new Integer(0));
+	}
+	
+	@Override
+	public void writeEntityToNBT(NBTTagCompound nbt) {
+		super.writeEntityToNBT(nbt);
+		nbt.setByte("flags",	dataWatcher.getWatchableObjectByte(B_FLAGS));
+		nbt.setByte("flags2",	dataWatcher.getWatchableObjectByte(B_FLAGS2));
+		nbt.setByte("type",		dataWatcher.getWatchableObjectByte(B_TYPE));
+		nbt.setByte("nameOrig",	dataWatcher.getWatchableObjectByte(B_NAME_ORIG));
+
+		nbt.setString("rulerName",	rulerName());
+		nbt.setString("customName",	getCustomName());
+		nbt.setIntArray("post", new int[] { postX, postY, postZ } );
+		
+		nbt.setShort("flyTime",		(short) flyTime);
+		nbt.setShort("healTime",	(short) healTime);
+		nbt.setShort("cryTime",		(short) cryTime);
+		nbt.setShort("loseInterest", (short) loseInterest);
+		nbt.setShort("loseTeam",	(short) loseTeam);
+
+		nbt.setBoolean("cower",		this.cower);
+		nbt.setBoolean("didHearts",	this.didHearts);
+		nbt.setBoolean("didSwing",	this.didSwing);		
+		if (this.fishEntity != null) {
+			this.wasFishing = true;
+			nbt.setBoolean("wasFishing", this.wasFishing);
+		}
+		nbt.setShort("snowballin",	(short) snowballin);
+
+		nbt.setBoolean("isSitting", isSitting());
+	}
+	  
+	@Override
+	public void readEntityFromNBT(NBTTagCompound nbt) {
+		super.readEntityFromNBT(nbt);
+		dataWatcher.updateObject(B_FLAGS,		nbt.getByte("flags"));
+		dataWatcher.updateObject(B_FLAGS2,		nbt.getByte("flags2"));
+		dataWatcher.updateObject(B_TYPE,		nbt.getByte("type"));
+		dataWatcher.updateObject(B_NAME_ORIG,	nbt.getByte("nameOrig"));
+
+		setRulerName(nbt.getString("rulerName"));
+		setCustomName(nbt.getString("customName"));
+		final int[] post = nbt.getIntArray("post");
+		if( post.length > 0 ) {
+			postX = post[0]; postY = post[1]; postZ = post[2];
+		}
+
+		flyTime = nbt.getShort("flyTime");
+		healTime = nbt.getShort("healTime");
+		cryTime = nbt.getShort("cryTime");
+		loseInterest = nbt.getShort("loseInterest");
+		loseTeam = nbt.getShort("loseTeam");
+		
+		cower = nbt.getBoolean("cower");
+		didHearts = nbt.getBoolean("didHearts");
+		didSwing = nbt.getBoolean("didSwing");
+		wasFishing = nbt.getBoolean("wasFishing");
+		snowballin = nbt.getShort("snowballin");
+
+		setSitting(nbt.getBoolean("isSitting"));
+
+		if (!this.worldObj.isRemote) {
+			setCanHeal(healTime <= 0);
+			setPosted(postY > -1);
+		}
 	}
 	
 	@Override
@@ -1139,13 +1212,6 @@ public class EntityFairy extends EntityAnimal {
 		}
 	}
 	
-	public int postedCount;
-	private boolean flag;
-	public boolean didSwing;
-	public int witherTime;
-	private ItemStack tempItem;
-	private boolean isSwinging;
-
 	// The AI method which handles post-related activities.
 	private void handlePosted(boolean b) {
 		if ( !tamed() || getFaction() > 0 || postedCount <= (posted() ? 2 : 5) ) {
@@ -1667,7 +1733,8 @@ public class EntityFairy extends EntityAnimal {
     	return ruler != null && rulerName() != null;
     }
 	public String rulerName() {
-		return dataWatcher.getWatchableObjectString(S_OWNER);
+		final String name = dataWatcher.getWatchableObjectString(S_OWNER);
+		return name;
 	}
 	public void setRulerName(String s) {
 		dataWatcher.updateObject( S_OWNER, s);
