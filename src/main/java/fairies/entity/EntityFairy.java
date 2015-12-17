@@ -8,10 +8,13 @@ import java.util.List;
 import cpw.mods.fml.relauncher.ReflectionHelper;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
+import fairies.FairyFactions;
 import fairies.Version;
 import fairies.ai.FairyJob;
+import fairies.world.FairyGroupGenerator;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockSign;
+import net.minecraft.block.material.Material;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityAgeable;
 import net.minecraft.entity.EntityCreature;
@@ -19,6 +22,7 @@ import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.entity.ai.attributes.IAttributeInstance;
+import net.minecraft.entity.item.EntityMinecart;
 import net.minecraft.entity.item.EntityTNTPrimed;
 import net.minecraft.entity.monster.EntityCreeper;
 import net.minecraft.entity.passive.EntityAnimal;
@@ -28,8 +32,10 @@ import net.minecraft.entity.passive.EntityMooshroom;
 import net.minecraft.entity.passive.EntityPig;
 import net.minecraft.entity.passive.EntitySheep;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.entity.projectile.EntityPotion;
 import net.minecraft.entity.projectile.EntitySnowball;
+import net.minecraft.init.Blocks;
 import net.minecraft.init.Items;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -39,6 +45,7 @@ import net.minecraft.tileentity.TileEntitySign;
 import net.minecraft.util.MathHelper;
 import net.minecraft.util.MovingObjectPosition;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.world.EnumDifficulty;
 import net.minecraft.world.World;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.chunk.EmptyChunk;
@@ -105,8 +112,6 @@ public class EntityFairy extends EntityAnimal {
 		this.setFlyTime( 400 + rand.nextInt(200) );
 		this.setCower(rand.nextBoolean());
 		this.postX = this.postY = this.postZ = -1;
-		
-		// TODO: Set texture
 	}
 	
 	// DataWatcher object indices
@@ -152,18 +157,17 @@ public class EntityFairy extends EntityAnimal {
 			int j = MathHelper.floor_double(boundingBox.minY) - 1;
 			int k = MathHelper.floor_double(posZ);
 
-			// TODO: FairyGroup.generate()
-			/*
-			if ((new FRY_FairyGroup(8, 10, getFaction())).generate(worldObj, rand, i, j, k))
-            {
-                //This is good.
-            }
-            else
-            {
+			// TODO: move group sizes into config
+			final FairyGroupGenerator group = new FairyGroupGenerator(8, 10, getFaction());
+			if( group.generate( worldObj, rand, i, j, k ) ) {
+				// This is good.
+			} else {
+				// TODO: issue a kill
+				/*
                 setDead(); //For singleplayer mode
                 //mod_FairyMod.fairyMod.sendFairyDespawn(this);
-            }
-			*/
+                 */
+			}			
 		}
 		
 		if( scout() ) {
@@ -580,13 +584,29 @@ public class EntityFairy extends EntityAnimal {
         return (PathEntity)null;
     }
 
-	private boolean canTeleportToRuler(EntityPlayer ruler2) {
-		// TODO: change criteria for this
-		return false;
+	private boolean canTeleportToRuler( EntityPlayer player ) {
+		return player.inventory != null
+				&& (player.inventory.hasItem( Items.ender_pearl ) || player.inventory.hasItem( Items.ender_eye ));
 	}
-	private void teleportToRuler(EntityLivingBase ruler2) {
-		// TODO Auto-generated method stub
-		
+
+	// Can teleport to the ruler if he has an enderman drop in his inventory.
+	private void teleportToRuler( EntityLivingBase entity ) {
+		int i = MathHelper.floor_double( entity.posX ) - 2;
+		int j = MathHelper.floor_double( entity.posZ ) - 2;
+		int k = MathHelper.floor_double( entity.boundingBox.minY );
+
+		for ( int l = 0; l <= 4; l++ ) {
+			for ( int i1 = 0; i1 <= 4; i1++ ) {
+				if ( (l < 1 || i1 < 1 || l > 3 || i1 > 3) && worldObj.getBlock( i + l, k - 1, j + i1 ).isNormalCube()
+						&& !worldObj.getBlock( i + l, k, j + i1 ).isNormalCube()
+						&& !worldObj.getBlock( i + l, k + 1, j + i1 ).isNormalCube()
+						&& isAirySpace( i + l, k, j + i1 ) ) {
+					setLocationAndAngles( (float) (i + l) + 0.5F, k, (float) (j + i1) + 0.5F, rotationYaw,
+							rotationPitch );
+					return;
+				}
+			}
+		}
 	}
     
 	private void handleAnger() {
@@ -1001,6 +1021,7 @@ public class EntityFairy extends EntityAnimal {
 	
     public static final ItemStack healPotion = new ItemStack(Items.potionitem, 1, 16389);
     public static final ItemStack restPotion = new ItemStack(Items.potionitem, 1, 16385);
+    public static final ItemStack fishingStick = new ItemStack(Items.stick, 1);
 
     public ItemStack handPotion() {
         return (rarePotion() ? restPotion : healPotion);
@@ -1124,6 +1145,8 @@ public class EntityFairy extends EntityAnimal {
 	private boolean flag;
 	public boolean didSwing;
 	public int witherTime;
+	private ItemStack tempItem;
+	private boolean isSwinging;
 
 	// The AI method which handles post-related activities.
 	private void handlePosted(boolean b) {
@@ -1190,9 +1213,9 @@ public class EntityFairy extends EntityAnimal {
 					z += cc;
 
 					if ( y >= 0 && y < worldObj.getHeight() ) {
-						Block block = worldObj.getBlock( x, y, z );
+						final Block block = worldObj.getBlock( x, y, z );
 
-						if ( block instanceof BlockSign ) {
+						if ( block == Blocks.standing_sign || block == Blocks.wall_sign ) {
 							TileEntity tileentity = worldObj.getTileEntity( x, y, z );
 
 							if ( tileentity != null && tileentity instanceof TileEntitySign ) {
@@ -1256,18 +1279,50 @@ public class EntityFairy extends EntityAnimal {
 	}
 
 	public void castRod() {
-		// TODO Auto-generated method stub
-		
+		if ( fishEntity != null ) {
+			fishEntity.catchFish();
+			armSwing( !didSwing );
+			setSitting( false );
+		} else {
+			worldObj.playSoundAtEntity( this, "random.bow", 0.5F, 0.4F / (rand.nextFloat() * 0.4F + 0.8F) );
+			FairyEntityFishHook hook = new FairyEntityFishHook( worldObj, this );
+			worldObj.spawnEntityInWorld( hook );
+			armSwing( !didSwing );
+			setTempItem( Items.stick );
+			setSitting( true );
+			isJumping = false;
+			setPathToEntity( (PathEntity) null );
+			setTarget( (Entity) null );
+			entityFear = null;
+		}
 	}
 
+	private boolean signContains( TileEntitySign sign, String str ) {
+		// If the sign's text is messed up or something
+		if ( sign.signText == null ) {
+			return false;
+		}
+
+		// makes the subsequence
+		final CharSequence mySeq = str.subSequence( 0, str.length() - 1 );
+
+		// loops through for all sign lines
+		for ( int i = 0; i < sign.signText.length; i++ ) {
+			// name just has to be included in full on one of the lines.
+			if ( sign.signText[i].contains( mySeq ) ) {
+				return true;
+			}
+		}
+
+		return false;		
+	}
 	private boolean canRoamFar( TileEntitySign sign ) {
-		// TODO Auto-generated method stub
-		return false;
+		return signContains( sign, "~f" );
 	}
-
 	private boolean mySign( TileEntitySign sign ) {
-		// TODO Auto-generated method stub
-		return false;
+		// Converts actual name
+		final String actualName = getActualName( getNamePrefix(), getNameSuffix() );
+		return signContains( sign, actualName );
 	}
 
 	// Leave a post.
@@ -1521,6 +1576,10 @@ public class EntityFairy extends EntityAnimal {
     	}
     }
     
+    public String toString() {
+    	return getActualName(getNamePrefix(), getNameSuffix());
+    }
+    
     // ---------- flag 2 ----------
     
     protected static final int FLAG2_CAN_HEAL		= 0;
@@ -1602,6 +1661,16 @@ public class EntityFairy extends EntityAnimal {
     }
     
     // ----------
+    
+    public boolean hasRuler() {
+    	return ruler != null && rulerName() != null;
+    }
+	public String rulerName() {
+		return dataWatcher.getWatchableObjectString(S_OWNER);
+	}
+	public void setRulerName(String s) {
+		dataWatcher.updateObject( S_OWNER, s);
+	}
     
     // Custom name of the fairy, enabled by paper.
     public String getCustomName() {
@@ -1697,69 +1766,517 @@ public class EntityFairy extends EntityAnimal {
         "<Petite Pugilists>"
     };
 
-    // ---------- stubs ----------
-    
-    private void processSwinging() {
-		// TODO Auto-generated method stub
-		
-	}
+	// ---------- stubs ----------
 
-    public boolean hasRuler() {
-    	return ruler != null && rulerName() != null;
-    }
-	private String rulerName() {
-		// TODO Auto-generated method stub
-		return null;
+	private void processSwinging() {
+		if ( getArmSwing() != didSwing ) {
+			didSwing = !didSwing;
+			// if(!isSwinging || swingProgressInt >= 3 || swingProgressInt < 0)
+			// {
+			swingProgressInt = -1;
+			isSwinging = true;
+			tempItem = null;
+			// }
+		}
+
+		if ( isSwinging ) {
+			swingProgressInt++;
+
+			if ( swingProgressInt >= 6 ) {
+				swingProgressInt = 0;
+				isSwinging = false;
+
+				if ( tempItem != null && tempItem != fishingStick ) {
+					tempItem = null;
+				}
+			} else if ( tempItem == null && getTempItem() != null ) {
+				tempItem = new ItemStack( getTempItem(), 1, 0 );
+			}
+		}
+
+		swingProgress = (float) swingProgressInt / 6F;
+
+		if ( !isSitting() && tempItem != null && tempItem == fishingStick ) {
+			tempItem = null;
+		}
 	}
 
 	private boolean checkGroundBelow() {
-		// TODO Auto-generated method stub
+		int a = MathHelper.floor_double( posX );
+		int b = MathHelper.floor_double( boundingBox.minY );
+		int b1 = MathHelper.floor_double( boundingBox.minY - 0.5D );
+		int c = MathHelper.floor_double( posZ );
+
+		if ( !isAirySpace( a, b - 1, c ) || !isAirySpace( a, b1 - 1, c ) ) {
+			return true;
+		}
+
 		return false;
 	}
 
-	private void showHeartsOrSmokeFX(boolean tamed) {
-		// TODO Auto-generated method stub
-		
+	private void showHeartsOrSmokeFX( boolean flag ) {
+		final String s = (flag ? "heart" : "smoke");
+
+		for ( int i = 0; i < 7; i++ ) {
+			double d = rand.nextGaussian() * 0.02D;
+			double d1 = rand.nextGaussian() * 0.02D;
+			double d2 = rand.nextGaussian() * 0.02D;
+			worldObj.spawnParticle( s, (posX + (double) (rand.nextFloat() * width * 2.0F)) - (double) width,
+					posY + 0.5D + (double) (rand.nextFloat() * height),
+					(posZ + (double) (rand.nextFloat() * width * 2.0F)) - (double) width, d, d1, d2 );
+		}
 	}
 
-	public void setSitting(boolean b) {
-		// TODO Auto-generated method stub
-		
+	public static final int FLAG_SITTING = 1;
+	public void setSitting( boolean flag ) {
+		setFlag( FLAG_SITTING, flag );
 	}
-
 	public boolean isSitting() {
-		// TODO Auto-generated method stub
-		return false;
+		return getFlag( FLAG_SITTING );
 	}
 
-	private void setFairyClimbing(boolean b) {
-		// TODO Auto-generated method stub
-		
+	protected void setFairyClimbing(boolean flag) {
+		setClimbing(flag);
 	}
 
 	private void updateWithering() {
-		// TODO Auto-generated method stub
-		
+		if ( rogue() ) {
+			return;
+		}
+
+		witherTime++;
+
+		if ( withered() ) {
+			// Deplete Health Very Quickly.
+			if ( witherTime >= 8 ) {
+				witherTime = 0;
+
+				if ( getHealth() > 1 ) {
+					heal( -1 );
+				}
+
+				if ( worldObj.isDaytime() ) {
+					int a = MathHelper.floor_double( posX );
+					int b = MathHelper.floor_double( boundingBox.minY );
+					int c = MathHelper.floor_double( posZ );
+					float f = getBrightness( 1.0F );
+
+					if ( f > 0.5F && worldObj.canBlockSeeTheSky( a, b, c )
+							&& rand.nextFloat() * 5F < (f - 0.4F) * 2.0F ) {
+						setWithered( false );
+
+						if ( tamed() ) {
+							setHearts( !didHearts );
+						}
+
+						witherTime = 0;
+						return;
+					}
+				}
+			}
+
+			setWithered( true );
+		} else {
+			if ( witherTime % 10 == 0 ) {
+				int a = MathHelper.floor_double( posX );
+				int b = MathHelper.floor_double( boundingBox.minY );
+				int c = MathHelper.floor_double( posZ );
+				float f = getBrightness( 1.0F );
+
+				if ( f > 0.05F || worldObj.canBlockSeeTheSky( a, b, c ) ) {
+					witherTime = rand.nextInt( 3 );
+				} else if ( witherTime >= 900 ) {
+					setWithered( true );
+					witherTime = 0;
+					return;
+				}
+			}
+
+			setWithered( false );
+		}
 	}
 
-	public boolean isAirySpace(int a, int b, int c) {
-		// TODO Auto-generated method stub
+	public boolean isAirySpace( int a, int b, int c ) {
+		if ( b < 0 || b >= worldObj.getHeight() ) {
+			return false;
+		}
+
+		Block block = worldObj.getBlock( a, b, c );
+		if ( block == null || block == Blocks.air )
+			return true;
+
+		Material matt = block.getMaterial();
+
+		if ( matt == null || matt == Material.air || matt == Material.plants || matt == Material.vine
+				|| matt == Material.fire || matt == Material.circuits || matt == Material.snow ) {
+			return true;
+		}
+
 		return false;
 	}
 
 	private boolean checkFlyBlocked() {
-		// TODO Auto-generated method stub
+		int a = MathHelper.floor_double( posX );
+		int b = MathHelper.floor_double( boundingBox.minY );
+		int c = MathHelper.floor_double( posZ );
+
+		if ( !isAirySpace( a, b + 1, c ) || !isAirySpace( a, b + 2, c ) ) {
+			return true;
+		}
+
 		return false;
 	}
 
-	private boolean sameTeam(EntityFairy fairy) {
-		// TODO Auto-generated method stub
+	// Checks to see if a fairy is their comrade.
+	private boolean sameTeam( EntityFairy fairy ) {
+		if ( tamed() ) {
+			return fairy.tamed() && fairy.getFaction() == 0 && fairy.rulerName().equals( this.rulerName() );
+		} else if ( getFaction() > 0 ) {
+			return fairy.getFaction() == this.getFaction();
+		}
+
 		return false;
+	}
+	
+	@Override
+	public boolean interact( EntityPlayer player ) {
+		if ( !worldObj.isRemote
+				&& (ridingEntity == null || ridingEntity == player || ridingEntity instanceof EntityMinecart) ) {
+			ItemStack stack = player.inventory.getCurrentItem();
+
+			if ( tamed() && player.getDisplayName().equals( rulerName() ) ) {
+				if ( stack != null && getHealth() < getMaxHealth() && acceptableFoods( stack.getItem() )
+						&& stack.stackSize > 0 ) {
+					stack.stackSize--;
+
+					if ( stack.stackSize <= 0 ) {
+						player.inventory.setInventorySlotContents( player.inventory.currentItem, null );
+					}
+
+					setHearts( !hearts() );
+
+					if ( stack.getItem() == Items.sugar ) {
+						heal( 5 );
+					} else {
+						heal( 99 );
+
+						if ( stack.getItem() == Items.speckled_melon ) {
+							setWithered( false );
+							witherTime = 0;
+						}
+					}
+
+					return true;
+				} else if ( stack != null && haircutItem( stack.getItem() ) && stack.stackSize > 0 && !rogue() ) {
+					setHairType( !hairType() );
+					return true;
+				} else if ( stack != null && ridingEntity == null && !isSitting() && vileSubstance( stack.getItem() )
+						&& stack.stackSize > 0 ) {
+					dropItem( stack.getItem(), 1 );
+					stack.stackSize--;
+
+					if ( stack.stackSize <= 0 ) {
+						player.inventory.setInventorySlotContents( player.inventory.currentItem, null );
+					}
+
+					disband();
+					return true;
+				} else if ( onGround && stack != null && namingItem( stack.getItem() ) && stack.stackSize > 0 ) {
+					stack.stackSize--;
+
+					if ( stack.stackSize <= 0 ) {
+						player.inventory.setInventorySlotContents( player.inventory.currentItem, null );
+					}
+
+					setSitting( true );
+					setNameEnabled( true );
+					isJumping = false;
+					setPathToEntity( (PathEntity) null );
+					setTarget( (Entity) null );
+					entityFear = null;
+				} else {
+					if ( isSitting() ) {
+						if ( stack != null && realFreshOysterBars( stack.getItem() ) && stack.stackSize > 0 ) {
+							hydraFairy();
+						} else {
+							setSitting( false );
+						}
+
+						return true;
+					} else if ( player.isSneaking() ) {
+						if ( flymode() || !onGround ) {
+							flyTime = 0;
+						} else {
+							setSitting( true );
+							isJumping = false;
+							setPathToEntity( (PathEntity) null );
+							setTarget( (Entity) null );
+							entityFear = null;
+						}
+					} else if ( stack == null || !snowballItem( stack.getItem() ) ) {
+						mountEntity( player );
+						setFlymode( true );
+						flyTime = 200;
+						setCanFlap( true );
+						return true;
+					}
+				}
+			} else {
+				if ( (getFaction() == 0 || worldObj.difficultySetting == EnumDifficulty.PEACEFUL) && !((queen() || posted()) && tamed())
+						&& !crying() && !angry() && stack != null && acceptableFoods( stack.getItem() )
+						&& stack.stackSize > 0 ) {
+					stack.stackSize--;
+
+					if ( stack.stackSize <= 0 ) {
+						player.inventory.setInventorySlotContents( player.inventory.currentItem, null );
+					}
+
+					if ( stack.getItem() != Items.sugar || rand.nextInt( 4 ) == 0 ) {
+						if ( stack.getItem() == Items.sugar ) {
+							heal( 5 );
+						} else {
+							heal( 99 );
+						}
+
+						tameMe( player );
+						return true;
+					} else {
+						setHearts( !hearts() );
+						return true;
+					}
+				} else if ( !tamed() ) {
+					setHearts( !hearts() );
+				}
+
+				tameFailMessage( player );
+				return true;
+			}
+		}
+
+		return super.interact( player );
+	}
+
+	// Foods that can be used for taming
+	public boolean acceptableFoods( Item i ) {
+		if ( i == Items.speckled_melon ) {
+			return true;
+		} else if ( tamed() || !queen() ) {
+			return i == Items.apple || i == Items.melon || i == Items.sugar
+					|| i == Items.cake || i == Items.cookie;
+		}
+
+		return false;
+	}
+	// Things used for disbanding
+	public boolean vileSubstance( Item i ) {
+		return i == Items.slime_ball || i == Items.rotten_flesh || i == Items.spider_eye
+				|| i == Items.fermented_spider_eye;
+	}
+
+	// The quickest way to Daphne
+	public boolean realFreshOysterBars( Item i ) {
+		return i == Items.magma_cream;
+	}
+
+	// Item used to rename a fairy, paper
+	public boolean namingItem( Item i ) {
+		return i == Items.paper;
+	}
+
+	// Is the item a snowball or not.
+	public boolean snowballItem( Item i ) {
+		return i == Items.snowball;
+	}
+
+	// Can the item give a haircut.
+	public boolean haircutItem( Item i ) {
+		return i == Items.shears;
 	}
 
 	private void disband() {
-		// TODO Auto-generated method stub
+		setRulerName( "" );
+		setFaction( 0 );
+		setHearts( !didHearts );
+		cryTime = 200;
+		setTamed( false );
+		setCustomName( "" );
+		abandonPost();
+		snowballin = 0;
+
+		if ( ruler != null ) {
+			PathEntity doug = roam( ruler, this, (float) Math.PI );
+
+			if ( doug != null ) {
+				setPathToEntity( doug );
+			}
+
+			if ( ruler instanceof EntityPlayer ) {
+				//
+				String s = getActualName( getNamePrefix(), getNameSuffix() ) + " ";
+
+				if ( queen() ) {
+					s = "Queen " + s;
+				}
+
+				int i = rand.nextInt( 6 );
+
+				if ( queen() && i < 3 ) {
+					s += "was greatly offended by your offering.";
+				} else if ( queen() ) {
+					s += "called you a 'dirty peasant' and stormed out.";
+				} else if ( i == 0 ) {
+					s += "threw it on the ground and had a fit.";
+				} else if ( i == 1 ) {
+					s += "called you a 'poopy-head' and ran away.";
+				} else if ( i == 2 ) {
+					s += "would rather die than eat that gross thing.";
+				} else if ( i == 3 ) {
+					s += "decided not to be your friend anymore.";
+				} else if ( i == 4 ) {
+					s += "gave you a dirty look and headed off.";
+				} else {
+					s += "says that's the grossest thing she's ever seen.";
+				}
+
+				FairyFactions.proxy.sendChat( (EntityPlayerMP)ruler, "* §9" + s );
+			}
+		}
+
+		ruler = null;
+	}
+	
+	public void tameMe( EntityPlayer player ) {
+		if ( player == null ) {
+			return;
+		}
+
+		setFaction( 0 );
+		setTamed( true );
+		setRulerName( player.getDisplayName() );
+		setHearts( !hearts() );
+		abandonPost();
+		snowballin = 0;
+		ruler = player;
+
+		if ( scout() ) {
+			cower = false;
+		}
+
+		String f = getActualName( getNamePrefix(), getNameSuffix() ) + " ";
+
+		if ( queen() ) {
+			f = "Queen " + f;
+		}
+
+		String s = f;
+		int i = rand.nextInt( 6 );
+
+		if ( queen() && i < 2 ) {
+			s += "reluctantly joined your party.";
+		} else if ( queen() && i > 3 ) {
+			s += "sighed and became your follower.";
+		} else if ( queen() ) {
+			s += "really enjoys eating glistering melons.";
+		} else if ( i == 0 ) {
+			s += "was kind of lonely without a leader.";
+		} else if ( i == 1 ) {
+			s += "shrugged and decided to follow you.";
+		} else if ( i == 2 ) {
+			s += "put the past behind her and joined you.";
+		} else if ( i == 3 ) {
+			s += "was easily persuaded by that yummy snack.";
+		} else if ( i == 4 ) {
+			s += "introduced herself properly to you.";
+		} else {
+			s += "ate that snack like there was no tomorrow.";
+		}
+
+		if( player instanceof EntityPlayerMP ) {
+			FairyFactions.proxy.sendChat( (EntityPlayerMP)player, "* §9" + s );
+		}
 		
+		FairyFactions.LOGGER.info( "tameMe: "+rulerName()+": "+this );
+	}
+	
+	// Don't let that spider bite you, spider bite hurt.
+	public void hydraFairy() 
+	{
+		double a = (boundingBox.minX + boundingBox.maxX) / 2D;
+		double b = (boundingBox.minY + (double) yOffset) - (double) ySize;
+		double c = (boundingBox.minZ + boundingBox.maxZ) / 2D;
+		motionX = 0D;
+		motionY = -0.1D;
+		motionZ = 0D;
+		// Anthony stopped to tie his shoe, and they all went marching on.
+		isJumping = false; 
+		moveForward = 0F;
+		moveStrafing = 0F;
+		setPathToEntity( (PathEntity) null );
+		setSitting( true );
+		onGround = true;
+		List list = worldObj.getEntitiesWithinAABB( EntityFairy.class, boundingBox.expand( 80D, 80D, 80D ) );
+
+		for ( int j = 0; j < list.size(); j++ ) {
+			EntityFairy fairy = (EntityFairy) list.get( j );
+
+			if ( fairy != this && fairy.getHealth() > 0 && sameTeam( fairy ) && fairy.ridingEntity == null
+					&& fairy.riddenByEntity == null ) {
+				fairy.setTarget( (Entity) null );
+				fairy.cryTime = 0;
+				fairy.entityFear = null;
+				// I'll pay top dollar for that Gidrovlicheskiy in the window.
+				fairy.setPosition( a, b, c ); 
+				fairy.motionX = 0D;
+				fairy.motionY = -0.1D;
+				fairy.motionZ = 0D;
+				fairy.isJumping = false;
+				fairy.moveForward = 0F;
+				fairy.moveStrafing = 0F;
+				fairy.setPathToEntity( (PathEntity) null );
+				fairy.setSitting( true );
+				fairy.onGround = true;
+				// It feels like I'm floating but I'm not
+				fairy.setFlymode( false ); 
+			}
+		}
+	}
+	
+	public void tameFailMessage( EntityPlayer player ) {
+		String s = "You can't ";
+
+		if ( angry() ) {
+			s += "tame this fairy because she's angry right now.";
+		} else if ( crying() ) {
+			s += "tame this fairy because she's upset right now.";
+		} else if ( getFaction() > 0 ) {
+			if ( queen() ) {
+				s += "tame a fairy queen until you defeat her minions.";
+			} else {
+				s += "tame this fairy until you defeat her queen.";
+			}
+		} else if ( tamed() && queen() ) {
+			s += "steal a fairy queen owned by someone else.";
+		} else if ( posted() ) {
+			s += "steal a fairy who's assigned to a post";
+		} else {
+			ItemStack stack = (ItemStack) null;
+
+			if ( player.inventory != null ) {
+				stack = player.inventory.getCurrentItem();
+			}
+
+			if ( stack != null && stack.stackSize > 0 && stack.getItem() == Items.glowstone_dust ) {
+				s += "seriously be trying to feed a fairy something that resembles its own guts.";
+			} else if ( queen() ) {
+				s += "tame a fairy queen without a slice of speckled melon.";
+			} else {
+				s += "tame a fairy without a sweet-tasting snack.";
+			}
+		}
+
+		if( player instanceof EntityPlayerMP ) {
+			FairyFactions.proxy.sendChat( (EntityPlayerMP)player, "* §9" + s );
+		}
 	}
 
 	/**
@@ -1810,11 +2327,6 @@ public class EntityFairy extends EntityAnimal {
 		this.cryTime = cryTime;
 	}
 
-	public boolean acceptableFoods( Item item ) {
-		// TODO Auto-generated method stub
-		return false;
-	}
-
 	public int getFlyTime() {
 		return flyTime;
 	}
@@ -1833,7 +2345,7 @@ public class EntityFairy extends EntityAnimal {
 
 	@Override
 	public EntityAgeable createChild(EntityAgeable p_90011_1_) {
-		// TODO Auto-generated method stub
+		// No fairy breeding.
 		return null;
 	}
 
