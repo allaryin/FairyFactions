@@ -707,8 +707,7 @@ public class EntityFairy extends EntityAnimal {
                 for (int j = 0; j < list.size(); j++) {
                     EntityPlayer player = (EntityPlayer)list.get(j);
                     
-                    // TODO: do correct player identification
-                    if (player.getHealth() > 0 && player.getDisplayName().equals(rulerName()) && canEntityBeSeen(player)) {
+                    if (player.getHealth() > 0 && isRuler(player) && canEntityBeSeen(player)) {
                         ruler = player;
                         break;
                     }
@@ -1164,7 +1163,7 @@ public class EntityFairy extends EntityAnimal {
 						// automatically cancels the post.
 			}
 
-			// Check to seeif the chunk is loaded.
+			// Check to see if the chunk is loaded.
 			Chunk chunk = worldObj.getChunkFromBlockCoords( postX, postZ );
 
 			if ( chunk != null && !(chunk instanceof EmptyChunk) ) {
@@ -1661,6 +1660,9 @@ public class EntityFairy extends EntityAnimal {
     
     // ----------
     
+    public boolean isRuler( EntityPlayer player ) {
+    	return tamed() && rulerName().equals(player.getGameProfile().getName());
+    }
     public boolean hasRuler() {
     	return ruler != null && rulerName() != null;
     }
@@ -1943,7 +1945,7 @@ public class EntityFairy extends EntityAnimal {
 				&& (ridingEntity == null || ridingEntity == player || ridingEntity instanceof EntityMinecart) ) {
 			ItemStack stack = player.inventory.getCurrentItem();
 
-			if ( tamed() && player.getDisplayName().equals( rulerName() ) ) {
+			if ( isRuler(player) ) {
 				if ( stack != null && getHealth() < getMaxHealth() && acceptableFoods( stack.getItem() )
 						&& stack.stackSize > 0 ) {
 					stack.stackSize--;
@@ -2151,7 +2153,7 @@ public class EntityFairy extends EntityAnimal {
 
 		setFaction( 0 );
 		setTamed( true );
-		setRulerName( player.getDisplayName() );
+		setRulerName( player.getGameProfile().getName() );
 		setHearts( !hearts() );
 		abandonPost();
 		snowballin = 0;
