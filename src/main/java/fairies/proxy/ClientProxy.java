@@ -8,6 +8,9 @@ import fairies.client.render.RenderFairy;
 import fairies.client.render.RenderFish;
 import fairies.entity.EntityFairy;
 import fairies.entity.FairyEntityFishHook;
+import net.minecraft.client.Minecraft;
+import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.EntityPlayerMP;
 
 @SideOnly(Side.CLIENT)
 public class ClientProxy extends CommonProxy {
@@ -28,6 +31,9 @@ public class ClientProxy extends CommonProxy {
 		RenderingRegistry.registerEntityRenderingHandler(FairyEntityFishHook.class, new RenderFish());
 	}
 	
-
+    @Override
+    public EntityPlayer getCurrentPlayer() {
+		return (EntityPlayer)Minecraft.getMinecraft().thePlayer; 
+	}
 
 }

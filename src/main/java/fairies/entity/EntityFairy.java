@@ -15,6 +15,7 @@ import fairies.world.FairyGroupGenerator;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockSign;
 import net.minecraft.block.material.Material;
+import net.minecraft.client.Minecraft;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityAgeable;
 import net.minecraft.entity.EntityCreature;
@@ -165,11 +166,11 @@ public class EntityFairy extends EntityAnimal {
 
 		nbt.setBoolean("cower",		this.cower);
 		nbt.setBoolean("didHearts",	this.didHearts);
-		nbt.setBoolean("didSwing",	this.didSwing);		
-		if (this.fishEntity != null) {
-			this.wasFishing = true;
-			nbt.setBoolean("wasFishing", this.wasFishing);
-		}
+		nbt.setBoolean("didSwing",	this.didSwing);
+		
+		this.wasFishing = (this.fishEntity != null);
+		nbt.setBoolean("wasFishing", this.wasFishing);
+		
 		nbt.setShort("snowballin",	(short) snowballin);
 
 		nbt.setBoolean("isSitting", isSitting());
@@ -423,6 +424,18 @@ public class EntityFairy extends EntityAnimal {
         return f + f3;
     }
     
+	@Override
+	protected void updateFallState(double par1, boolean par3) {
+		super.updateFallState(par1 / 6D, par3);
+		int i = MathHelper.floor_double(posX);
+		int j = MathHelper.floor_double(boundingBox.minY) - 1;
+		int k = MathHelper.floor_double(posZ);
+
+		if (j > 0 && j < worldObj.getHeight()) {
+			worldObj.markBlockForUpdate(i, j, k);
+		}
+	}
+    
     @Override
     protected void fall(float f) {
     	// HAH!
@@ -511,7 +524,7 @@ public class EntityFairy extends EntityAnimal {
                 setCanFlap(true);
                 setFlyTime( 400 + rand.nextInt(200) );
 
-                //Scouts are more likely to want to fly.
+                // Scouts are more likely to want to fly.
                 if (scout())  {
                     setFlyTime( getFlyTime() * 3 );
                 }
@@ -547,8 +560,8 @@ public class EntityFairy extends EntityAnimal {
             }
         }
 
+        // TODO: break this out
         ++listActions;
-
         if (listActions >= 8) {
             listActions = rand.nextInt(3);
 
@@ -1624,15 +1637,10 @@ public class EntityFairy extends EntityAnimal {
             if( queen() ) {
                 woosh = "Queen " + woosh;
             }
-
-            /**
-             * TODO: Escape out to proxy for this.
-             * 
-            if (ModLoader.getMinecraftInstance().thePlayer.username.equals(rulerName()))
-            {
+            
+            if( isRuler(FairyFactions.proxy.getCurrentPlayer()) ) {
                 woosh = (posted() ? "�a" : "�c") + "@�f" + woosh + (posted() ? "�a" : "�c") + "@";
             }
-            */
 
             return woosh;
     	} else {
@@ -1707,6 +1715,7 @@ public class EntityFairy extends EntityAnimal {
     	return getFairyFlagTwo(FLAG2_POSTED);
     }
     public void setPosted(boolean flag) {
+    	postedCount = 0;
     	setFairyFlagTwo(FLAG2_POSTED, flag);
     }
     
@@ -1727,6 +1736,7 @@ public class EntityFairy extends EntityAnimal {
     // ----------
     
     public boolean isRuler( EntityPlayer player ) {
+    	if( player == null ) return false;
     	return tamed() && rulerName().equals(player.getGameProfile().getName());
     }
     public boolean hasRuler() {

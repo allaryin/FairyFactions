@@ -13,6 +13,7 @@ import fairies.entity.EntityFairy;
 import fairies.entity.FairyEntityFishHook;
 import fairies.event.FairyEventListener;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.network.Packet;
 import net.minecraft.network.play.server.S02PacketChat;
@@ -45,6 +46,10 @@ public class CommonProxy {
 	}
 
 	public void postInit() {
+	}
+	
+	public EntityPlayer getCurrentPlayer() {
+		return null; 
 	}
 	
 	////////// packet handling
