@@ -8,6 +8,7 @@ import cpw.mods.fml.common.SidedProxy;
 import cpw.mods.fml.common.event.FMLInitializationEvent;
 import cpw.mods.fml.common.event.FMLPostInitializationEvent;
 import cpw.mods.fml.common.event.FMLPreInitializationEvent;
+import cpw.mods.fml.common.gameevent.TickEvent;
 import fairies.entity.EntityFairy;
 import fairies.event.FairyEventListener;
 import fairies.proxy.CommonProxy;
@@ -74,10 +75,13 @@ public class FairyFactions {
 		final int freqNum = 8;
 		fairySpawner.setMaxAnimals(maxNum);
 		fairySpawner.AddCustomSpawn(EntityFairy.class, freqNum, EnumCreatureType.creature);
+		FMLCommonHandler.instance().bus().register(fairySpawner);
+		
 		// TODO: register egg
 		// TODO: register entity localization
 		LOGGER.debug("Spawner is a modified version of CustomSpawner, created by DrZhark.");
 
 		proxy.postInit();
 	}
+	
 }

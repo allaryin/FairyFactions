@@ -49,6 +49,7 @@ import net.minecraft.util.MovingObjectPosition;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.EnumDifficulty;
 import net.minecraft.world.World;
+import net.minecraft.world.biome.BiomeGenBase;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.chunk.EmptyChunk;
 
@@ -2425,6 +2426,44 @@ public class EntityFairy extends EntityAnimal {
 	public EntityAgeable createChild(EntityAgeable p_90011_1_) {
 		// No fairy breeding.
 		return null;
+	}
+	
+    @Override
+    public int getMaxSpawnedInChunk() {
+        return 1;
+    }
+
+	@Override
+	public boolean getCanSpawnHere() {
+		if (super.getCanSpawnHere()) {
+			int x = MathHelper.floor_double(posX);
+			int z = MathHelper.floor_double(posZ);
+			BiomeGenBase biome = worldObj.getBiomeGenForCoords(x, z);
+
+			if (biome != null && biome.rootHeight > -0.25F
+					&& (biome.rootHeight + biome.heightVariation) <= 0.5F && biome.temperature >= 0.1F
+					&& biome.temperature <= 1.0F && biome.rainfall > 0.0F
+					&& biome.rainfall <= 0.8F) {
+				List list = worldObj.getEntitiesWithinAABB(
+						EntityFairy.class, this.boundingBox.expand(32D, 32D, 32D));
+
+				if (( list == null || list.size() < 1 ) && !worldObj.isRemote) {
+					setJob(0);
+					setSpecialJob(true);
+					heal(30);
+					setHealth(30);
+					int i = rand.nextInt(15) + 1;
+					setFaction(i);
+					setSkin(rand.nextInt(4));
+					cower = false;
+					createGroup = true;
+				}
+
+				return true;
+			}
+		}
+
+		return false;
 	}
 
 }

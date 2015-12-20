@@ -10,6 +10,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
+import cpw.mods.fml.common.eventhandler.SubscribeEvent;
+import cpw.mods.fml.common.gameevent.TickEvent;
 import fairies.entity.EntityFairy;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
@@ -81,6 +83,21 @@ public final class Spawner {
 			clearLists();
 		} catch (IllegalAccessException exception) {
 			throw new RuntimeException(exception);
+		}
+	}
+	
+	@SubscribeEvent
+	public void onTick(TickEvent.WorldTickEvent event) {
+		final World world = event.world;
+		if( world != null && !world.isRemote 
+				&& world.difficultySetting.getDifficultyId() > 0 
+				&& world.getWorldInfo().getWorldTime() % 300L == 0L ) {
+			final List list = world.playerEntities;
+			if( list != null && list.size() > 0 ) {
+				final int maxNum = 12 + (list.size() * 6);
+				this.setMaxAnimals(maxNum);
+			}
+			this.doCustomSpawning(world, true, true);
 		}
 	}
 
@@ -511,7 +528,7 @@ public final class Spawner {
 	public int countSpawnedEntities(World world, EnumCreatureType enumcreaturetype) {
 		int i = getEnumIndex(enumcreaturetype);
 		int finalcount = 0;
-		{
+		if( i > -1 ) {
 			boolean flag = false;
 
 			for (Iterator iterator = entityClasses[i].iterator(); iterator.hasNext();) {
