@@ -19,6 +19,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityAgeable;
 import net.minecraft.entity.EntityCreature;
+import net.minecraft.entity.EntityFlying;
 import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.SharedMonsterAttributes;
@@ -42,8 +43,11 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.pathfinding.PathEntity;
+import net.minecraft.potion.Potion;
+import net.minecraft.potion.PotionEffect;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.tileentity.TileEntitySign;
+import net.minecraft.util.DamageSource;
 import net.minecraft.util.MathHelper;
 import net.minecraft.util.MovingObjectPosition;
 import net.minecraft.util.ResourceLocation;
@@ -1521,6 +1525,8 @@ public class EntityFairy extends EntityAnimal {
 		} else if ( job > MAX_JOB ) {
 			job = MAX_JOB;
 		}
+		
+		FairyFactions.LOGGER.info("setJob: "+this+" -> "+job);
         
         byte byte0 = dataWatcher.getWatchableObjectByte(B_FLAGS);
         byte0 = (byte)(byte0 & 0xf3);
@@ -2277,9 +2283,97 @@ public class EntityFairy extends EntityAnimal {
 		FairyFactions.LOGGER.info( "tameMe: "+rulerName()+": "+this );
 	}
 	
+	public void alertFollowers(Entity entity) {
+		if (queen() && getFaction() > 0) {
+			List list = worldObj.getEntitiesWithinAABB(EntityFairy.class,
+					boundingBox.expand(40D, 40D, 40D));
+
+			for (int j = 0; j < list.size(); j++) {
+				EntityFairy fairy = (EntityFairy) list.get(j);
+
+				if (fairy != this && fairy.getHealth() > 0 && sameTeam(fairy)
+						&& ( fairy.ruler == null || fairy.ruler == this )) {
+					if (fairy.ridingEntity != null) {
+						// TODO: send mount call
+						fairy.mountEntity(fairy.ridingEntity);
+						// mod_FairyMod.fairyMod.sendFairyMount(fairy,
+						// fairy.ridingEntity);
+					}
+
+					fairy.setTarget((Entity) null);
+					fairy.cryTime = 300;
+					fairy.setFaction(0);
+					// if(entity != null && entity instanceof EntityLiving) {
+					fairy.entityFear = null;
+					// }
+					fairy.ruler = null;
+				}
+			}
+		}
+	}
+
+	public void alertRuler(Entity entity) {
+		if (getFaction() > 0 && ruler != null
+				&& ruler instanceof EntityFairy
+				&& sameTeam((EntityFairy) ruler)) {
+			EntityFairy queen = ( (EntityFairy) ruler );
+			boolean flag = false;
+			List list = worldObj.getEntitiesWithinAABB(EntityFairy.class,
+					queen.boundingBox.expand(40D, 40D, 40D));
+
+			for (int j = 0; j < list.size(); j++) {
+				EntityFairy fairy = (EntityFairy) list.get(j);
+
+				if (fairy != queen && fairy.getHealth() > 0 && queen.sameTeam(fairy)
+						&& ( fairy.ruler == null || fairy.ruler == queen )) {
+					flag = true;
+					break;
+				}
+			}
+
+			if (!flag) {
+				queen.setTarget((Entity) null);
+				queen.cryTime = 600;
+				queen.setFaction(0);
+				// if(entity != null && entity instanceof EntityLiving) {
+				queen.entityFear = null;
+				// }
+			}
+		} else if (tamed() && ruler != null && ruler instanceof EntityPlayerMP) {
+			// EntityPlayerMP player = (EntityPlayerMP)ruler;
+			String f = getActualName(getNamePrefix(), getNameSuffix());
+
+			if (queen()) {
+				f = "Queen " + f;
+			}
+
+			String s = f;
+			int i = rand.nextInt(6);
+
+			if (i == 0) {
+				s += " bit the dust.";
+			} else if (i == 1) {
+				s += " ran into some problems.";
+			} else if (i == 2) {
+				s += " went to the big forest in the sky.";
+			} else if (i == 3) {
+				s += " had to go away for a while.";
+			} else if (i == 3) {
+				s += " lived a good life.";
+			} else if (i == 4) {
+				s += " is in a better place now.";
+			} else {
+				s += " kicked the bucket.";
+			}
+
+			// mod_FairyMod.fairyMod.sendDisband(player, "* �c" + s);
+			FairyFactions.proxy.sendChat((EntityPlayerMP)ruler, "* �c" + s);
+		}
+	}
+
+	
 	// Don't let that spider bite you, spider bite hurt.
-	public void hydraFairy() 
-	{
+	public void hydraFairy() {
 		double a = (boundingBox.minX + boundingBox.maxX) / 2D;
 		double b = (boundingBox.minY + (double) yOffset) - (double) ySize;
 		double c = (boundingBox.minZ + boundingBox.maxZ) / 2D;
@@ -2319,6 +2413,102 @@ public class EntityFairy extends EntityAnimal {
 			}
 		}
 	}
+	
+	@Override
+	protected void attackEntity(Entity entity, float f) {
+		if (attackTime <= 0 && f < ( tamed() ? 2.5F : 2.0F )
+				&& ( ( entity.boundingBox.maxY > boundingBox.minY
+						&& entity.boundingBox.minY < boundingBox.maxY )
+						|| f == 0F )) {
+			attackTime = 20;
+
+			if (flymode() && canFlap() && scout()
+					&& entity instanceof EntityLiving && ridingEntity == null
+					&& riddenByEntity == null && entity.ridingEntity == null
+					&& entity.riddenByEntity == null
+					&& !( entity instanceof EntityFairy
+							|| entity instanceof EntityFlying )) {
+				// Scout's Totally Leet Air Attack.
+				mountEntity(entity);
+				setFlymode(true);
+				flyTime = 200;
+				setCanFlap(true);
+				attackTime = 35;
+			} else {
+				if (scout() && ridingEntity != null && entity != null
+						&& entity == ridingEntity) {
+					// The finish of its air attack.
+					mountEntity(entity); 
+					attackTime = 35;
+				}
+
+				// normal boring strike.
+				smackThatAss(entity);
+			}
+		}
+	}
+
+	// TODO: rename childish method
+	protected boolean smackThatAss(Entity entity) {
+		// Swings arm and attacks.
+		armSwing(!didSwing);
+
+		if (rogue() && healTime <= 0 && entity != null
+				&& entity instanceof EntityLiving) {
+			boolean fred = entity.attackEntityFrom(
+					DamageSource.causeMobDamage(this), attackStrength());
+
+			if (fred) {
+				applyPoison((EntityLiving) entity);
+			}
+
+			return fred;
+		}
+
+		return entity.attackEntityFrom(DamageSource.causeMobDamage(this),
+				attackStrength());
+	}
+	
+	protected int attackStrength() {
+		// Self explanatory.
+		if (queen()) {
+			return 5;
+		} else if (guard()) {
+			return 4;
+		} else if (rogue()) {
+			return 3;
+		} else {
+			return 2;
+		}
+	}
+
+	public void applyPoison(EntityLiving entityliving) {
+		int effect = rand.nextInt(3);
+		if (effect == 0) {
+			effect = Potion.poison.id;
+		} else if (effect == 1) {
+			effect = Potion.weakness.id;
+		} else {
+			effect = Potion.blindness.id;
+		}
+
+		byte duration = 0;
+		switch( worldObj.difficultySetting ) {
+			case NORMAL:	duration = 7; break;
+			case HARD:		duration = 15; break;
+			default:
+		}
+		if (duration > 0) {
+			( entityliving )
+					.addPotionEffect(new PotionEffect(effect, duration * 20, 0));
+		}
+
+		healTime = 100 + rand.nextInt(100);
+		setTarget((Entity) null);
+		entityFear = entityliving;
+		cryTime = healTime;
+	}
+
 	
 	public void tameFailMessage( EntityPlayer player ) {
 		String s = "You can't ";
@@ -2440,7 +2630,7 @@ public class EntityFairy extends EntityAnimal {
 			int z = MathHelper.floor_double(posZ);
 			BiomeGenBase biome = worldObj.getBiomeGenForCoords(x, z);
 
-			if (biome != null && biome.rootHeight > -0.25F
+			if (biome != null && (biome.rootHeight - biome.heightVariation > -0.25F)
 					&& (biome.rootHeight + biome.heightVariation) <= 0.5F && biome.temperature >= 0.1F
 					&& biome.temperature <= 1.0F && biome.rainfall > 0.0F
 					&& biome.rainfall <= 0.8F) {
