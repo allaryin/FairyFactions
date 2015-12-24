@@ -50,6 +50,7 @@ import net.minecraft.tileentity.TileEntity;
 import net.minecraft.tileentity.TileEntitySign;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.EntityDamageSourceIndirect;
+import net.minecraft.util.IIcon;
 import net.minecraft.util.MathHelper;
 import net.minecraft.util.MovingObjectPosition;
 import net.minecraft.util.ResourceLocation;
@@ -283,6 +284,28 @@ public class EntityFairy extends EntityAnimal {
 				.setBaseValue(DEF_BASE_SPEED);
 		// this.getEntityAttribute(SharedMonsterAttributes.attackDamage).setBaseValue(4.0D);
 		// this.getEntityAttribute(SharedMonsterAttributes.followRange).setBaseValue(10.0D);
+	}
+	
+	/*
+	public float getMaxHealth()   //Max Health
+    {
+    	// TODO: figure out where to put this, getMaxHealth is final
+        return queen() ? 30 : rogue() ? 10 : 15;
+    }
+    */
+	
+	@Override
+	public double getYOffset() {
+		if (ridingEntity != null) {
+			if (this.worldObj.isRemote) {
+				return yOffset - ( flymode() ? 1.15F : 1.35f );
+			}
+
+			return yOffset + ( flymode() ? 0.65F : 0.55F )
+					- ( ridingEntity instanceof EntityChicken ? 0.0F : 0.15F );
+		} else {
+			return yOffset;
+		}
 	}
 
 	@SuppressWarnings("unused")
@@ -1317,15 +1340,64 @@ public class EntityFairy extends EntityAnimal {
 		}
 	}
 
-	public static final ItemStack	healPotion		= new ItemStack(
-			Items.potionitem, 1, 16389);
-	public static final ItemStack	restPotion		= new ItemStack(
-			Items.potionitem, 1, 16385);
-	public static final ItemStack	fishingStick	= new ItemStack(Items.stick,
-			1);
+	public static final ItemStack	healPotion		= new ItemStack(Items.potionitem, 1, 16389);
+	public static final ItemStack	restPotion		= new ItemStack(Items.potionitem, 1, 16385);
+	public static final ItemStack	fishingStick	= new ItemStack(Items.stick, 1);
+	public static final ItemStack	scoutMap		= new ItemStack(Items.map, 1);
+	
+	public static final ItemStack	woodSword		= new ItemStack(Items.wooden_sword, 1);
+	public static final ItemStack	ironSword		= new ItemStack(Items.iron_sword, 1);
+	public static final ItemStack	goldSword		= new ItemStack(Items.golden_sword, 1);
 
 	public ItemStack handPotion() {
 		return ( rarePotion() ? restPotion : healPotion );
+	}
+	
+	@Override
+	public Item getDropItem() {
+		return Items.glowstone_dust;
+	}
+	
+	@Override
+	public ItemStack getHeldItem() {
+		if (tempItem != null) {
+			return tempItem;
+		} else if (queen()) // Queens always carry the gold/iron sword, guards
+							// always have the wooden sword.
+		{
+			if (getSkin() % 2 == 1) {
+				return ironSword;
+			} else {
+				return goldSword;
+			}
+		} else if (guard()) {
+			return woodSword;
+		} else if (medic() && canHeal() && !angry()) // Medics carry potions
+		{
+			return handPotion();
+		} else if (scout()) // Scouts have maps now.
+		{
+			return scoutMap;
+		} else {
+			return super.getHeldItem();
+		}
+	}
+	
+	@SideOnly(Side.CLIENT)
+	@Override
+	public IIcon getItemIcon(ItemStack itemstack, int i) {
+		IIcon j = super.getItemIcon(itemstack, i);
+
+		if (itemstack.getItem() == Items.potionitem) {
+			if (i == 1) {
+				return itemstack.getIconIndex();
+			} else {
+				// TODO: figure this out :)
+				// return 141;
+			}
+		}
+
+		return j;
 	}
 
 	// TODO: fix childish method name :P
@@ -2150,6 +2222,33 @@ public class EntityFairy extends EntityAnimal {
 	public boolean isSitting() {
 		return getFlag(FLAG_SITTING);
 	}
+	
+	/**
+	 * This is really confusing. The original reads from byte 19
+	 * then writes out to byte 22.
+	 * 
+	 * TODO: figure out what this was supposed to do
+	 */
+    protected void setFairyHealth(int i)
+    {
+        byte byte0 = dataWatcher.getWatchableObjectByte(19);
+
+        if (i < 0)
+        {
+            i = 0;
+        }
+        else if (i > 255)
+        {
+            i = 255;
+        }
+
+        byte0 = (byte)((byte)i & 0xff);
+        dataWatcher.updateObject(22, Byte.valueOf(byte0));
+    }
+    public int fairyHealth()
+    {
+        return (byte)dataWatcher.getWatchableObjectByte(22) & 0xff;
+    }
 
 	protected void setFairyClimbing(boolean flag) {
 		setClimbing(flag);
@@ -2678,6 +2777,19 @@ public class EntityFairy extends EntityAnimal {
 			}
 		}
 	}
+	
+    @Override
+    protected boolean isMovementCeased() {
+        return isSitting();
+        // renderYawOffset = prevRenderYawOffset = rotationYaw;
+        // rotationPitch = 10F;
+        // return true;
+    }
+
+    @Override
+    public boolean isOnLadder() {
+        return climbing();
+    }
 
 	@Override
 	protected void attackEntity(Entity entity, float f) {
