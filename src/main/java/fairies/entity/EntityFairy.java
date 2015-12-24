@@ -171,10 +171,10 @@ public class EntityFairy extends EntityAnimal {
 
 		// fairy-specific init
 		setSkin(rand.nextInt(4));
-		setJob(rand.nextInt(4));
-		setSpecialJob(false);
 		setFaction(0);
 		setFairyName(rand.nextInt(16), rand.nextInt(16));
+		setSpecialJob(false);
+		setJob(rand.nextInt(4));
 
 		setFlymode(false);
 		this.sinage = rand.nextFloat();
@@ -1835,7 +1835,7 @@ public class EntityFairy extends EntityAnimal {
 
 		byte byte0 = dataWatcher.getWatchableObjectByte(B_FLAGS);
 		byte0 = (byte) ( byte0 & 0xfc );
-		byte0 |= (byte) skin << 2;
+		byte0 = (byte)(byte0 | (byte)skin);
 
 		dataWatcher.updateObject(B_FLAGS, Byte.valueOf(byte0));
 	}
@@ -1855,7 +1855,8 @@ public class EntityFairy extends EntityAnimal {
 
 		byte byte0 = dataWatcher.getWatchableObjectByte(B_FLAGS);
 		byte0 = (byte) ( byte0 & 0xf3 );
-		byte0 |= (byte) job << 2;
+		//byte0 |= (byte) job << 2;
+		byte0 = (byte)(byte0 | (byte)job << 2);
 
 		dataWatcher.updateObject(B_FLAGS, Byte.valueOf(byte0));
 	}
