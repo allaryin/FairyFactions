@@ -16,6 +16,7 @@ import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.entity.RenderLiving;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLiving;
+import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.init.Items;
 import net.minecraft.item.ItemBlock;
 import net.minecraft.item.ItemStack;
@@ -48,7 +49,8 @@ public class RenderFairy extends RenderLiving
         fairyModel5 = new ModelFairyProps2();
     }
 
-    protected void preRenderCallback(EntityLiving entityliving, float f)
+    @Override
+    protected void preRenderCallback(EntityLivingBase entityliving, float f)
     {
         EntityFairy fairy = (EntityFairy)entityliving;
         float f1 = 0.875F;
@@ -67,7 +69,8 @@ public class RenderFairy extends RenderLiving
         }
     }
 
-    protected void renderEquippedItems(EntityLiving entityliving, float f)
+    @Override
+    protected void renderEquippedItems(EntityLivingBase entityliving, float f)
     {
         ItemStack itemstack = entityliving.getHeldItem();
 
@@ -124,9 +127,11 @@ public class RenderFairy extends RenderLiving
         }
     }
     
-
-    protected int setFairyBrightness(EntityFairy fairy, int i, float f)
+    @Override
+    protected int shouldRenderPass(EntityLivingBase entityliving, int i, float f)
     {
+    	final EntityFairy fairy = (EntityFairy)entityliving;
+    	
         if (i == 0 && (fairy.withered() || fairy.rogue()))  //Render Withered Skin.
         {
             float transp = 0.7F;
@@ -214,7 +219,8 @@ public class RenderFairy extends RenderLiving
         }
     }
 
-    protected void passSpecialRender(EntityLiving entityliving, double d, double d1, double d2)
+    @Override
+    protected void passSpecialRender(EntityLivingBase entityliving, double d, double d1, double d2)
     {
         renderFairyName((EntityFairy)entityliving, d, d1, d2);
     }
@@ -240,12 +246,7 @@ public class RenderFairy extends RenderLiving
         }
     }
 
-    protected int shouldRenderPass(EntityLiving entityliving, int i, float f)
-    {
-        return setFairyBrightness((EntityFairy)entityliving, i, f);
-    }
-
-    protected void renderLivingLabel(EntityLiving par1EntityLiving, String par2Str, double par3, double par5, double par7, float range)
+    protected void renderLivingLabel(EntityLivingBase par1EntityLiving, String par2Str, double par3, double par5, double par7, float range)
     {
         float f = par1EntityLiving.getDistanceToEntity(renderManager.livingPlayer);
 
@@ -293,6 +294,10 @@ public class RenderFairy extends RenderLiving
 	@Override
 	protected ResourceLocation getEntityTexture(Entity entity) {
 		final EntityFairy fairy = (EntityFairy)entity;
+		return getEntityTexture(fairy);
+	}
+	
+	protected ResourceLocation getEntityTexture(EntityFairy fairy) {
 		return fairy.getTexture(fairy.getSkin());
 	}
 

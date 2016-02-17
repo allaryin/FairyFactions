@@ -1989,7 +1989,7 @@ public class EntityFairy extends EntityAnimal {
 
 			return woosh;
 		} else {
-			return null;
+			return "NULL";
 		}
 	}
 
