@@ -32,6 +32,11 @@ public class ClientProxy extends CommonProxy {
 	}
 	
     @Override
+    public void initGUI() {
+    	// TODO: something goes here, probably
+    }
+	
+    @Override
     public EntityPlayer getCurrentPlayer() {
 		return (EntityPlayer)Minecraft.getMinecraft().thePlayer; 
 	}

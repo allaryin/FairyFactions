@@ -234,7 +234,7 @@ public class RenderFairy extends RenderLiving
 
                 if (s != null)
                 {
-                    renderLivingLabel(fairy, s, d, d1 - (fairy.flymode() ? 1.125D : 0.825D), d2, 64);
+                    renderLivingLabel(fairy, s, d, d1 - (fairy.flymode() ? 1.125D : 0.825D), d2, NAME_TAG_RANGE);
                 }
             }
         }
@@ -245,11 +245,11 @@ public class RenderFairy extends RenderLiving
         return setFairyBrightness((EntityFairy)entityliving, i, f);
     }
 
-    protected void renderLivingLabel(EntityLiving par1EntityLiving, String par2Str, double par3, double par5, double par7, int par9)
+    protected void renderLivingLabel(EntityLiving par1EntityLiving, String par2Str, double par3, double par5, double par7, float range)
     {
         float f = par1EntityLiving.getDistanceToEntity(renderManager.livingPlayer);
 
-        if (f > (float)par9)
+        if (f > range)
         {
             return;
         }

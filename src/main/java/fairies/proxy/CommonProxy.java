@@ -42,7 +42,7 @@ public class CommonProxy {
 	}
 
 	public void initGUI() {
-		// TODO Auto-generated method stub
+		// should only ever be implemented on client-side
 	}
 
 	public void postInit() {
@@ -73,7 +73,7 @@ public class CommonProxy {
 	}
 
 	public void sendFairyRename(String name) {
-		// TODO Auto-generated method stub
+		// TODO send custom PacketSetFairyName
 	}
 	
 	// Packet that handles fairy mounting.

@@ -13,13 +13,17 @@ import fairies.entity.EntityFairy;
 import fairies.event.FairyEventListener;
 import fairies.proxy.CommonProxy;
 import fairies.world.Spawner;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.EnumCreatureType;
+import net.minecraft.world.WorldServer;
+import net.minecraftforge.common.DimensionManager;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.config.Configuration;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.io.File;
+import java.util.List;
 
 @Mod(modid = Version.MOD_ID, version = Version.VERSION)
 public class FairyFactions {
@@ -52,15 +56,17 @@ public class FairyFactions {
 	public void init(FMLInitializationEvent event) {
 		FairyEventListener listener = new FairyEventListener();
 		MinecraftForge.EVENT_BUS.register(listener);
-		
-		FMLCommonHandler.instance().bus().register(this);
-		LOGGER.debug("Registered events");
+
+		proxy.initEntities();
+		LOGGER.debug("Registered entities");
 
 		proxy.initChannel(listener);
 		LOGGER.debug("Registered channel");
 
-		proxy.initEntities();
-		LOGGER.debug("Registered entities");
+		/*
+		FMLCommonHandler.instance().bus().register(this);
+		LOGGER.debug("Registered events");
+		*/
 		
 		proxy.initGUI();
 		LOGGER.debug("Registered GUI");
@@ -82,6 +88,28 @@ public class FairyFactions {
 		LOGGER.debug("Spawner is a modified version of CustomSpawner, created by DrZhark.");
 
 		proxy.postInit();
+	}
+	
+	/**
+	 * Find a fairy in the world by entity id. This method was in the base class
+	 * in the original mod, and I can't find a better place to put it for now...
+	 * 
+	 * @param fairyID
+	 * @return The fairy in question, null if not found. 
+	 */
+	public static EntityFairy getFairy(int fairyID) {
+		for( WorldServer dim : DimensionManager.getWorlds() ) {
+			if( dim != null ) {
+				List<Entity> entities = dim.loadedEntityList;
+				if( entities != null && !entities.isEmpty() ) {
+					for( Entity entity : entities ) {
+						if( entity instanceof EntityFairy && entity.getEntityId() == fairyID )
+							return (EntityFairy)entity;
+					}
+				}
+			}
+		}
+		return null;
 	}
 	
 }
