@@ -1,19 +1,12 @@
 package fairies.client.gui;
 
-import java.util.ArrayList;
-import java.util.List;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiButton;
-import net.minecraft.client.gui.GuiScreen;
-import net.minecraft.util.ChatAllowedCharacters;
-
 import org.lwjgl.input.Keyboard;
-import org.lwjgl.opengl.GL11;
-
-import com.sun.xml.internal.bind.v2.runtime.unmarshaller.XsiNilLoader.Array;
 
 import fairies.FairyFactions;
 import fairies.entity.EntityFairy;
+import net.minecraft.client.gui.GuiButton;
+import net.minecraft.client.gui.GuiScreen;
+import net.minecraft.util.ChatAllowedCharacters;
 
 public class GuiName extends GuiScreen
 {
