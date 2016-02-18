@@ -1961,7 +1961,8 @@ public class EntityFairy extends EntityAnimal {
 
 			return woosh;
 		} else {
-			return "<wild>";
+			// wild fairies should not display a nametag
+			return null;
 		}
 	}
 
