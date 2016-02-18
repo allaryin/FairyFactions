@@ -10,7 +10,6 @@ import fairies.entity.EntityFairy;
 import fairies.entity.FairyEntityFishHook;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.entity.player.EntityPlayerMP;
 
 @SideOnly(Side.CLIENT)
 public class ClientProxy extends CommonProxy {
