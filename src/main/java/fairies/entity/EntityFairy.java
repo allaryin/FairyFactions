@@ -1,9 +1,10 @@
 package fairies.entity;
 
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Collections;
 import java.util.List;
+
+import org.apache.logging.log4j.Logger;
 
 import cpw.mods.fml.relauncher.ReflectionHelper;
 import cpw.mods.fml.relauncher.Side;
@@ -15,7 +16,6 @@ import fairies.world.FairyGroupGenerator;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockSign;
 import net.minecraft.block.material.Material;
-import net.minecraft.client.Minecraft;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityAgeable;
 import net.minecraft.entity.EntityCreature;
@@ -60,7 +60,10 @@ import net.minecraft.world.biome.BiomeGenBase;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.chunk.EmptyChunk;
 
+
 public class EntityFairy extends EntityAnimal {
+	
+	private static final Logger LOG = FairyFactions.LOGGER;
 
 	// TODO: put these into config file
 	public static final double	DEF_BASE_HEALTH		= 15.0D;
@@ -68,62 +71,19 @@ public class EntityFairy extends EntityAnimal {
 	public static final float	DEF_SCOUT_SPEED		= 1.05F;
 	public static final float	DEF_WITHER_MULT		= 0.75F;
 
-	public static final double	DEF_FLOAT_RATE		= -0.2D;				// fall
-																			// speed
-	public static final double	DEF_FLAP_RATE		= 0.15D;				// fly
-																			// speed
-	public static final double	DEF_SOLO_FLAP_MULT	= 1.25D;				// bonus
-																			// to
-																			// flight
-																			// while
-																			// unburdened
-	public static final double	DEF_LIFTOFF_MULT	= 2.0D;					// bonus
-																			// to
-																			// flight
-																			// when
-																			// launching
+	public static final double	DEF_FLOAT_RATE		= -0.2D;				// fall speed
+	public static final double	DEF_FLAP_RATE		= 0.15D;				// fly speed
+	public static final double	DEF_SOLO_FLAP_MULT	= 1.25D;				// bonus to flight while unburdened
+	public static final double	DEF_LIFTOFF_MULT	= 2.0D;					// bonus to flight when launching
 
 	public static final int		DEF_MAX_PARTICLES	= 5;
 
-	public static final float	DEF_PATH_RANGE		= 16F;					// how
-																			// far
-																			// will
-																			// we
-																			// path
-																			// to
-																			// something?
-	public static final float	DEF_PURSUE_RANGE	= DEF_PATH_RANGE;		// how
-																			// far
-																			// will
-																			// we
-																			// chase
-																			// something?
-	public static final float	DEF_DEFEND_RANGE	= DEF_PURSUE_RANGE / 2;	// how
-																			// close
-																			// will
-																			// guards
-																			// protect
-																			// the
-																			// queen
-																			// from?
-	public static final float	DEF_FEAR_RANGE		= 12F;					// how
-																			// far
-																			// will
-																			// we
-																			// flee
-																			// from
-																			// something?
+	public static final float	DEF_PATH_RANGE		= 16F;					// how far will we path to something?
+	public static final float	DEF_PURSUE_RANGE	= DEF_PATH_RANGE;		// how far will we chase something?
+	public static final float	DEF_DEFEND_RANGE	= DEF_PURSUE_RANGE / 2;	// how close will guards protect the queen from?
+	public static final float	DEF_FEAR_RANGE		= 12F;					// how far will we flee from something?
 
-	public static final int		DEF_AGGRO_TIMER		= 15;					// how
-																			// long
-																			// will
-																			// tame
-																			// fairies
-																			// stay
-																			// mad?
-																			// (3x
-																			// for
-																			// wild)
+	public static final int		DEF_AGGRO_TIMER		= 15;					// how long will tame fairies stay mad? 3x for wild
 
 	private boolean				cower;
 	public boolean				didHearts;
@@ -137,10 +97,7 @@ public class EntityFairy extends EntityAnimal {
 	private int					loseInterest;
 	private int					loseTeam;
 
-	private int					postX, postY, postZ;						// where
-																			// is
-																			// our
-																			// sign?
+	private int					postX, postY, postZ;						// where is our sign?
 
 	private EntityLivingBase	ruler;
 	private EntityLivingBase	entityHeal;
@@ -148,14 +105,8 @@ public class EntityFairy extends EntityAnimal {
 	public FairyEntityFishHook	fishEntity;
 
 	// non-persistent fields
-	public float				sinage;										// what
-																			// does
-																			// this
-																			// mean?
-	private boolean				flag;										// flagged
-																			// for
-																			// what,
-																			// precisely?
+	public float				sinage;										// what does this mean?
+	private boolean				flag;										// flagged for what, precisely?
 	private boolean				createGroup;
 	private int					listActions;
 	public int					postedCount;
@@ -190,7 +141,7 @@ public class EntityFairy extends EntityAnimal {
 	protected final static int	S_OWNER		= 20;	// owner name
 	protected final static int	B_FLAGS2	= 21;	// capabilities, activities,
 													// etc...
-	protected final static int	B_HEALTH	= 22;
+	protected final static int	B_HEALTH	= 22;	// NB: UNUSED currently - was used in original mod
 	protected final static int	S_NAME_REAL	= 23;	// custom name
 	protected final static int	I_TOOL		= 24;	// temporary tool
 
@@ -206,6 +157,23 @@ public class EntityFairy extends EntityAnimal {
 		dataWatcher.addObject(S_NAME_REAL, "");
 		dataWatcher.addObject(I_TOOL, new Integer(0));
 	}
+	
+	private void _dump_() {
+		StringBuilder sb = new StringBuilder();
+		sb.append(this.getEntityId());
+		sb.append(" : ");
+		byte b0 = dataWatcher.getWatchableObjectByte(B_TYPE);
+		byte b1 = dataWatcher.getWatchableObjectByte(B_FLAGS);
+		byte b2 = dataWatcher.getWatchableObjectByte(B_FLAGS2);
+		
+		sb.append( String.format("%8s", Integer.toBinaryString(b0)).replace(' ', '0') );
+		sb.append("-");
+		sb.append( String.format("%8s", Integer.toBinaryString(b1)).replace(' ', '0') );
+		sb.append("-");
+		sb.append( String.format("%8s", Integer.toBinaryString(b2)).replace(' ', '0') );
+		
+		System.out.println(sb.toString());
+	}
 
 	@Override
 	public void writeEntityToNBT(NBTTagCompound nbt) {
@@ -213,8 +181,7 @@ public class EntityFairy extends EntityAnimal {
 		nbt.setByte("flags", dataWatcher.getWatchableObjectByte(B_FLAGS));
 		nbt.setByte("flags2", dataWatcher.getWatchableObjectByte(B_FLAGS2));
 		nbt.setByte("type", dataWatcher.getWatchableObjectByte(B_TYPE));
-		nbt.setByte("nameOrig",
-				dataWatcher.getWatchableObjectByte(B_NAME_ORIG));
+		nbt.setByte("nameOrig", dataWatcher.getWatchableObjectByte(B_NAME_ORIG));
 
 		nbt.setString("rulerName", rulerName());
 		nbt.setString("customName", getCustomName());
@@ -314,6 +281,7 @@ public class EntityFairy extends EntityAnimal {
 		super.onUpdate();
 
 		if (this.createGroup) {
+			
 			createGroup = false;
 			int i = MathHelper.floor_double(posX);
 			int j = MathHelper.floor_double(boundingBox.minY) - 1;
@@ -610,6 +578,8 @@ public class EntityFairy extends EntityAnimal {
 	@Override
 	public void updateEntityActionState() {
 		super.updateEntityActionState();
+		
+		// _dump_();
 
 		if (wasFishing) {
 			wasFishing = false;
@@ -752,6 +722,8 @@ public class EntityFairy extends EntityAnimal {
 		setCrying(getCryTime() > 0);
 		setAngry(entityToAttack != null);
 		setCanHeal(healTime <= 0);
+		
+		// _dump_();
 	}// end: updateEntityActionState
 
 	/**
@@ -1740,7 +1712,7 @@ public class EntityFairy extends EntityAnimal {
 		} else {
 			byte0 &= ~( 1 << i );
 		}
-		dataWatcher.updateObject(B_FLAGS2, Byte.valueOf(byte0));
+		dataWatcher.updateObject(B_FLAGS, Byte.valueOf(byte0));
 	}
 
 	public static final int	FLAG_ARM_SWING	= 0;
@@ -1823,7 +1795,7 @@ public class EntityFairy extends EntityAnimal {
 	public static final int	MAX_NAMEIDX	= 15;
 
 	public int getSkin() {
-		return dataWatcher.getWatchableObjectByte(B_FLAGS) & 0x03;
+		return dataWatcher.getWatchableObjectByte(B_TYPE) & 0x03;
 	}
 
 	protected void setSkin(int skin) {
@@ -1833,15 +1805,15 @@ public class EntityFairy extends EntityAnimal {
 			skin = MAX_SKIN;
 		}
 
-		byte byte0 = dataWatcher.getWatchableObjectByte(B_FLAGS);
+		byte byte0 = dataWatcher.getWatchableObjectByte(B_TYPE);
 		byte0 = (byte) ( byte0 & 0xfc );
 		byte0 = (byte)(byte0 | (byte)skin);
 
-		dataWatcher.updateObject(B_FLAGS, Byte.valueOf(byte0));
+		dataWatcher.updateObject(B_TYPE, Byte.valueOf(byte0));
 	}
 
 	public int getJob() {
-		return ( dataWatcher.getWatchableObjectByte(B_FLAGS) >> 2 ) & 0x03;
+		return ( dataWatcher.getWatchableObjectByte(B_TYPE) >> 2 ) & 0x03;
 	}
 
 	public void setJob(int job) {
@@ -1853,12 +1825,12 @@ public class EntityFairy extends EntityAnimal {
 
 		FairyFactions.LOGGER.info("setJob: " + this + " -> " + job);
 
-		byte byte0 = dataWatcher.getWatchableObjectByte(B_FLAGS);
+		byte byte0 = dataWatcher.getWatchableObjectByte(B_TYPE);
 		byte0 = (byte) ( byte0 & 0xf3 );
 		//byte0 |= (byte) job << 2;
 		byte0 = (byte)(byte0 | (byte)job << 2);
 
-		dataWatcher.updateObject(B_FLAGS, Byte.valueOf(byte0));
+		dataWatcher.updateObject(B_TYPE, Byte.valueOf(byte0));
 	}
 
 	protected static final int	NJOB_NORMAL	= 0;
@@ -1893,7 +1865,7 @@ public class EntityFairy extends EntityAnimal {
 	}
 
 	protected int getFaction() {
-		return ( dataWatcher.getWatchableObjectByte(B_FLAGS) >> 4 ) & 0x0f;
+		return ( dataWatcher.getWatchableObjectByte(B_TYPE) >> 4 ) & 0x0f;
 	}
 
 	public void setFaction(int faction) {
@@ -1903,11 +1875,11 @@ public class EntityFairy extends EntityAnimal {
 			faction = MAX_FACTION;
 		}
 
-		byte byte0 = dataWatcher.getWatchableObjectByte(B_FLAGS);
+		byte byte0 = dataWatcher.getWatchableObjectByte(B_TYPE);
 		byte0 = (byte) ( byte0 & 0x0f );
 		byte0 |= (byte) faction << 4;
 
-		dataWatcher.updateObject(B_FLAGS, Byte.valueOf(byte0));
+		dataWatcher.updateObject(B_TYPE, Byte.valueOf(byte0));
 	}
 
 	// ---------- name ----------
@@ -1989,7 +1961,7 @@ public class EntityFairy extends EntityAnimal {
 
 			return woosh;
 		} else {
-			return "NULL";
+			return "<wild>";
 		}
 	}
 
@@ -2138,9 +2110,10 @@ public class EntityFairy extends EntityAnimal {
 			"munch", "star", "bird", "wing", "shine", "snap", "kins", "bee",
 			"chime", "button", "bun", "heart", "boo" };
 
-	private static final String	faction_colors[]	= { "�0", "�1", "�2", "�3",
-			"�4", "�5", "�6", "�7", "�8", "�9", "�a", "�b", "�c", "�d", "�e",
-			"�f" };
+	private static final String	faction_colors[]	= { "��0", "��1", "��2",
+			"��3", "��4", "��5", "��6", "��7", "��8", "��9", "��a",
+			"��b", "��c", "��d", "��e", "��f" };
+	  
 
 	private static final String	faction_names[]		= { "no queen",
 			"<Aviary Army>", "<Bantam Brawlers>", "<Charging Cherubs>",
