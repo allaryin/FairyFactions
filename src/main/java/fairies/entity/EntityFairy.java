@@ -1955,8 +1955,8 @@ public class EntityFairy extends EntityAnimal {
 			}
 
 			if (isRuler(FairyFactions.proxy.getCurrentPlayer())) {
-				woosh = ( posted() ? "�a" : "�c" ) + "@�f" + woosh
-						+ ( posted() ? "�a" : "�c" ) + "@";
+				woosh = ( posted() ? "§a" : "§c" ) + "@§f" + woosh
+						+ ( posted() ? "§a" : "§c" ) + "@";
 			}
 
 			return woosh;
@@ -2110,9 +2110,9 @@ public class EntityFairy extends EntityAnimal {
 			"munch", "star", "bird", "wing", "shine", "snap", "kins", "bee",
 			"chime", "button", "bun", "heart", "boo" };
 
-	private static final String	faction_colors[]	= { "��0", "��1", "��2",
-			"��3", "��4", "��5", "��6", "��7", "��8", "��9", "��a",
-			"��b", "��c", "��d", "��e", "��f" };
+	private static final String	faction_colors[]	= { "§0", "§1", "§2",
+			"§3", "§4", "§5", "§6", "§7", "§8", "§9", "§a",
+			"§b", "§c", "§d", "§e", "§f" };
 	  
 
 	private static final String	faction_names[]		= { "no queen",
@@ -2559,7 +2559,7 @@ public class EntityFairy extends EntityAnimal {
 				}
 
 				FairyFactions.proxy.sendChat((EntityPlayerMP) ruler,
-						"* �9" + s);
+						"* §9" + s);
 			}
 		}
 
@@ -2613,7 +2613,7 @@ public class EntityFairy extends EntityAnimal {
 		}
 
 		if (player instanceof EntityPlayerMP) {
-			FairyFactions.proxy.sendChat((EntityPlayerMP) player, "* �9" + s);
+			FairyFactions.proxy.sendChat((EntityPlayerMP) player, "* §9" + s);
 		}
 
 		FairyFactions.LOGGER.info("tameMe: " + rulerName() + ": " + this);
@@ -2703,8 +2703,8 @@ public class EntityFairy extends EntityAnimal {
 				s += " kicked the bucket.";
 			}
 
-			// mod_FairyMod.fairyMod.sendDisband(player, "* �c" + s);
-			FairyFactions.proxy.sendChat((EntityPlayerMP) ruler, "* �c" + s);
+			// mod_FairyMod.fairyMod.sendDisband(player, "* §c" + s);
+			FairyFactions.proxy.sendChat((EntityPlayerMP) ruler, "* §c" + s);
 		}
 	}
 
@@ -3006,7 +3006,7 @@ public class EntityFairy extends EntityAnimal {
 		}
 
 		if (player instanceof EntityPlayerMP) {
-			FairyFactions.proxy.sendChat((EntityPlayerMP) player, "* �9" + s);
+			FairyFactions.proxy.sendChat((EntityPlayerMP) player, "* §9" + s);
 		}
 	}
 
