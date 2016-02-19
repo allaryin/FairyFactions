@@ -1503,9 +1503,11 @@ public class EntityFairy extends EntityAnimal {
 	private int postedCount;		// flag for counting posted checks
 	// The AI method which handles post-related activities.
 	private void handlePosted(boolean flag) {
+		/*
 		if( tamed() ) {
 			System.out.println("handlePosted("+flag+") - "+postedCount+" - "+this);
 		}
+		*/
 		if (!tamed() || getFaction() > 0 /*|| postedCount <= ( posted() ? 2 : 5 ) */ ) {
 			++postedCount;
 			return; // Avoid processing too often or when not necessary.
