@@ -76,23 +76,20 @@ public class CommonProxy {
 	}
 	
 	// Packet that handles fairy mounting.
-	public void sendFairyMount(final Entity entity1, final Entity entity2) {
-		Entity rider = entity1;
-		Entity vehicle = entity2;
-
-		if (entity1.ridingEntity != null && entity1.ridingEntity == entity2) {
-			vehicle = null;
+	public void sendFairyMount(final Entity rider, final Entity vehicle) {
+		final Entity newVehicle;
+		if (rider.ridingEntity != null && rider.ridingEntity == vehicle) {
+			newVehicle = null;
+		} else {
+			newVehicle = vehicle;
 		}
-
-		S1BPacketEntityAttach packet = new S1BPacketEntityAttach(0, entity1, entity2);
+			
+		final S1BPacketEntityAttach packet = new S1BPacketEntityAttach(0, rider, newVehicle);
 		sendToAllPlayers(packet);
 
-		/*
-		 * TODO: deal with fishhook case :)
-		if (!( entity1 instanceof FRY_EntityFishHook )) {
-			entity1.mountEntity(entity2);
+		if (!(rider instanceof FairyEntityFishHook)) {
+			rider.mountEntity(newVehicle);
 		}
-		*/
 	}
 	
 	// Packet that handles forced fairy despawning.
