@@ -109,7 +109,6 @@ public class EntityFairy extends EntityAnimal {
 	private boolean				flag;										// flagged for what, precisely?
 	private boolean				createGroup;
 	private int					listActions;
-	public int					postedCount;
 	public int					witherTime;
 	private ItemStack			tempItem;
 	private boolean				isSwinging;
@@ -1501,10 +1500,10 @@ public class EntityFairy extends EntityAnimal {
 		}
 	}
 
+	public int postedCount;		// flag for counting posted checks
 	// The AI method which handles post-related activities.
-	private void handlePosted(boolean b) {
-		if (!tamed() || getFaction() > 0
-				|| postedCount <= ( posted() ? 2 : 5 )) {
+	private void handlePosted(boolean flag) {
+		if (!tamed() || getFaction() > 0 || postedCount <= ( posted() ? 2 : 5 )) {
 			postedCount++;
 			return; // Avoid processing too often or when not necessary.
 		}
@@ -1574,13 +1573,10 @@ public class EntityFairy extends EntityAnimal {
 					if (y >= 0 && y < worldObj.getHeight()) {
 						final Block block = worldObj.getBlock(x, y, z);
 
-						if (block == Blocks.standing_sign
-								|| block == Blocks.wall_sign) {
-							TileEntity tileentity = worldObj.getTileEntity(x, y,
-									z);
+						if (block == Blocks.standing_sign || block == Blocks.wall_sign) {
+							TileEntity tileentity = worldObj.getTileEntity(x, y, z);
 
-							if (tileentity != null
-									&& tileentity instanceof TileEntitySign) {
+							if (tileentity != null && tileentity instanceof TileEntitySign) {
 								TileEntitySign sign = (TileEntitySign) tileentity;
 
 								if (mySign(sign)) {
@@ -2344,14 +2340,14 @@ public class EntityFairy extends EntityAnimal {
 	@Override
 	public boolean interact(EntityPlayer player) {
 		if (!worldObj.isRemote
-				&& ( ridingEntity == null || ridingEntity == player
-						|| ridingEntity instanceof EntityMinecart )) {
+				&& ( ridingEntity == null || ridingEntity == player || ridingEntity instanceof EntityMinecart )) {
 			ItemStack stack = player.inventory.getCurrentItem();
 
 			if (isRuler(player)) {
 				if (stack != null && getHealth() < getMaxHealth()
 						&& acceptableFoods(stack.getItem())
 						&& stack.stackSize > 0) {
+					// right-clicking sugar or glistering melons will heal
 					stack.stackSize--;
 
 					if (stack.stackSize <= 0) {
@@ -2375,11 +2371,13 @@ public class EntityFairy extends EntityAnimal {
 					return true;
 				} else if (stack != null && haircutItem(stack.getItem())
 						&& stack.stackSize > 0 && !rogue()) {
+					// right-clicking with shears will toggle haircut on non-rogues
 					setHairType(!hairType());
 					return true;
 				} else if (stack != null && ridingEntity == null && !isSitting()
 						&& vileSubstance(stack.getItem())
 						&& stack.stackSize > 0) {
+					// right-clicking with something nasty will untame
 					dropItem(stack.getItem(), 1);
 					stack.stackSize--;
 
@@ -2392,6 +2390,7 @@ public class EntityFairy extends EntityAnimal {
 					return true;
 				} else if (onGround && stack != null
 						&& namingItem(stack.getItem()) && stack.stackSize > 0) {
+					// right-clicking with paper will open the rename gui
 					stack.stackSize--;
 
 					if (stack.stackSize <= 0) {
@@ -2410,16 +2409,20 @@ public class EntityFairy extends EntityAnimal {
 						if (stack != null
 								&& realFreshOysterBars(stack.getItem())
 								&& stack.stackSize > 0) {
+							// right-clicking magma cream on seated fairy invokes "hydra"
 							hydraFairy();
 						} else {
+							// right-clicking a seated fairy makes it stand up
 							setSitting(false);
 						}
 
 						return true;
 					} else if (player.isSneaking()) {
 						if (flymode() || !onGround) {
+							// shift-right-clicking while flying aborts flight
 							flyTime = 0;
 						} else {
+							// shift-right-clicking otherwise makes fairy sit down
 							setSitting(true);
 							isJumping = false;
 							setPathToEntity((PathEntity) null);
@@ -2428,7 +2431,8 @@ public class EntityFairy extends EntityAnimal {
 						}
 					} else if (stack == null
 							|| !snowballItem(stack.getItem())) {
-						mountEntity(player);
+						// otherwise, right-clicking wears a fairy hat
+						FairyFactions.proxy.sendFairyMount(this, player);
 						setFlymode(true);
 						flyTime = 200;
 						setCanFlap(true);
@@ -2631,10 +2635,7 @@ public class EntityFairy extends EntityAnimal {
 				if (fairy != this && fairy.getHealth() > 0 && sameTeam(fairy)
 						&& ( fairy.ruler == null || fairy.ruler == this )) {
 					if (fairy.ridingEntity != null) {
-						// TODO: send mount call
-						fairy.mountEntity(fairy.ridingEntity);
-						// mod_FairyMod.fairyMod.sendFairyMount(fairy,
-						// fairy.ridingEntity);
+						FairyFactions.proxy.sendFairyMount(fairy, fairy.ridingEntity);
 					}
 
 					fairy.setTarget((Entity) null);
@@ -2781,7 +2782,7 @@ public class EntityFairy extends EntityAnimal {
 					&& !( entity instanceof EntityFairy
 							|| entity instanceof EntityFlying )) {
 				// Scout's Totally Leet Air Attack.
-				mountEntity(entity);
+				FairyFactions.proxy.sendFairyMount(this, entity);
 				setFlymode(true);
 				flyTime = 200;
 				setCanFlap(true);
@@ -2790,7 +2791,7 @@ public class EntityFairy extends EntityAnimal {
 				if (scout() && ridingEntity != null && entity != null
 						&& entity == ridingEntity) {
 					// The finish of its air attack.
-					mountEntity(entity);
+					FairyFactions.proxy.sendFairyMount(this, entity);
 					attackTime = 35;
 				}
 
@@ -2890,11 +2891,11 @@ public class EntityFairy extends EntityAnimal {
 			}
 
 			if (ridingEntity != null && rand.nextInt(2) == 0) {
-				mountEntity(ridingEntity);
+				FairyFactions.proxy.sendFairyMount(this, ridingEntity);
 			}
 		} else if (flag) {
 			if (ridingEntity != null) {
-				mountEntity(ridingEntity);
+				FairyFactions.proxy.sendFairyMount(this, ridingEntity);
 			}
 
 			if (queen() && !tamed()) {
