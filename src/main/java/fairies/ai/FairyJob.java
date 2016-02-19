@@ -174,20 +174,20 @@ public class FairyJob {
 							final TileEntityChest chest = (TileEntityChest) tent;
 
 							if ( goodies != null && collectGoodies( chest, world ) ) {
-								fairy.postedCount = 2;
+								// fairy.postedCount = 2;
 								return;
 							}
 
 							for ( int p = 0; p < chest.getSizeInventory(); p++ ) {
 								if ( checkChestItem( chest.getStackInSlot( p ), x, y, z, world ) ) {
 									cleanSlot( chest, p );
-									fairy.postedCount = 2;
+									// fairy.postedCount = 2;
 									return;
 								}
 							}
 
 							if ( miscActions( chest, x, y, z, world ) ) {
-								fairy.postedCount = 2;
+								// fairy.postedCount = 2;
 								return;
 							}
 						}
@@ -221,7 +221,7 @@ public class FairyJob {
 								if ( stack != null && isFishingItem( stack.getItem() )
 										&& onFishingUse( stack, x, y, z, world ) ) {
 									cleanSlot( chest, p );
-									fairy.postedCount = 2;
+									// fairy.postedCount = 2;
 									return;
 								}
 							}
