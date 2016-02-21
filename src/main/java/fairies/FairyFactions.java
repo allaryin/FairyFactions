@@ -27,7 +27,7 @@ import net.minecraftforge.common.config.Configuration;
 
 @Mod(modid = Version.MOD_ID, version = Version.VERSION)
 public class FairyFactions {
-	
+
 	@Instance
 	public static FairyFactions		INSTANCE;
 
@@ -41,10 +41,21 @@ public class FairyFactions {
 
 	private Spawner					fairySpawner;
 
+    public static int SPAWN_FACTION_MIN_SIZE = 8;
+    public static int SPAWN_FACTION_MAX_SIZE = 10;
+
 	@EventHandler
 	public void preInit(FMLPreInitializationEvent event) {
 		BaseDir = new File(event.getModConfigurationDirectory(), Version.MOD_ID);
 		Config = new Configuration(event.getSuggestedConfigurationFile());
+        Config.load();
+
+        SPAWN_FACTION_MAX_SIZE = Config.getInt("max", "spawning", SPAWN_FACTION_MAX_SIZE,
+                0, 30, "maximum fairy spawn group size");
+        SPAWN_FACTION_MIN_SIZE = Config.getInt("min", "spawning", SPAWN_FACTION_MIN_SIZE,
+                0, 30, "minimum fairy spawn group size");
+
+        Config.save();
 
 		if (!BaseDir.exists())
 			BaseDir.mkdir();
@@ -67,7 +78,7 @@ public class FairyFactions {
 		FMLCommonHandler.instance().bus().register(this);
 		LOGGER.debug("Registered events");
 		*/
-		
+
 		proxy.initGUI();
 		LOGGER.debug("Registered GUI");
 
@@ -82,20 +93,19 @@ public class FairyFactions {
 		fairySpawner.setMaxAnimals(maxNum);
 		fairySpawner.AddCustomSpawn(EntityFairy.class, freqNum, EnumCreatureType.creature);
 		FMLCommonHandler.instance().bus().register(fairySpawner);
-		
-		// TODO: register egg
-		// TODO: register entity localization
+
+        // TODO: register entity localization
 		LOGGER.debug("Spawner is a modified version of CustomSpawner, created by DrZhark.");
 
 		proxy.postInit();
 	}
-	
+
 	/**
 	 * Find a fairy in the world by entity id. This method was in the base class
 	 * in the original mod, and I can't find a better place to put it for now...
-	 * 
+	 *
 	 * @param fairyID
-	 * @return The fairy in question, null if not found. 
+	 * @return The fairy in question, null if not found.
 	 */
 	public static EntityFairy getFairy(int fairyID) {
 		for( WorldServer dim : DimensionManager.getWorlds() ) {
@@ -111,5 +121,5 @@ public class FairyFactions {
 		}
 		return null;
 	}
-	
+
 }
