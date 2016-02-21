@@ -12,6 +12,7 @@ import net.minecraft.entity.passive.EntityAnimal;
 import net.minecraft.entity.passive.EntitySheep;
 import net.minecraft.init.Blocks;
 import net.minecraft.init.Items;
+import net.minecraft.inventory.IInventory;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemDye;
 import net.minecraft.item.ItemStack;
@@ -179,7 +180,7 @@ public class FairyJob {
 							}
 
 							for ( int p = 0; p < chest.getSizeInventory(); p++ ) {
-								if ( checkChestItem( chest.getStackInSlot( p ), x, y, z, world ) ) {
+								if ( checkChestItem( chest, p, x, y, z, world ) ) {
 									cleanSlot( chest, p );
 									// fairy.postedCount = 2;
 									return;
@@ -233,54 +234,70 @@ public class FairyJob {
 	}
 
 	// Actions related to specific items.
-	private boolean checkChestItem( final ItemStack stack, final int x, final int y, final int z, final World world ) {
-		if ( stack == null || stack.stackSize == 0 ) {
+	private boolean checkChestItem(IInventory chest, int slot, final int x, final int y, final int z, final World world ) {
+		ItemStack stack = chest.decrStackSize(slot, 1);
+		try {
+			if (stack == null || stack.stackSize == 0) {
+				return false;
+			}
+
+			// Farming
+			if (isHoeItem(stack.getItem()) && onHoeUse(stack, x, y - 1, z, world)) {
+				return true;
+			}
+
+			if (isSeedItem(stack.getItem()) && onSeedUse(stack, x, y, z, world)) {
+				return true;
+			}
+
+			if (isBonemealItem(stack.getItem(), stack.getItemDamage()) && onBonemealUse(stack, x, y - 1, z, world)) {
+				return true;
+			}
+
+			// Foresting
+			if (isAxeItem(stack.getItem()) && onAxeUse(stack, x, y, z, world)) {
+				return true;
+			}
+			// TODO, I think the seed planting code should take care of this now?
+			if ( isSaplingBlock( stack.getItem() ) && onSaplingUse( stack, x, y - 1, z, world ) ) {
+				return true;
+			}
+
+			// Breeding
+			if (!triedBreeding && isBreedingItem(stack.getItem()) && onBreedingUse(stack, world)) {
+				return true;
+			}
+
+			// Breeding
+			if (!triedShearing && isShearingItem(stack.getItem()) && onShearingUse(stack, world)) {
+				return true;
+			}
+
+			// Fishing
+			if (isFishingItem(stack.getItem()) && onFishingUse(stack, x, y, z, world)) {
+				return true;
+			}
+
+			// Snack
+			if (fairy.acceptableFoods(stack.getItem()) && snackTime(stack)) {
+				return true;
+			}
+
 			return false;
+		} finally {
+			// return the remainder to the chest.
+			if (stack != null && stack.stackSize > 0) {
+				ItemStack chestStack = chest.getStackInSlot(slot);
+				if (chestStack == null) {
+					chest.setInventorySlotContents(slot, stack);
+				}
+				else {
+					assert stack.getItem() == chestStack.getItem(); // avoid duplication glitch?
+					assert stack.stackSize + chestStack.stackSize < chestStack.getMaxStackSize();
+					chestStack.stackSize += stack.stackSize;
+				}
+			}
 		}
-
-		// Farming
-		if ( isHoeItem( stack.getItem() ) && onHoeUse( stack, x, y - 1, z, world ) ) {
-			return true;
-		}
-
-		if ( isSeedItem( stack.getItem() ) && onSeedUse( stack, x, y - 1, z, world ) ) {
-			return true;
-		}
-
-		if ( isBonemealItem( stack.getItem(), stack.getItemDamage() ) && onBonemealUse( stack, x, y - 1, z, world ) ) {
-			return true;
-		}
-
-		// Foresting
-		if ( isAxeItem( stack.getItem() ) && onAxeUse( stack, x, y, z, world ) ) {
-			return true;
-		}
-
-		if ( isSaplingBlock( stack.getItem() ) && onSaplingUse( stack, x, y - 1, z, world ) ) {
-			return true;
-		}
-
-		// Breeding
-		if ( !triedBreeding && isBreedingItem( stack.getItem() ) && onBreedingUse( stack, world ) ) {
-			return true;
-		}
-
-		// Breeding
-		if ( !triedShearing && isShearingItem( stack.getItem() ) && onShearingUse( stack, world ) ) {
-			return true;
-		}
-
-		// Fishing
-		if ( isFishingItem( stack.getItem() ) && onFishingUse( stack, x, y, z, world ) ) {
-			return true;
-		}
-
-		// Snack
-		if ( fairy.acceptableFoods( stack.getItem() ) && snackTime( stack ) ) {
-			return true;
-		}
-
-		return false;
 	}
 
 	// Actions that only require a chest.
@@ -338,25 +355,25 @@ public class FairyJob {
 	private boolean onSeedUse( final ItemStack stack, int x, final int y, int z, final World world ) {
 
 		/**
-		 * TODO: Actually plant seeds correctly, we have interfaces for this
-		 * now. This has the benefit of actually planting non-wheat seeds too...
-		 * 
 		 * This can be a bit messy, so will actually defer cleanup until after release.
 		 */
+		IPlantable plantable = (IPlantable) stack.getItem();
+		final Block block = plantable.getPlant(world, x, y, z);
+		//plantable.getPlant(world, x, y, z).canPlaceBlockAt()
 
 		for ( int a = 0; a < 3; a++ ) {
-			final Block i = world.getBlock( x, y, z );
+			// final Block i = world.getBlock( x, y, z );
 
-			if ( world.isAirBlock( x, y + 1, z ) && i == Blocks.farmland ) {
-				final Block block = Blocks.wheat;
+			if ( block.canPlaceBlockAt(world, x, y, z) ) {
+
 				world.playSoundEffect( x + 0.5F, y + 0.5F, z + 0.5F, block.stepSound.getBreakSound(),
 						(block.stepSound.getVolume() + 1.0F) / 2.0F, block.stepSound.getPitch() * 0.8F );
-				world.setBlock( x, y + 1, z, block );
+				world.setBlock( x, y, z, block );
 				stack.stackSize--;
 				
 				fairy.armSwing( !fairy.didSwing );
 				fairy.setTempItem( stack.getItem() );
-				fairy.attackTime = 1;
+				fairy.attackTime = 30;
 
 				if ( fairy.flymode() && fairy.getFlyTime() > 0 ) {
 					fairy.setFlyTime( 0 );
@@ -806,8 +823,9 @@ public class FairyJob {
 	}
 
 	// Is the item a wheat seed?
+	// TODO: read allowed seeds from config file.
 	private boolean isSeedItem( final Item item ) {
-		return item == Items.wheat_seeds;
+		return item instanceof IPlantable;
 	}
 
 	private boolean isBonemealItem( final Item item, final int j ) {
