@@ -2347,6 +2347,8 @@ public class EntityFairy extends EntityAnimal {
 		if (!worldObj.isRemote
 				&& ( ridingEntity == null || ridingEntity == player || ridingEntity instanceof EntityMinecart )) {
 			ItemStack stack = player.inventory.getCurrentItem();
+			// TODO: spawn eggs aren't producing queens.  Add a EntityAgeable style interaction
+			// to get them, the way you can spawn baby cows...
 
 			if (isRuler(player)) {
 				if (stack != null && getHealth() < getMaxHealth()
