@@ -286,8 +286,9 @@ public class EntityFairy extends EntityAnimal {
 			int j = MathHelper.floor_double(boundingBox.minY) - 1;
 			int k = MathHelper.floor_double(posZ);
 
-			// TODO: move group sizes into config
-			final FairyGroupGenerator group = new FairyGroupGenerator(8, 10,
+			final FairyGroupGenerator group = new FairyGroupGenerator(
+					FairyFactions.SPAWN_FACTION_MIN_SIZE,
+					FairyFactions.SPAWN_FACTION_MAX_SIZE,
 					getFaction());
 			if (group.generate(worldObj, rand, i, j, k)) {
 				// This is good.
@@ -2347,6 +2348,8 @@ public class EntityFairy extends EntityAnimal {
 		if (!worldObj.isRemote
 				&& ( ridingEntity == null || ridingEntity == player || ridingEntity instanceof EntityMinecart )) {
 			ItemStack stack = player.inventory.getCurrentItem();
+			// TODO: spawn eggs aren't producing queens.  Add a EntityAgeable style interaction
+			// to get them, the way you can spawn baby cows...
 
 			if (isRuler(player)) {
 				if (stack != null && getHealth() < getMaxHealth()
