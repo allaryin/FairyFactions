@@ -9,6 +9,7 @@ import org.apache.logging.log4j.Logger;
 import cpw.mods.fml.relauncher.ReflectionHelper;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
+import fairies.FairyConfig;
 import fairies.FairyFactions;
 import fairies.Version;
 import fairies.ai.FairyJob;
@@ -287,8 +288,8 @@ public class EntityFairy extends EntityAnimal {
 			int k = MathHelper.floor_double(posZ);
 
 			final FairyGroupGenerator group = new FairyGroupGenerator(
-					FairyFactions.SPAWN_FACTION_MIN_SIZE,
-					FairyFactions.SPAWN_FACTION_MAX_SIZE,
+					FairyConfig.SPAWN_FACTION_MIN_SIZE,
+					FairyConfig.SPAWN_FACTION_MAX_SIZE,
 					getFaction());
 			if (group.generate(worldObj, rand, i, j, k)) {
 				// This is good.
@@ -1578,7 +1579,6 @@ public class EntityFairy extends EntityAnimal {
 
 					if (y >= 0 && y < worldObj.getHeight()) {
 						final Block block = worldObj.getBlock(x, y, z);
-
 						if (block == Blocks.standing_sign || block == Blocks.wall_sign) {
 							TileEntity tileentity = worldObj.getTileEntity(x, y, z);
 

@@ -37,25 +37,14 @@ public class FairyFactions {
 	public static final Logger		LOGGER	= LogManager.getFormatterLogger(Version.MOD_ID);
 
 	private File					BaseDir;
-	private static Configuration	Config;
+	private static FairyConfig		Config;
 
 	private Spawner					fairySpawner;
-
-    public static int SPAWN_FACTION_MIN_SIZE = 8;
-    public static int SPAWN_FACTION_MAX_SIZE = 10;
 
 	@EventHandler
 	public void preInit(FMLPreInitializationEvent event) {
 		BaseDir = new File(event.getModConfigurationDirectory(), Version.MOD_ID);
-		Config = new Configuration(event.getSuggestedConfigurationFile());
-        Config.load();
-
-        SPAWN_FACTION_MAX_SIZE = Config.getInt("max", "spawning", SPAWN_FACTION_MAX_SIZE,
-                0, 30, "maximum fairy spawn group size");
-        SPAWN_FACTION_MIN_SIZE = Config.getInt("min", "spawning", SPAWN_FACTION_MIN_SIZE,
-                0, 30, "minimum fairy spawn group size");
-
-        Config.save();
+		Config = new FairyConfig(event.getSuggestedConfigurationFile());
 
 		if (!BaseDir.exists())
 			BaseDir.mkdir();
