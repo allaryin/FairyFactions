@@ -2541,21 +2541,21 @@ public class EntityFairy extends EntityAnimal {
 				int i = rand.nextInt(6);
 
 				if (queen() && i < 3) {
-					s += "was greatly offended by your offering.";
+					s += Loc.DISBAND_QUEEN_1.get();
 				} else if (queen()) {
-					s += "called you a 'dirty peasant' and stormed out.";
+					s += Loc.DISBAND_QUEEN_2.get();
 				} else if (i == 0) {
-					s += "threw it on the ground and had a fit.";
+					s += Loc.DISBAND_OTHER_1.get();
 				} else if (i == 1) {
-					s += "called you a 'poopy-head' and ran away.";
+					s += Loc.DISBAND_OTHER_2.get();
 				} else if (i == 2) {
-					s += "would rather die than eat that gross thing.";
+					s += Loc.DISBAND_OTHER_3.get();
 				} else if (i == 3) {
-					s += "decided not to be your friend anymore.";
+					s += Loc.DISBAND_OTHER_4.get();
 				} else if (i == 4) {
-					s += "gave you a dirty look and headed off.";
+					s += Loc.DISBAND_OTHER_5.get();
 				} else {
-					s += "says that's the grossest thing she's ever seen.";
+					s += Loc.DISBAND_OTHER_6.get();
 				}
 
 				FairyFactions.proxy.sendChat((EntityPlayerMP) ruler,

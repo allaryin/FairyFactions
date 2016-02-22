@@ -23,7 +23,16 @@ public enum Loc {
 	FACTION_12("text.faction.12.name"),
 	FACTION_13("text.faction.13.name"),
 	FACTION_14("text.faction.14.name"),
-	FACTION_15("text.faction.15.name");
+	FACTION_15("text.faction.15.name"),
+	
+	DISBAND_QUEEN_1("text.disband.queen.1.message"),
+	DISBAND_QUEEN_2("text.disband.queen.2.message"),
+	DISBAND_OTHER_1("text.disband.other.1.message"),
+	DISBAND_OTHER_2("text.disband.other.2.message"),
+	DISBAND_OTHER_3("text.disband.other.3.message"),
+	DISBAND_OTHER_4("text.disband.other.4.message"),
+	DISBAND_OTHER_5("text.disband.other.5.message"),
+	DISBAND_OTHER_6("text.disband.other.6.message");
 	
 	public final String key;
 	private Loc(String key) {
