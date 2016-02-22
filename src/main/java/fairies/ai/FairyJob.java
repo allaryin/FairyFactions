@@ -565,8 +565,19 @@ public class FairyJob {
 		if ( sheep == null ) {
 			return false;
 		}
+		for (Object one_sheep_raw : sheep) {
+			EntitySheep one_sheep = (EntitySheep) one_sheep_raw;
+			if (!one_sheep.getSheared()) {
+				fairy.armSwing( !fairy.didSwing );
+				fairy.setTempItem( stack.getItem() );
+				stack.damageItem( 1, fairy );
+				fairy.attackTime = 30;
 
-		// TODO: shear a sheep correctly
+				one_sheep.entityDropItem(new ItemStack(Item.getItemFromBlock(Blocks.wool), 1, one_sheep.getFleeceColor()), 0.0F);
+				one_sheep.setSheared(true);
+				break; // shear one at a time... looks better.
+			}
+		}
 
 		return false;
 	}
