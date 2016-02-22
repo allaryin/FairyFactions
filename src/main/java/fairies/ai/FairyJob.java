@@ -6,6 +6,8 @@ import java.util.List;
 import cpw.mods.fml.relauncher.ReflectionHelper;
 import fairies.entity.EntityFairy;
 import net.minecraft.block.Block;
+import net.minecraft.block.BlockCrops;
+import net.minecraft.block.BlockReed;
 import net.minecraft.entity.EntityCreature;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.passive.EntityAnimal;
@@ -357,18 +359,23 @@ public class FairyJob {
 		/**
 		 * This can be a bit messy, so will actually defer cleanup until after release.
 		 */
-		IPlantable plantable = (IPlantable) stack.getItem();
+		IPlantable plantable;
+		if (stack.getItem() instanceof IPlantable) {
+			plantable = (IPlantable) stack.getItem();
+		} else if (stack.getItem() == Items.reeds) {
+			plantable = (BlockReed) Blocks.reeds;
+		} else {
+			throw new NullPointerException("stack doesn't look plantable to me.");
+		}
 		final Block block = plantable.getPlant(world, x, y, z);
-		//plantable.getPlant(world, x, y, z).canPlaceBlockAt()
 
 		for ( int a = 0; a < 3; a++ ) {
-			// final Block i = world.getBlock( x, y, z );
 
 			if ( block.canPlaceBlockAt(world, x, y, z) ) {
 
 				world.playSoundEffect( x + 0.5F, y + 0.5F, z + 0.5F, block.stepSound.getBreakSound(),
 						(block.stepSound.getVolume() + 1.0F) / 2.0F, block.stepSound.getPitch() * 0.8F );
-				world.setBlock( x, y, z, block );
+				world.setBlock( x, y, z, block);
 				stack.stackSize--;
 				
 				fairy.armSwing( !fairy.didSwing );
@@ -661,6 +668,9 @@ public class FairyJob {
 	}
 
 	// Trim tall grass to look for seeds.
+	/* TODO: I think we can do somewhat better than this, something like Block::harvestBlock for mobs?
+	 * check inventory for best tool?  can earn harvest?  Can mine ores?
+	 */
 	private boolean cutTallGrass( int x, final int y, int z, final World world ) {
 		final int m = x;
 		final int n = z;
@@ -669,16 +679,19 @@ public class FairyJob {
 			x = m + (a / 3) - 1;
 			z = n + (a % 3) - 1;
 			final Block i = world.getBlock( x, y, z );
+			final Block above = world.getBlock(x, y + 1, z);
+			final Block below = world.getBlock(x, y - 1, z);
+
 			final int j = world.getBlockMetadata( x, y, z );
 
-			if ( breakablePlant( i, j ) ) {
+			if ( breakablePlant( i, j, above, below ) ) {
 				final Block block = i;
 				world.playSoundEffect( x + 0.5F, y + 0.5F, z + 0.5F, block.stepSound.getBreakSound(),
 						(block.stepSound.getVolume() + 1.0F) / 2.0F, block.stepSound.getPitch() * 0.8F );
 				block.dropBlockAsItemWithChance( world, x, y, z, j, 1.0F, 0 );
-				world.setBlock( x, y, z, i );
+				world.setBlockToAir(x, y, z);
 				fairy.armSwing( !fairy.didSwing );
-				fairy.attackTime = 1;
+				fairy.attackTime = 30;
 
 				if ( fairy.flymode() && fairy.getFlyTime() > 0 ) {
 					fairy.setFlyTime( 0 );
@@ -817,15 +830,35 @@ public class FairyJob {
 	}
 
 	// Is it a plant that should be broken
-	private boolean breakablePlant( final Block i, final int j ) {
-		return (i == Blocks.wheat && j == 7) || i == Blocks.tallgrass || i == Blocks.yellow_flower
-				|| i == Blocks.red_flower || i == Blocks.snow;
+	private boolean breakablePlant( final Block i, final int j, final Block above, final Block below ) {
+		// we're gonna treat this as everything block that should be punched.
+		// cocoa?... hrmmm
+		// mushrooms: tricky, when there are at least 4 other mushrooms of same type in 9x3x9 area.
+		// snow?  maybe?  if there's plants?  if there's no shovel?
+
+		// crops: that should be wheat, carrots and potatoes, when MD level is 7.
+		return (i instanceof BlockCrops && j == 7)
+				// not a crop, a bush apparently...
+				|| i == Blocks.nether_wart && j == 3
+				// reeds: when above reeds.
+				|| i == Blocks.reeds && below == Blocks.reeds
+				// cactus: break only when above sand and below cactus, to prevent losing drops.
+				|| i == Blocks.cactus && above == Blocks.cactus && below != Blocks.cactus
+				// melons/pumkins... always?
+				|| i == Blocks.melon_block || i == Blocks.pumpkin
+				// tallgrass, which drops seeds!
+				|| i == Blocks.tallgrass
+				// all other doo-dads? ie bushes and tall plants?
+				|| i == Blocks.yellow_flower
+				|| i == Blocks.red_flower
+				|| i == Blocks.snow;
 	}
 
 	// Is the item a wheat seed?
 	// TODO: read allowed seeds from config file.
 	private boolean isSeedItem( final Item item ) {
-		return item instanceof IPlantable;
+		return item instanceof IPlantable
+				|| item == Items.reeds;
 	}
 
 	private boolean isBonemealItem( final Item item, final int j ) {
