@@ -438,14 +438,7 @@ public class FairyJob {
 		for ( int a = 0; a < 9; a++ ) {
 			x = m + ((a / 3) % 9) - 1;
 			z = n + (a % 3) - 1;
-			final Block block = world.getBlock( x, y, z );
-			final int j = world.getBlockMetadata( x, y, z );
-			
-			if ( block == Blocks.log || block == Blocks.log2 ) {
-				world.playSoundEffect( x + 0.5F, y + 0.5F, z + 0.5F, block.stepSound.getBreakSound(),
-						(block.stepSound.getVolume() + 1.0F) / 2.0F, block.stepSound.getPitch() * 0.8F );
-				block.dropBlockAsItemWithChance( world, x, y, z, j, 1.0F, 0 );
-				world.setBlockToAir( x, y, z );
+			if( chopLog( world, x, y, z) ) {
 				fairy.armSwing( !fairy.didSwing );
 				fairy.setTempItem( stack.getItem() );
 				stack.damageItem( 1, fairy );
@@ -466,6 +459,21 @@ public class FairyJob {
 
 		return false;
 	}
+	
+	private boolean chopLog( final World world, final int x, final int y, final int z ) {
+		final Block block = world.getBlock( x, y, z );
+		final int meta = world.getBlockMetadata( x, y, z );
+
+		if ( block == Blocks.log || block == Blocks.log2 ) {
+			world.playSoundEffect( x + 0.5F, y + 0.5F, z + 0.5F, block.stepSound.getBreakSound(),
+					(block.stepSound.getVolume() + 1.0F) / 2.0F, block.stepSound.getPitch() * 0.8F );
+			block.dropBlockAsItemWithChance( world, x, y, z, meta, 1.0F, 0 );
+			world.setBlockToAir( x, y, z );
+			return true;
+		} else {
+			return false;
+		}
+	}
 
 	@Deprecated
 	private void additionalAxeUse( final ItemStack stack, int x, final int y, int z, final World world, int recurse ) {
@@ -479,14 +487,8 @@ public class FairyJob {
 		for ( int a = 0; a < 9; a++ ) {
 			x = m + ((a / 3) % 9) - 1;
 			z = n + (a % 3) - 1;
-			final Block block = world.getBlock( x, y, z );
-			final int j = world.getBlockMetadata( x, y, z );
-
-			if ( block == Blocks.log || block == Blocks.log2 ) {
-				world.playSoundEffect( x + 0.5F, y + 0.5F, z + 0.5F, block.stepSound.getBreakSound(),
-						(block.stepSound.getVolume() + 1.0F) / 2.0F, block.stepSound.getPitch() * 0.8F );
-				block.dropBlockAsItemWithChance( world, x, y, z, j, 1.0F, 0 );
-				world.setBlockToAir( x, y, z );
+			
+			if( chopLog( world, x, y, z ) ) {
 				stack.damageItem( 1, fairy );
 
 				if ( stack.stackSize > 0 && recurse > 0 ) {
