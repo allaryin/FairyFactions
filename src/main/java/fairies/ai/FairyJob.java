@@ -337,7 +337,7 @@ public class FairyJob {
 				fairy.setTempItem( stack.getItem() );
 				stack.damageItem( 1, fairy );
 
-				fairy.attackTime = 1;
+				fairy.attackTime = 30;
 
 				if ( fairy.flymode() && fairy.getFlyTime() > 0 ) {
 					fairy.setFlyTime( 0 );
@@ -411,7 +411,7 @@ public class FairyJob {
 
 				fairy.armSwing( !fairy.didSwing );
 				fairy.setTempItem( stack.getItem() );
-				fairy.attackTime = 1;
+				fairy.attackTime = 30;
 
 				if ( fairy.flymode() && fairy.getFlyTime() > 0 ) {
 					fairy.setFlyTime( 0 );
@@ -438,11 +438,10 @@ public class FairyJob {
 		for ( int a = 0; a < 9; a++ ) {
 			x = m + ((a / 3) % 9) - 1;
 			z = n + (a % 3) - 1;
-			final Block i = world.getBlock( x, y, z );
+			final Block block = world.getBlock( x, y, z );
 			final int j = world.getBlockMetadata( x, y, z );
-
-			if ( i == Blocks.log ) {
-				final Block block = Blocks.log;
+			
+			if ( block == Blocks.log || block == Blocks.log2 ) {
 				world.playSoundEffect( x + 0.5F, y + 0.5F, z + 0.5F, block.stepSound.getBreakSound(),
 						(block.stepSound.getVolume() + 1.0F) / 2.0F, block.stepSound.getPitch() * 0.8F );
 				block.dropBlockAsItemWithChance( world, x, y, z, j, 1.0F, 0 );
@@ -455,7 +454,7 @@ public class FairyJob {
 					additionalAxeUse( stack, x, y + 1, z, world, maxTreeHeight );
 				}
 
-				fairy.attackTime = 1;
+				fairy.attackTime = 30;
 
 				if ( !fairy.flymode() && fairy.getFlyTime() > 0 ) {
 					fairy.setFlyTime( 0 );
@@ -480,11 +479,10 @@ public class FairyJob {
 		for ( int a = 0; a < 9; a++ ) {
 			x = m + ((a / 3) % 9) - 1;
 			z = n + (a % 3) - 1;
-			final Block i = world.getBlock( x, y, z );
+			final Block block = world.getBlock( x, y, z );
 			final int j = world.getBlockMetadata( x, y, z );
 
-			if ( i == Blocks.log ) {
-				final Block block = Blocks.log;
+			if ( block == Blocks.log || block == Blocks.log2 ) {
 				world.playSoundEffect( x + 0.5F, y + 0.5F, z + 0.5F, block.stepSound.getBreakSound(),
 						(block.stepSound.getVolume() + 1.0F) / 2.0F, block.stepSound.getPitch() * 0.8F );
 				block.dropBlockAsItemWithChance( world, x, y, z, j, 1.0F, 0 );
@@ -750,7 +748,7 @@ public class FairyJob {
 				block.dropBlockAsItemWithChance( world, x, y, z, j, 1.0F, 0 );
 				world.setBlock( x, y, z, Blocks.air );
 				fairy.armSwing( !fairy.didSwing );
-				fairy.attackTime = 1;
+				fairy.attackTime = 20;
 				return true;
 			}
 		}
@@ -876,7 +874,6 @@ public class FairyJob {
 				|| i == Blocks.snow;
 	}
 
-	// Is the item a wheat seed?
 	// TODO: read allowed seeds from config file.
 	private boolean isSeedItem( final Item item ) {
 		return item instanceof IPlantable
@@ -894,7 +891,7 @@ public class FairyJob {
 
 	// Is the item a log block?
 	private boolean isLogBlock( final Item item ) {
-		return item == Item.getItemFromBlock( Blocks.log );
+		return item == Item.getItemFromBlock( Blocks.log ) || item == Item.getItemFromBlock( Blocks.log2 );
 	}
 
 	private boolean isShearingItem( final Item item ) {
