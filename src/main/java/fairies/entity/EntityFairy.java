@@ -11,6 +11,7 @@ import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import fairies.FairyConfig;
 import fairies.FairyFactions;
+import fairies.Loc;
 import fairies.Version;
 import fairies.ai.FairyJob;
 import fairies.world.FairyGroupGenerator;
@@ -1805,7 +1806,7 @@ public class EntityFairy extends EntityAnimal {
 			job = MAX_JOB;
 		}
 
-		FairyFactions.LOGGER.info("setJob: " + this + " -> " + job);
+		// FairyFactions.LOGGER.info("setJob: " + this + " -> " + job);
 
 		byte byte0 = dataWatcher.getWatchableObjectByte(B_TYPE);
 		byte0 = (byte) ( byte0 & 0xf3 );
@@ -1908,9 +1909,9 @@ public class EntityFairy extends EntityAnimal {
 
 	public String getQueenName(int prefix, int suffix, int faction) {
 		if (faction < 0 || faction > MAX_FACTION)
-			return "Queen Error-faction";
+			return Loc.QUEEN.get()+" Error-faction";
 
-		return faction_colors[faction] + "Queen "
+		return faction_colors[faction] + Loc.QUEEN.get()+ " "
 				+ getActualName(prefix, suffix);
 	}
 
@@ -1933,7 +1934,7 @@ public class EntityFairy extends EntityAnimal {
 			String woosh = getActualName(getNamePrefix(), getNameSuffix());
 
 			if (queen()) {
-				woosh = "Queen " + woosh;
+				woosh = Loc.QUEEN.get()+ " " + woosh;
 			}
 
 			if (isRuler(FairyFactions.proxy.getCurrentPlayer())) {
@@ -2528,7 +2529,7 @@ public class EntityFairy extends EntityAnimal {
 						+ " ";
 
 				if (queen()) {
-					s = "Queen " + s;
+					s = Loc.QUEEN.get()+ " " + s;
 				}
 
 				int i = rand.nextInt(6);
@@ -2579,7 +2580,7 @@ public class EntityFairy extends EntityAnimal {
 		String f = getActualName(getNamePrefix(), getNameSuffix()) + " ";
 
 		if (queen()) {
-			f = "Queen " + f;
+			f = Loc.QUEEN.get()+ " " + f;
 		}
 
 		String s = f;
@@ -2671,7 +2672,7 @@ public class EntityFairy extends EntityAnimal {
 			String f = getActualName(getNamePrefix(), getNameSuffix());
 
 			if (queen()) {
-				f = "Queen " + f;
+				f = Loc.QUEEN.get()+ " " + f;
 			}
 
 			String s = f;
