@@ -66,8 +66,6 @@ public class EntityFairy extends EntityAnimal {
 	
 	private static final Logger LOG = FairyFactions.LOGGER;
 
-	// TODO: put these into config file
-
 	private boolean				cower;
 	public boolean				didHearts;
 	public boolean				didSwing;
@@ -228,9 +226,9 @@ public class EntityFairy extends EntityAnimal {
 	protected void applyEntityAttributes() {
 		super.applyEntityAttributes();
 		this.getEntityAttribute(SharedMonsterAttributes.maxHealth)
-				.setBaseValue(FairyConfig.DEF_BASE_HEALTH);
+				.setBaseValue(FairyConfig.GENERAL_HEALTH_BASE);
 		this.getEntityAttribute(SharedMonsterAttributes.movementSpeed)
-				.setBaseValue(FairyConfig.DEF_BASE_SPEED);
+				.setBaseValue(FairyConfig.GENERAL_SPEED_BASE);
 		// this.getEntityAttribute(SharedMonsterAttributes.attackDamage).setBaseValue(4.0D);
 		// this.getEntityAttribute(SharedMonsterAttributes.followRange).setBaseValue(10.0D);
 	}
@@ -285,16 +283,16 @@ public class EntityFairy extends EntityAnimal {
 
 		if (scout()) {
 			this.getEntityAttribute(SharedMonsterAttributes.movementSpeed)
-					.setBaseValue(FairyConfig.DEF_SCOUT_SPEED);
+					.setBaseValue(FairyConfig.GENERAL_SPEED_SCOUT);
 		} else {
 			this.getEntityAttribute(SharedMonsterAttributes.movementSpeed)
-					.setBaseValue(FairyConfig.DEF_BASE_SPEED);
+					.setBaseValue(FairyConfig.GENERAL_SPEED_BASE);
 		}
 
 		if (withered()) {
 			IAttributeInstance speed = this
 					.getEntityAttribute(SharedMonsterAttributes.movementSpeed);
-			speed.setBaseValue(speed.getAttributeValue() * FairyConfig.DEF_WITHER_MULT);
+			speed.setBaseValue(speed.getAttributeValue() * FairyConfig.GENERAL_SPEED_WITHER_MULT);
 		}
 
 		if (!worldObj.isRemote) {
@@ -742,7 +740,7 @@ public class EntityFairy extends EntityAnimal {
 			if (j > 4 && j < worldObj.getHeight() - 1 && isAirySpace(i, j, k)
 					&& !isAirySpace(i, j - 1, k)) {
 				PathEntity dogs = worldObj.getEntityPathToXYZ(actor, i, j, k,
-						FairyConfig.DEF_PATH_RANGE, false, false, true, true);
+						FairyConfig.BEHAVIOR_PATH_RANGE, false, false, true, true);
 
 				if (dogs != null) {
 					return dogs;
@@ -778,7 +776,7 @@ public class EntityFairy extends EntityAnimal {
 			if (j > 4 && j < worldObj.getHeight() - 1 && isAirySpace(i, j, k)
 					&& !isAirySpace(i, j - 1, k)) {
 				PathEntity dogs = worldObj.getEntityPathToXYZ(actor, i, j, k,
-						FairyConfig.DEF_PATH_RANGE, false, false, true, true);
+						FairyConfig.BEHAVIOR_PATH_RANGE, false, false, true, true);
 
 				if (dogs != null) {
 					return dogs;
@@ -827,12 +825,12 @@ public class EntityFairy extends EntityAnimal {
 		if (entityToAttack != null) {
 			final float enemy_dist = getDistanceToEntity(entityToAttack);
 
-			if (enemy_dist >= FairyConfig.DEF_PURSUE_RANGE || ( rand.nextBoolean()
+			if (enemy_dist >= FairyConfig.BEHAVIOR_PURSUE_RANGE || ( rand.nextBoolean()
 					&& !canEntityBeSeen(entityToAttack) )) {
 				++loseInterest;
 
-				if (loseInterest >= ( tamed() ? FairyConfig.DEF_AGGRO_TIMER
-						: FairyConfig.DEF_AGGRO_TIMER * 3 )) {
+				if (loseInterest >= ( tamed() ? FairyConfig.BEHAVIOR_AGGRO_TIMER
+						: FairyConfig.BEHAVIOR_AGGRO_TIMER * 3 )) {
 					setTarget(null);
 					loseInterest = 0;
 				}
@@ -848,8 +846,8 @@ public class EntityFairy extends EntityAnimal {
 				if (fairy.entityToAttack != null) {
 					float queen_dist = getDistanceToEntity(fairy);
 
-					if (queen_dist < FairyConfig.DEF_DEFEND_RANGE
-							&& enemy_dist < FairyConfig.DEF_DEFEND_RANGE
+					if (queen_dist < FairyConfig.BEHAVIOR_DEFEND_RANGE
+							&& enemy_dist < FairyConfig.BEHAVIOR_DEFEND_RANGE
 							&& canEntityBeSeen(fairy)) {
 						this.setTarget(fairy.entityToAttack);
 						fairy.setTarget(null);
@@ -871,7 +869,7 @@ public class EntityFairy extends EntityAnimal {
 				float dist = getDistanceToEntity(getEntityFear());
 
 				// Run from entityFear if you can see it and it is close.
-				if (dist < FairyConfig.DEF_FEAR_RANGE) {
+				if (dist < FairyConfig.BEHAVIOR_FEAR_RANGE) {
 					PathEntity doug = roam(getEntityFear(), this, PATH_AWAY);
 
 					if (doug != null) {

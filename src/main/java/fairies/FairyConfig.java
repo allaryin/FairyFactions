@@ -9,11 +9,19 @@ public class FairyConfig extends Configuration {
     public static int		SPAWN_FACTION_MIN_SIZE	= 8;
     public static int		SPAWN_FACTION_MAX_SIZE	= 10;
     
-	public static double	DEF_BASE_HEALTH			= 15.0D;
-	public static float		DEF_BASE_SPEED			= 0.9F;
-	public static float		DEF_SCOUT_SPEED			= 1.05F;
-	public static float		DEF_WITHER_MULT			= 0.75F;
+	public static double	GENERAL_HEALTH_BASE		= 15.0D;
+	public static float		GENERAL_SPEED_BASE		= 0.9F;
+	public static float		GENERAL_SPEED_SCOUT		= 1.05F;
+	public static float		GENERAL_SPEED_WITHER_MULT	= 0.75F;
 
+	public static float		BEHAVIOR_PATH_RANGE			= 16F;
+	public static float		BEHAVIOR_PURSUE_RANGE		= BEHAVIOR_PATH_RANGE;
+	public static float		BEHAVIOR_DEFEND_RANGE		= BEHAVIOR_PURSUE_RANGE / 2;
+	public static float		BEHAVIOR_FEAR_RANGE			= 12F;
+
+	// how long will tame fairies stay mad? 3x for wild
+	public static int		BEHAVIOR_AGGRO_TIMER		= 15;
+	
 	// fall speed
 	public static double	DEF_FLOAT_RATE			= -0.2D;
 	// fly speed
@@ -24,18 +32,6 @@ public class FairyConfig extends Configuration {
 	public static double	DEF_LIFTOFF_MULT		= 2.0D;
 
 	public static int		DEF_MAX_PARTICLES		= 5;
-
-	// how far will we path to something?
-	public static float		DEF_PATH_RANGE			= 16F;
-	// how far will we chase something?
-	public static float		DEF_PURSUE_RANGE		= DEF_PATH_RANGE;
-	// how close will guards protect the queen from?
-	public static float		DEF_DEFEND_RANGE		= DEF_PURSUE_RANGE / 2;
-	// how far will we flee from something?
-	public static float		DEF_FEAR_RANGE			= 12F;
-
-	// how long will tame fairies stay mad? 3x for wild
-	public static final int	DEF_AGGRO_TIMER			= 15;					
 
 	public FairyConfig(File file) {
 		super(file);
@@ -58,7 +54,32 @@ public class FairyConfig extends Configuration {
         /**
          * General fairy stats
          */
-        //GENERAL_HEALTH_BASE = getFloat("health.base", "general", )
+        GENERAL_HEALTH_BASE = getFloat("health.base", "general", (float)GENERAL_HEALTH_BASE,
+        		1.0F, 40.0F, "base maximum health");
+        GENERAL_SPEED_BASE = getFloat("speed.base", "general", GENERAL_SPEED_BASE,
+        		0.1F, 2.0F, "base move speed");
+        GENERAL_SPEED_SCOUT = getFloat("speed.scout", "general", GENERAL_SPEED_SCOUT,
+        		0.1F, 2.0F, "move speed for scouts");
+        GENERAL_SPEED_WITHER_MULT = getFloat("speed.wither_mult", "general", GENERAL_SPEED_WITHER_MULT,
+        		0.05F, 0.95F, "multiplier to speed for wither debuff (lower is slower)");
+        
+        /**
+         * Behavior modifiers
+         */
+        BEHAVIOR_PATH_RANGE = getFloat("range.path", "behavior", BEHAVIOR_PATH_RANGE,
+        		4.0F, 32F, "how far will we path to something?");
+        final float pursue_range_mult = getFloat("range.pursue_mult", "behavior", 1.0F,
+        		0.25F, 2F, "how much farther will we chase something than our normal pathing?");
+        final float defend_range_mult = getFloat("range.defend_mult", "behavior", 0.5F,
+        		0.25F, 2F, "how close will guards stay to the queen?");
+        BEHAVIOR_FEAR_RANGE = getFloat("range.fear", "behavior", BEHAVIOR_FEAR_RANGE,
+        		4.0F, 32F, "how far will we run away when afraid?");
+        
+        BEHAVIOR_PURSUE_RANGE = BEHAVIOR_PATH_RANGE * pursue_range_mult;
+        BEHAVIOR_DEFEND_RANGE = BEHAVIOR_PATH_RANGE * defend_range_mult;   
+        
+        BEHAVIOR_AGGRO_TIMER = getInt("timer.anger", "behavior", BEHAVIOR_AGGRO_TIMER,
+        		1, 100, "how long will tame fairies stay angry? (wild are 3x this)");
 	}
 
 }
