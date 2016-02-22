@@ -12,6 +12,7 @@ import fairies.entity.EntityFairy;
 import fairies.entity.FairyEntityFishHook;
 import fairies.event.FairyEventListener;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityList;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.network.Packet;
@@ -36,8 +37,26 @@ public class CommonProxy {
 	}
 
 	public void initEntities() {
-		EntityRegistry.registerGlobalEntityID( EntityFairy.class, "Fairy", EntityRegistry.findGlobalUniqueEntityId(), 0xea8fde, 0x8658bf );
-		EntityRegistry.registerModEntity( FairyEntityFishHook.class, "FairyFishhook", EntityRegistry.findGlobalUniqueEntityId(), FairyFactions.INSTANCE, 64, 4, true );
+		int entityID = 0;
+		registerEntity( entityID++, EntityFairy.class, "Fairy", 0xea8fde, 0x8658bf );
+		registerEntity( entityID++, FairyEntityFishHook.class, "FairyFishhook" );
+	}
+	
+	private void registerEntity( int entityID, Class<?extends Entity> entityClass, String entityName ) {
+		EntityRegistry.registerModEntity( entityClass, entityName, entityID, FairyFactions.INSTANCE, 64, 4, true);
+	}
+	private void registerEntity( int entityID, Class<?extends Entity> entityClass, String entityName, int backgroundEggColor, int foregroundEggColor ) {
+		registerEntity( entityID, entityClass, entityName );
+		
+		// Thanks to the Metallurgy team for the clean implementation of this in Atum that I am adapting.
+		int i = 120;
+		do {
+			++i;
+		} while( EntityList.getStringFromID(i) != null );
+		final Integer eggID = Integer.valueOf(i);
+			
+		EntityList.IDtoClassMapping.put(eggID, entityClass);
+		EntityList.entityEggs.put(eggID, new EntityList.EntityEggInfo(eggID, backgroundEggColor, foregroundEggColor));
 	}
 
 	public void initGUI() {

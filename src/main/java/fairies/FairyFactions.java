@@ -77,6 +77,7 @@ public class FairyFactions {
 	@EventHandler
 	public void postInit(FMLPostInitializationEvent event) {
 		fairySpawner = new Spawner();
+		// TODO: move these thresholds into config file
 		final int maxNum = 18;
 		final int freqNum = 8;
 		fairySpawner.setMaxAnimals(maxNum);
