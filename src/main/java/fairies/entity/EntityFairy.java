@@ -427,7 +427,7 @@ public class EntityFairy extends EntityAnimal {
 					posY + (double) super.getEyeHeight() + (double) f1);
 			int l = MathHelper.floor_double(posZ + (double) f2);
 
-			if (worldObj.getBlock(j, k, l).isBlockNormalCube()) {
+			if (worldObj.getBlock(j, k, l).isNormalCube()) {
 				return true;
 			}
 		}
