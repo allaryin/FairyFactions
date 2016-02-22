@@ -67,24 +67,6 @@ public class EntityFairy extends EntityAnimal {
 	private static final Logger LOG = FairyFactions.LOGGER;
 
 	// TODO: put these into config file
-	public static final double	DEF_BASE_HEALTH		= 15.0D;
-	public static final float	DEF_BASE_SPEED		= 0.9F;
-	public static final float	DEF_SCOUT_SPEED		= 1.05F;
-	public static final float	DEF_WITHER_MULT		= 0.75F;
-
-	public static final double	DEF_FLOAT_RATE		= -0.2D;				// fall speed
-	public static final double	DEF_FLAP_RATE		= 0.15D;				// fly speed
-	public static final double	DEF_SOLO_FLAP_MULT	= 1.25D;				// bonus to flight while unburdened
-	public static final double	DEF_LIFTOFF_MULT	= 2.0D;					// bonus to flight when launching
-
-	public static final int		DEF_MAX_PARTICLES	= 5;
-
-	public static final float	DEF_PATH_RANGE		= 16F;					// how far will we path to something?
-	public static final float	DEF_PURSUE_RANGE	= DEF_PATH_RANGE;		// how far will we chase something?
-	public static final float	DEF_DEFEND_RANGE	= DEF_PURSUE_RANGE / 2;	// how close will guards protect the queen from?
-	public static final float	DEF_FEAR_RANGE		= 12F;					// how far will we flee from something?
-
-	public static final int		DEF_AGGRO_TIMER		= 15;					// how long will tame fairies stay mad? 3x for wild
 
 	private boolean				cower;
 	public boolean				didHearts;
@@ -246,9 +228,9 @@ public class EntityFairy extends EntityAnimal {
 	protected void applyEntityAttributes() {
 		super.applyEntityAttributes();
 		this.getEntityAttribute(SharedMonsterAttributes.maxHealth)
-				.setBaseValue(DEF_BASE_HEALTH);
+				.setBaseValue(FairyConfig.DEF_BASE_HEALTH);
 		this.getEntityAttribute(SharedMonsterAttributes.movementSpeed)
-				.setBaseValue(DEF_BASE_SPEED);
+				.setBaseValue(FairyConfig.DEF_BASE_SPEED);
 		// this.getEntityAttribute(SharedMonsterAttributes.attackDamage).setBaseValue(4.0D);
 		// this.getEntityAttribute(SharedMonsterAttributes.followRange).setBaseValue(10.0D);
 	}
@@ -303,16 +285,16 @@ public class EntityFairy extends EntityAnimal {
 
 		if (scout()) {
 			this.getEntityAttribute(SharedMonsterAttributes.movementSpeed)
-					.setBaseValue(DEF_SCOUT_SPEED);
+					.setBaseValue(FairyConfig.DEF_SCOUT_SPEED);
 		} else {
 			this.getEntityAttribute(SharedMonsterAttributes.movementSpeed)
-					.setBaseValue(DEF_BASE_SPEED);
+					.setBaseValue(FairyConfig.DEF_BASE_SPEED);
 		}
 
 		if (withered()) {
 			IAttributeInstance speed = this
 					.getEntityAttribute(SharedMonsterAttributes.movementSpeed);
-			speed.setBaseValue(speed.getAttributeValue() * DEF_WITHER_MULT);
+			speed.setBaseValue(speed.getAttributeValue() * FairyConfig.DEF_WITHER_MULT);
 		}
 
 		if (!worldObj.isRemote) {
@@ -344,29 +326,29 @@ public class EntityFairy extends EntityAnimal {
 						&& ridingEntity instanceof EntityLiving) {
 					ridingEntity.fallDistance = 0F;
 
-					if (ridingEntity.motionY < DEF_FLOAT_RATE) {
-						ridingEntity.motionY = DEF_FLOAT_RATE;
+					if (ridingEntity.motionY < FairyConfig.DEF_FLOAT_RATE) {
+						ridingEntity.motionY = FairyConfig.DEF_FLOAT_RATE;
 					}
 
 					// TODO: research how to find this now
 					final boolean isJumping = false; // ((EntityLiving)ridingEntity).isJumping
-					if (isJumping && ridingEntity.motionY < DEF_FLAP_RATE
+					if (isJumping && ridingEntity.motionY < FairyConfig.DEF_FLAP_RATE
 							&& canFlap()) {
-						ridingEntity.motionY = DEF_FLAP_RATE;
+						ridingEntity.motionY = FairyConfig.DEF_FLAP_RATE;
 					}
 				} else {
-					if (motionY < DEF_FLOAT_RATE) {
-						motionY = DEF_FLOAT_RATE;
+					if (motionY < FairyConfig.DEF_FLOAT_RATE) {
+						motionY = FairyConfig.DEF_FLOAT_RATE;
 					}
 
 					if (canFlap() && checkGroundBelow() && motionY < 0D) {
-						motionY = DEF_FLOAT_RATE * DEF_SOLO_FLAP_MULT;
+						motionY = FairyConfig.DEF_FLOAT_RATE * FairyConfig.DEF_SOLO_FLAP_MULT;
 					}
 
 					if (liftOff() && ridingEntity != null) {
 						ridingEntity.fallDistance = 0F;
-						motionY = ridingEntity.motionY = DEF_FLAP_RATE
-								* DEF_LIFTOFF_MULT;
+						motionY = ridingEntity.motionY = FairyConfig.DEF_FLAP_RATE
+								* FairyConfig.DEF_LIFTOFF_MULT;
 					}
 				}
 			}
@@ -377,8 +359,8 @@ public class EntityFairy extends EntityAnimal {
 			}
 
 			++particleCount;
-			if (particleCount >= DEF_MAX_PARTICLES) {
-				particleCount = rand.nextInt(DEF_MAX_PARTICLES >> 1);
+			if (particleCount >= FairyConfig.DEF_MAX_PARTICLES) {
+				particleCount = rand.nextInt(FairyConfig.DEF_MAX_PARTICLES >> 1);
 
 				if (angry() || ( crying() && queen() )) {
 					// anger smoke, queens don't cry :P
@@ -760,7 +742,7 @@ public class EntityFairy extends EntityAnimal {
 			if (j > 4 && j < worldObj.getHeight() - 1 && isAirySpace(i, j, k)
 					&& !isAirySpace(i, j - 1, k)) {
 				PathEntity dogs = worldObj.getEntityPathToXYZ(actor, i, j, k,
-						DEF_PATH_RANGE, false, false, true, true);
+						FairyConfig.DEF_PATH_RANGE, false, false, true, true);
 
 				if (dogs != null) {
 					return dogs;
@@ -796,7 +778,7 @@ public class EntityFairy extends EntityAnimal {
 			if (j > 4 && j < worldObj.getHeight() - 1 && isAirySpace(i, j, k)
 					&& !isAirySpace(i, j - 1, k)) {
 				PathEntity dogs = worldObj.getEntityPathToXYZ(actor, i, j, k,
-						DEF_PATH_RANGE, false, false, true, true);
+						FairyConfig.DEF_PATH_RANGE, false, false, true, true);
 
 				if (dogs != null) {
 					return dogs;
@@ -845,12 +827,12 @@ public class EntityFairy extends EntityAnimal {
 		if (entityToAttack != null) {
 			final float enemy_dist = getDistanceToEntity(entityToAttack);
 
-			if (enemy_dist >= DEF_PURSUE_RANGE || ( rand.nextBoolean()
+			if (enemy_dist >= FairyConfig.DEF_PURSUE_RANGE || ( rand.nextBoolean()
 					&& !canEntityBeSeen(entityToAttack) )) {
 				++loseInterest;
 
-				if (loseInterest >= ( tamed() ? DEF_AGGRO_TIMER
-						: DEF_AGGRO_TIMER * 3 )) {
+				if (loseInterest >= ( tamed() ? FairyConfig.DEF_AGGRO_TIMER
+						: FairyConfig.DEF_AGGRO_TIMER * 3 )) {
 					setTarget(null);
 					loseInterest = 0;
 				}
@@ -866,8 +848,8 @@ public class EntityFairy extends EntityAnimal {
 				if (fairy.entityToAttack != null) {
 					float queen_dist = getDistanceToEntity(fairy);
 
-					if (queen_dist < DEF_DEFEND_RANGE
-							&& enemy_dist < DEF_DEFEND_RANGE
+					if (queen_dist < FairyConfig.DEF_DEFEND_RANGE
+							&& enemy_dist < FairyConfig.DEF_DEFEND_RANGE
 							&& canEntityBeSeen(fairy)) {
 						this.setTarget(fairy.entityToAttack);
 						fairy.setTarget(null);
@@ -889,7 +871,7 @@ public class EntityFairy extends EntityAnimal {
 				float dist = getDistanceToEntity(getEntityFear());
 
 				// Run from entityFear if you can see it and it is close.
-				if (dist < DEF_FEAR_RANGE) {
+				if (dist < FairyConfig.DEF_FEAR_RANGE) {
 					PathEntity doug = roam(getEntityFear(), this, PATH_AWAY);
 
 					if (doug != null) {
