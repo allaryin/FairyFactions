@@ -625,6 +625,7 @@ public class FairyJob {
 					if ( doug != null && canSeeToSpot( posX, posY, posZ, world ) ) {
 						fairy.rotationYaw = angle;
 						fairy.castRod();
+						// TODO: player fishing normally damages the rod when the reels something in; should we do that?
 						stack.damageItem( 1, fairy );
 
 						return true;

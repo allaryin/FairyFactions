@@ -15,6 +15,7 @@ import net.minecraft.util.MathHelper;
 import net.minecraft.util.MovingObjectPosition;
 import net.minecraft.util.Vec3;
 import net.minecraft.world.World;
+import net.minecraftforge.common.FishingHooks;
 
 public class FairyEntityFishHook extends Entity
 {
@@ -487,7 +488,8 @@ public class FairyEntityFishHook extends Entity
         }
         else if (this.ticksCatchable > 0)
         {
-            EntityItem var13 = new EntityItem(this.worldObj, this.posX, this.posY, this.posZ, new ItemStack(Items.fish));
+            ItemStack fish = FishingHooks.getRandomFishable(this.rand, this.worldObj.rand.nextFloat());
+            EntityItem var13 = new EntityItem(this.worldObj, this.posX, this.posY, this.posZ, fish);
             double var3 = this.angler.posX - this.posX;
             double var5 = this.angler.posY - this.posY;
             double var7 = this.angler.posZ - this.posZ;
