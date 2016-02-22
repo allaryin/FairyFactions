@@ -266,7 +266,7 @@ public class FairyJob {
 			}
 
 			// Breeding
-			if (!triedBreeding && isBreedingItem(stack.getItem()) && onBreedingUse(stack, world)) {
+			if (!triedBreeding && onBreedingUse(stack, world)) {
 				return true;
 			}
 
@@ -513,7 +513,6 @@ public class FairyJob {
 	// Attempt to breed animals
 	private boolean onBreedingUse( final ItemStack stack, final World world ) {
 		final ArrayList animals = getAnimals( world );
-		triedBreeding = true;
 
 		if ( animals == null ) {
 			return false;
@@ -521,10 +520,21 @@ public class FairyJob {
 
 		int count = 0;
 
+
 		for ( int i = 0; i < animals.size() && count < 3 && stack.stackSize > 0; i++ ) {
 			final EntityAnimal entity = (EntityAnimal) animals.get( i );
 
+			int isBreedingCounter = ReflectionHelper.getPrivateValue(EntityAnimal.class, entity, "breeding");
+			// skip unbreedable animals
+			if (!entity.isBreedingItem(stack) // can't breed with this item
+					|| entity.getGrowingAge() != 0 // is juvenile (negative) or recently proceated (positive)
+					|| isBreedingCounter != 0 // literally breeding now.
+					) {
+				continue;}
+			triedBreeding = true;
+
 			if ( fairy.getDistanceToEntity( entity ) < 3F ) {
+
 				ReflectionHelper.setPrivateValue(EntityAnimal.class, entity, 600, "inLove");			
 				count++;
 				stack.stackSize--;
@@ -875,11 +885,6 @@ public class FairyJob {
 		return item == Item.getItemFromBlock( Blocks.log );
 	}
 
-	// Item used to breed animals
-	private boolean isBreedingItem( final Item item ) {
-		return item == Items.wheat;
-	}
-
 	private boolean isShearingItem( final Item item ) {
 		return item == Items.shears;
 	}
@@ -907,7 +912,7 @@ public class FairyJob {
 	private boolean goodItem( final Item item, final int j ) {
 		return isHoeItem( item ) || isSeedItem( item ) || isBonemealItem( item, j ) || isAxeItem( item )
 				|| isSaplingBlock( item ) || isLogBlock( item ) || fairy.acceptableFoods( item )
-				|| isBreedingItem( item ) || isShearingItem( item ) || isClothBlock( item ) || isFishingItem( item )
+				|| /* isBreedingItem( item ) || */ isShearingItem( item ) || isClothBlock( item ) || isFishingItem( item )
 				|| isRawFish( item ) || isFlower( item );
 	}
 
