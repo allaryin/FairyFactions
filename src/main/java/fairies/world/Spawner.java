@@ -617,14 +617,14 @@ public final class Spawner {
 			final Block block = world.getBlock(i, j, k);
 			final Block blockAbove = world.getBlock(i, j + 1, k);
 
-			return block.getMaterial().isLiquid() && !block.isBlockNormalCube();
+			return block.getMaterial().isLiquid() && !block.isNormalCube();
 		} else {
 			final Block block = world.getBlock(i, j, k);
 			final Block blockAbove = world.getBlock(i, j + 1, k);
 			final Block blockBelow = world.getBlock(i, j - 1, k);
 
-			return blockBelow.isBlockNormalCube() && !block.isBlockNormalCube() && !block.getMaterial().isLiquid()
-					&& !blockAbove.isBlockNormalCube();
+			return blockBelow.isNormalCube() && !block.isNormalCube() && !block.getMaterial().isLiquid()
+					&& !blockAbove.isNormalCube();
 		}
 	}
 
