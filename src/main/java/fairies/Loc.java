@@ -32,7 +32,36 @@ public enum Loc {
 	DISBAND_OTHER_3("text.disband.other.3.message"),
 	DISBAND_OTHER_4("text.disband.other.4.message"),
 	DISBAND_OTHER_5("text.disband.other.5.message"),
-	DISBAND_OTHER_6("text.disband.other.6.message");
+	DISBAND_OTHER_6("text.disband.other.6.message"),
+	
+	TAME_QUEEN_1("text.disband.queen.1.message"),
+	TAME_QUEEN_2("text.disband.queen.2.message"),
+	TAME_QUEEN_3("text.disband.queen.3.message"),
+	TAME_OTHER_1("text.disband.other.1.message"),
+	TAME_OTHER_2("text.disband.other.2.message"),
+	TAME_OTHER_3("text.disband.other.3.message"),
+	TAME_OTHER_4("text.disband.other.4.message"),
+	TAME_OTHER_5("text.disband.other.5.message"),
+	TAME_OTHER_6("text.disband.other.6.message"),
+	
+	TAME_FAIL_PREFIX("text.tame.fail.prefix"),
+	TAME_FAIL_ANGRY("text.tame.fail.angry.message"),
+	TAME_FAIL_CRYING("text.tame.fail.crying.message"),
+	TAME_FAIL_HAS_FOLLOWERS("text.tame.fail.has_followers.message"),
+	TAME_FAIL_HAS_QUEEN("text.tame.fail.has_queen.message"),
+	TAME_FAIL_TAME_QUEEN("text.tame.fail.tame_queen.message"),
+	TAME_FAIL_POSTED("text.tame.fail.posted.message"),
+	TAME_FAIL_GLOWSTONE("text.tame.fail.glowstone.message"),
+	TAME_FAIL_NOT_MELON("text.tame.fail.not_melon.message"),
+	TAME_FAIL_NOT_SNACK("text.tame.fail.not_snack.message"),
+		
+	DEATH_1("text.death.1.message"),
+	DEATH_2("text.death.2.message"),
+	DEATH_3("text.death.3.message"),
+	DEATH_4("text.death.4.message"),
+	DEATH_5("text.death.5.message"),
+	DEATH_6("text.death.6.message"),
+	DEATH_7("text.death.7.message");
 	
 	public final String key;
 	private Loc(String key) {
@@ -43,6 +72,9 @@ public enum Loc {
 	
 	public String get() {
 		return getLoc(this.key);
+	}
+	public String toString() {
+		return get();
 	}
 	
 	public static String getLoc(String key) {

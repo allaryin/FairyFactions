@@ -1909,9 +1909,9 @@ public class EntityFairy extends EntityAnimal {
 
 	public String getQueenName(int prefix, int suffix, int faction) {
 		if (faction < 0 || faction > MAX_FACTION)
-			return Loc.QUEEN.get()+" Error-faction";
+			return Loc.QUEEN + " Error-faction";
 
-		return faction_colors[faction] + Loc.QUEEN.get()+ " "
+		return faction_colors[faction] + Loc.QUEEN + " "
 				+ getActualName(prefix, suffix);
 	}
 
@@ -1934,7 +1934,7 @@ public class EntityFairy extends EntityAnimal {
 			String woosh = getActualName(getNamePrefix(), getNameSuffix());
 
 			if (queen()) {
-				woosh = Loc.QUEEN.get()+ " " + woosh;
+				woosh = Loc.QUEEN + " " + woosh;
 			}
 
 			if (isRuler(FairyFactions.proxy.getCurrentPlayer())) {
@@ -2535,27 +2535,27 @@ public class EntityFairy extends EntityAnimal {
 						+ " ";
 
 				if (queen()) {
-					s = Loc.QUEEN.get()+ " " + s;
+					s = Loc.QUEEN + " " + s;
 				}
 
 				int i = rand.nextInt(6);
 
 				if (queen() && i < 3) {
-					s += Loc.DISBAND_QUEEN_1.get();
+					s += Loc.DISBAND_QUEEN_1;
 				} else if (queen()) {
-					s += Loc.DISBAND_QUEEN_2.get();
+					s += Loc.DISBAND_QUEEN_2;
 				} else if (i == 0) {
-					s += Loc.DISBAND_OTHER_1.get();
+					s += Loc.DISBAND_OTHER_1;
 				} else if (i == 1) {
-					s += Loc.DISBAND_OTHER_2.get();
+					s += Loc.DISBAND_OTHER_2;
 				} else if (i == 2) {
-					s += Loc.DISBAND_OTHER_3.get();
+					s += Loc.DISBAND_OTHER_3;
 				} else if (i == 3) {
-					s += Loc.DISBAND_OTHER_4.get();
+					s += Loc.DISBAND_OTHER_4;
 				} else if (i == 4) {
-					s += Loc.DISBAND_OTHER_5.get();
+					s += Loc.DISBAND_OTHER_5;
 				} else {
-					s += Loc.DISBAND_OTHER_6.get();
+					s += Loc.DISBAND_OTHER_6;
 				}
 
 				FairyFactions.proxy.sendChat((EntityPlayerMP) ruler,
@@ -2586,30 +2586,30 @@ public class EntityFairy extends EntityAnimal {
 		String f = getActualName(getNamePrefix(), getNameSuffix()) + " ";
 
 		if (queen()) {
-			f = Loc.QUEEN.get()+ " " + f;
+			f = Loc.QUEEN + " " + f;
 		}
 
 		String s = f;
 		int i = rand.nextInt(6);
 
 		if (queen() && i < 2) {
-			s += "reluctantly joined your party.";
+			s += Loc.TAME_QUEEN_1;
 		} else if (queen() && i > 3) {
-			s += "sighed and became your follower.";
+			s += Loc.TAME_QUEEN_2;
 		} else if (queen()) {
-			s += "really enjoys eating glistering melons.";
+			s += Loc.TAME_QUEEN_3;
 		} else if (i == 0) {
-			s += "was kind of lonely without a leader.";
+			s += Loc.TAME_OTHER_1;
 		} else if (i == 1) {
-			s += "shrugged and decided to follow you.";
+			s += Loc.TAME_OTHER_2;
 		} else if (i == 2) {
-			s += "put the past behind her and joined you.";
+			s += Loc.TAME_OTHER_3;
 		} else if (i == 3) {
-			s += "was easily persuaded by that yummy snack.";
+			s += Loc.TAME_OTHER_4;
 		} else if (i == 4) {
-			s += "introduced herself properly to you.";
+			s += Loc.TAME_OTHER_5;
 		} else {
-			s += "ate that snack like there was no tomorrow.";
+			s += Loc.TAME_OTHER_6;
 		}
 
 		if (player instanceof EntityPlayerMP) {
@@ -2678,26 +2678,26 @@ public class EntityFairy extends EntityAnimal {
 			String f = getActualName(getNamePrefix(), getNameSuffix());
 
 			if (queen()) {
-				f = Loc.QUEEN.get()+ " " + f;
+				f = Loc.QUEEN + " " + f;
 			}
 
 			String s = f;
-			int i = rand.nextInt(6);
+			int i = rand.nextInt(7);
 
 			if (i == 0) {
-				s += " bit the dust.";
+				s += " "+Loc.DEATH_1;
 			} else if (i == 1) {
-				s += " ran into some problems.";
+				s += " "+Loc.DEATH_2;
 			} else if (i == 2) {
-				s += " went to the big forest in the sky.";
+				s += " "+Loc.DEATH_3;
 			} else if (i == 3) {
-				s += " had to go away for a while.";
-			} else if (i == 3) {
-				s += " lived a good life.";
+				s += " "+Loc.DEATH_4;
 			} else if (i == 4) {
-				s += " is in a better place now.";
+				s += " "+Loc.DEATH_5;
+			} else if (i == 5) {
+				s += " "+Loc.DEATH_6;
 			} else {
-				s += " kicked the bucket.";
+				s += " "+Loc.DEATH_7;
 			}
 
 			// mod_FairyMod.fairyMod.sendDisband(player, "* §c" + s);
@@ -2969,22 +2969,22 @@ public class EntityFairy extends EntityAnimal {
 	}
 
 	public void tameFailMessage(EntityPlayer player) {
-		String s = "You can't ";
+		String s = Loc.TAME_FAIL_PREFIX + " ";
 
 		if (angry()) {
-			s += "tame this fairy because she's angry right now.";
+			s += Loc.TAME_FAIL_ANGRY;
 		} else if (crying()) {
-			s += "tame this fairy because she's upset right now.";
+			s += Loc.TAME_FAIL_CRYING;
 		} else if (getFaction() > 0) {
 			if (queen()) {
-				s += "tame a fairy queen until you defeat her minions.";
+				s += Loc.TAME_FAIL_HAS_FOLLOWERS;
 			} else {
-				s += "tame this fairy until you defeat her queen.";
+				s += Loc.TAME_FAIL_HAS_QUEEN;
 			}
 		} else if (tamed() && queen()) {
-			s += "steal a fairy queen owned by someone else.";
+			s += Loc.TAME_FAIL_TAME_QUEEN;
 		} else if (posted()) {
-			s += "steal a fairy who's assigned to a post";
+			s += Loc.TAME_FAIL_POSTED;
 		} else {
 			ItemStack stack = (ItemStack) null;
 
@@ -2994,11 +2994,11 @@ public class EntityFairy extends EntityAnimal {
 
 			if (stack != null && stack.stackSize > 0
 					&& stack.getItem() == Items.glowstone_dust) {
-				s += "seriously be trying to feed a fairy something that resembles its own guts.";
+				s += Loc.TAME_FAIL_GLOWSTONE;
 			} else if (queen()) {
-				s += "tame a fairy queen without a slice of speckled melon.";
+				s += Loc.TAME_FAIL_NOT_MELON;
 			} else {
-				s += "tame a fairy without a sweet-tasting snack.";
+				s += Loc.TAME_FAIL_NOT_SNACK;
 			}
 		}
 
