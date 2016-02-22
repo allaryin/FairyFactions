@@ -2191,11 +2191,13 @@ public class EntityFairy extends EntityAnimal {
 	 * This is really confusing. The original reads from byte 19
 	 * then writes out to byte 22.
 	 * 
+	 * This must have been a bug.
+	 * 
 	 * TODO: figure out what this was supposed to do
 	 */
     protected void setFairyHealth(int i)
     {
-        byte byte0 = dataWatcher.getWatchableObjectByte(19);
+        byte byte0 = dataWatcher.getWatchableObjectByte(B_HEALTH);
 
         if (i < 0)
         {
@@ -2207,11 +2209,11 @@ public class EntityFairy extends EntityAnimal {
         }
 
         byte0 = (byte)((byte)i & 0xff);
-        dataWatcher.updateObject(22, Byte.valueOf(byte0));
+        dataWatcher.updateObject(B_HEALTH, Byte.valueOf(byte0));
     }
     public int fairyHealth()
     {
-        return (byte)dataWatcher.getWatchableObjectByte(22) & 0xff;
+        return (byte)dataWatcher.getWatchableObjectByte(B_HEALTH) & 0xff;
     }
 
 	protected void setFairyClimbing(boolean flag) {
