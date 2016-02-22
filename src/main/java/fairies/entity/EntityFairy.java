@@ -1919,7 +1919,7 @@ public class EntityFairy extends EntityAnimal {
 		if (faction < 0 || faction > MAX_FACTION)
 			return "Error-faction";
 
-		return faction_colors[faction] + faction_names[faction];
+		return faction_colors[faction] + "<" + faction_names[faction] + ">";
 	}
 
 	public String getDisplayName() {
@@ -2085,6 +2085,12 @@ public class EntityFairy extends EntityAnimal {
 
 	// ----------
 
+	/**
+	 *  NB: These name strings must match on client and server - so cannot
+	 *  simply be moved into the loc system. They CAN, however, be moved into
+	 *  config files when the time comes.
+	 */
+
 	private static final String	name_prefixes[]		= { "Silly", "Fire",
 			"Twinkle", "Bouncy", "Speedy", "Wiggle", "Fluffy", "Cloudy",
 			"Floppy", "Ginger", "Sugar", "Winky", "Giggle", "Cutie", "Sunny",
@@ -2100,11 +2106,11 @@ public class EntityFairy extends EntityAnimal {
 	  
 
 	private static final String	faction_names[]		= { "no queen",
-			"<Aviary Army>", "<Bantam Brawlers>", "<Charging Cherubs>",
-			"<Dainty Demons>", "<Enigmatic Escorts>", "<Floating Fury>",
-			"<Graceful Gliders>", "<Hardy Handmaids>", "<Iron Imps>",
-			"<Opulent Order>", "<Kute Killers>", "<Lethal Ladies>",
-			"<Maiden Militia>", "<Nimble Nymphs>", "<Petite Pugilists>" };
+			Loc.FACTION_1.get(), Loc.FACTION_2.get(), Loc.FACTION_3.get(), 
+			Loc.FACTION_4.get(), Loc.FACTION_5.get(), Loc.FACTION_6.get(), 
+			Loc.FACTION_7.get(), Loc.FACTION_8.get(), Loc.FACTION_9.get(), 
+			Loc.FACTION_10.get(), Loc.FACTION_11.get(), Loc.FACTION_12.get(), 
+			Loc.FACTION_13.get(), Loc.FACTION_14.get(), Loc.FACTION_15.get() };
 
 	// ---------- stubs ----------
 
