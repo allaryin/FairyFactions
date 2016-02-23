@@ -324,17 +324,16 @@ public class EntityFairy extends EntityAnimal {
 
 			if (flymode()) {
 				if (!liftOff() && ridingEntity != null && !ridingEntity.onGround
-						&& ridingEntity instanceof EntityLiving) {
+						&& ridingEntity instanceof EntityLivingBase) {
 					ridingEntity.fallDistance = 0F;
 
 					if (ridingEntity.motionY < FairyConfig.DEF_FLOAT_RATE) {
 						ridingEntity.motionY = FairyConfig.DEF_FLOAT_RATE;
 					}
 
-					// TODO: research how to find this now
-					final boolean isJumping = false; // ((EntityLiving)ridingEntity).isJumping
-					if (isJumping && ridingEntity.motionY < FairyConfig.DEF_FLAP_RATE
-							&& canFlap()) {
+					final boolean isJumping = ReflectionHelper.getPrivateValue(EntityLivingBase.class, 
+							(EntityLivingBase)ridingEntity, "isJumping");
+					if (isJumping && ridingEntity.motionY < FairyConfig.DEF_FLAP_RATE && canFlap()) {
 						ridingEntity.motionY = FairyConfig.DEF_FLAP_RATE;
 					}
 				} else {
