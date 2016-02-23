@@ -1685,96 +1685,7 @@ public class EntityFairy extends EntityAnimal {
 		setPosted(false);
 	}
 
-	// ---------- flag 1 -----------
-
-	protected boolean getFairyFlag(int i) {
-		return ( dataWatcher.getWatchableObjectByte(B_FLAGS)
-				& ( 1 << i ) ) != 0;
-	}
-
-	protected void setFairyFlag(int i, boolean flag) {
-		byte byte0 = dataWatcher.getWatchableObjectByte(B_FLAGS);
-		if (flag) {
-			byte0 |= 1 << i;
-		} else {
-			byte0 &= ~( 1 << i );
-		}
-		dataWatcher.updateObject(B_FLAGS, Byte.valueOf(byte0));
-	}
-
-	public static final int	FLAG_ARM_SWING	= 0;
-	public static final int	FLAG_FLY_MODE	= 1;
-	public static final int	FLAG_CAN_FLAP	= 2;
-	public static final int	FLAG_TAMED		= 3;
-	public static final int	FLAG_ANGRY		= 4;
-	public static final int	FLAG_CRYING		= 5;
-	public static final int	FLAG_LIFTOFF	= 6;
-	public static final int	FLAG_HEARTS		= 7;
-
-	public boolean getArmSwing() {
-		return getFairyFlag(FLAG_ARM_SWING);
-	}
-
-	public void armSwing(boolean flag) {
-		setFairyFlag(FLAG_ARM_SWING, flag);
-		setTempItem(null);
-	}
-
-	public boolean flymode() {
-		return getFairyFlag(FLAG_FLY_MODE);
-	}
-
-	protected void setFlymode(boolean flag) {
-		setFairyFlag(FLAG_FLY_MODE, flag);
-	}
-
-	public boolean canFlap() {
-		return getFairyFlag(FLAG_CAN_FLAP);
-	}
-
-	protected void setCanFlap(boolean flag) {
-		setFairyFlag(FLAG_CAN_FLAP, flag);
-	}
-
-	public boolean tamed() {
-		return getFairyFlag(FLAG_TAMED);
-	}
-
-	protected void setTamed(boolean flag) {
-		setFairyFlag(FLAG_TAMED, flag);
-	}
-
-	public boolean angry() {
-		return getFairyFlag(FLAG_ANGRY);
-	}
-
-	protected void setAngry(boolean flag) {
-		setFairyFlag(FLAG_ANGRY, flag);
-	}
-
-	public boolean crying() {
-		return getFairyFlag(FLAG_CRYING);
-	}
-
-	protected void setCrying(boolean flag) {
-		setFairyFlag(FLAG_CRYING, flag);
-	}
-
-	public boolean liftOff() {
-		return getFairyFlag(FLAG_LIFTOFF);
-	}
-
-	protected void setLiftOff(boolean flag) {
-		setFairyFlag(FLAG_LIFTOFF, flag);
-	}
-
-	public boolean hearts() {
-		return getFairyFlag(FLAG_HEARTS);
-	}
-
-	public void setHearts(boolean flag) {
-		setFairyFlag(FLAG_HEARTS, flag);
-	}
+	// ---------- B_TYPE ----------
 
 	public static final int	MAX_SKIN	= 3;
 	public static final int	MAX_JOB		= 3;
@@ -1956,9 +1867,33 @@ public class EntityFairy extends EntityAnimal {
 	public String toString() {
 		return getActualName(getNamePrefix(), getNameSuffix());
 	}
+	
+	// ---------- B_FLAGS | B_FLAGS2 -----------
 
-	// ---------- flag 2 ----------
+	protected boolean getFairyFlag(int object, int offset) {
+		return ( dataWatcher.getWatchableObjectByte(object)
+				& ( 1 << offset ) ) != 0;
+	}
 
+	protected void setFairyFlag(int object, int offset, boolean flag) {
+		byte byte0 = dataWatcher.getWatchableObjectByte(object);
+		if (flag) {
+			byte0 |= 1 << offset;
+		} else {
+			byte0 &= ~( 1 << offset );
+		}
+		dataWatcher.updateObject(object, Byte.valueOf(byte0));
+	}
+	
+	protected static final int	FLAG_ARM_SWING		= 0;
+	protected static final int	FLAG_FLY_MODE		= 1;
+	protected static final int	FLAG_CAN_FLAP		= 2;
+	protected static final int	FLAG_TAMED			= 3;
+	protected static final int	FLAG_ANGRY			= 4;
+	protected static final int	FLAG_CRYING			= 5;
+	protected static final int	FLAG_LIFTOFF		= 6;
+	protected static final int	FLAG_HEARTS			= 7;
+	
 	protected static final int	FLAG2_CAN_HEAL		= 0;
 	protected static final int	FLAG2_RARE_POTION	= 1;
 	protected static final int	FLAG2_SPECIAL_JOB	= 2;
@@ -1968,84 +1903,118 @@ public class EntityFairy extends EntityAnimal {
 	protected static final int	FLAG2_WITHERED		= 6;
 	protected static final int	FLAG2_HAIR_TYPE		= 7;
 
-	protected boolean getFairyFlagTwo(int i) {
-		return ( dataWatcher.getWatchableObjectByte(B_FLAGS2)
-				& ( 1 << i ) ) != 0;
+	public boolean getArmSwing() {
+		return getFairyFlag(B_FLAGS, FLAG_ARM_SWING);
+	}
+	public void armSwing(boolean flag) {
+		setFairyFlag(B_FLAGS, FLAG_ARM_SWING, flag);
+		setTempItem(null);
 	}
 
-	protected void setFairyFlagTwo(int i, boolean flag) {
-		byte byte0 = dataWatcher.getWatchableObjectByte(B_FLAGS2);
-		if (flag) {
-			byte0 |= 1 << i;
-		} else {
-			byte0 &= ~( 1 << i );
-		}
-		dataWatcher.updateObject(B_FLAGS2, Byte.valueOf(byte0));
+	public boolean flymode() {
+		return getFairyFlag(B_FLAGS, FLAG_FLY_MODE);
+	}
+	protected void setFlymode(boolean flag) {
+		setFairyFlag(B_FLAGS, FLAG_FLY_MODE, flag);
+	}
+
+	public boolean canFlap() {
+		return getFairyFlag(B_FLAGS, FLAG_CAN_FLAP);
+	}
+	protected void setCanFlap(boolean flag) {
+		setFairyFlag(B_FLAGS, FLAG_CAN_FLAP, flag);
+	}
+
+	public boolean tamed() {
+		return getFairyFlag(B_FLAGS, FLAG_TAMED);
+	}
+	protected void setTamed(boolean flag) {
+		setFairyFlag(B_FLAGS, FLAG_TAMED, flag);
+	}
+
+	public boolean angry() {
+		return getFairyFlag(B_FLAGS, FLAG_ANGRY);
+	}
+	protected void setAngry(boolean flag) {
+		setFairyFlag(B_FLAGS, FLAG_ANGRY, flag);
+	}
+
+	public boolean crying() {
+		return getFairyFlag(B_FLAGS, FLAG_CRYING);
+	}
+	protected void setCrying(boolean flag) {
+		setFairyFlag(B_FLAGS, FLAG_CRYING, flag);
+	}
+
+	public boolean liftOff() {
+		return getFairyFlag(B_FLAGS, FLAG_LIFTOFF);
+	}
+	protected void setLiftOff(boolean flag) {
+		setFairyFlag(B_FLAGS, FLAG_LIFTOFF, flag);
+	}
+
+	public boolean hearts() {
+		return getFairyFlag(B_FLAGS, FLAG_HEARTS);
+	}
+	public void setHearts(boolean flag) {
+		setFairyFlag(B_FLAGS, FLAG_HEARTS, flag);
 	}
 
 	public boolean canHeal() {
-		return getFairyFlagTwo(FLAG2_CAN_HEAL);
+		return getFairyFlag(B_FLAGS2, FLAG2_CAN_HEAL);
 	}
-
 	public void setCanHeal(boolean flag) {
-		setFairyFlagTwo(FLAG2_CAN_HEAL, flag);
+		setFairyFlag(B_FLAGS2, FLAG2_CAN_HEAL, flag);
 	}
 
 	public boolean rarePotion() {
-		return getFairyFlagTwo(FLAG2_RARE_POTION);
+		return getFairyFlag(B_FLAGS2, FLAG2_RARE_POTION);
 	}
-
 	public void setRarePotion(boolean flag) {
-		setFairyFlagTwo(FLAG2_RARE_POTION, flag);
+		setFairyFlag(B_FLAGS2, FLAG2_RARE_POTION, flag);
 	}
 
 	public boolean specialJob() {
-		return getFairyFlagTwo(FLAG2_SPECIAL_JOB);
+		return getFairyFlag(B_FLAGS2, FLAG2_SPECIAL_JOB);
 	}
-
 	public void setSpecialJob(boolean flag) {
-		setFairyFlagTwo(FLAG2_SPECIAL_JOB, flag);
+		setFairyFlag(B_FLAGS2, FLAG2_SPECIAL_JOB, flag);
 	}
 
 	public boolean nameEnabled() {
-		return getFairyFlagTwo(FLAG2_NAME_ENABLED);
+		return getFairyFlag(B_FLAGS2, FLAG2_NAME_ENABLED);
 	}
-
 	public void setNameEnabled(boolean flag) {
-		setFairyFlagTwo(FLAG2_NAME_ENABLED, flag);
+		setFairyFlag(B_FLAGS2, FLAG2_NAME_ENABLED, flag);
 	}
 
 	public boolean climbing() {
-		return getFairyFlagTwo(FLAG2_CLIMBING);
+		return getFairyFlag(B_FLAGS2, FLAG2_CLIMBING);
 	}
-
 	public void setClimbing(boolean flag) {
-		setFairyFlagTwo(FLAG2_CLIMBING, flag);
+		setFairyFlag(B_FLAGS2, FLAG2_CLIMBING, flag);
 	}
 
 	public boolean posted() {
-		return getFairyFlagTwo(FLAG2_POSTED);
+		return getFairyFlag(B_FLAGS2, FLAG2_POSTED);
 	}
-
 	public void setPosted(boolean flag) {
 		postedCount = 0;
-		setFairyFlagTwo(FLAG2_POSTED, flag);
+		setFairyFlag(B_FLAGS2, FLAG2_POSTED, flag);
 	}
 
 	public boolean withered() {
-		return getFairyFlagTwo(FLAG2_WITHERED);
+		return getFairyFlag(B_FLAGS2, FLAG2_WITHERED);
 	}
-
 	public void setWithered(boolean flag) {
-		setFairyFlagTwo(FLAG2_WITHERED, flag);
+		setFairyFlag(B_FLAGS2, FLAG2_WITHERED, flag);
 	}
 
 	public boolean hairType() {
-		return getFairyFlagTwo(FLAG2_HAIR_TYPE);
+		return getFairyFlag(B_FLAGS2, FLAG2_HAIR_TYPE);
 	}
-
 	public void setHairType(boolean flag) {
-		setFairyFlagTwo(FLAG2_HAIR_TYPE, flag);
+		setFairyFlag(B_FLAGS2, FLAG2_HAIR_TYPE, flag);
 	}
 
 	// ----------
