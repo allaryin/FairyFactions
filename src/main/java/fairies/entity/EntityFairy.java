@@ -279,6 +279,8 @@ public class EntityFairy extends EntityAnimal {
 				if (!worldObj.isRemote) {
 					FairyFactions.proxy.sendFairyDespawn(this);
 				}
+				// NB: the original had this in client side
+				// setDead(); // For singleplayer mode
 			}
 		}
 
@@ -357,47 +359,48 @@ public class EntityFairy extends EntityAnimal {
 				showHeartsOrSmokeFX(tamed());
 			}
 
-			++particleCount;
-			if (particleCount >= FairyConfig.DEF_MAX_PARTICLES) {
-				particleCount = rand.nextInt(FairyConfig.DEF_MAX_PARTICLES >> 1);
-
-				if (angry() || ( crying() && queen() )) {
-					// anger smoke, queens don't cry :P
-					worldObj.spawnParticle("smoke", posX, boundingBox.maxY,
-							posZ, 0D, 0D, 0D);
-				} else if (crying()) {
-					// crying effect
-					worldObj.spawnParticle("splash", posX, boundingBox.maxY,
-							posZ, 0D, 0D, 0D);
-				}
-
-				if (liftOff()) {
-					// liftoff effect below feet
-					worldObj.spawnParticle("explode", posX, boundingBox.minY,
-							posZ, 0D, 0D, 0D);
-				}
-
-				if (withered() || ( rogue() && canHeal() )) {
-					// TODO: more proxying
-					/*
-					 * Offload to proxy for client-side rendering
-					 *
-					 * double a = posX - 0.2D + (0.4D * rand.nextDouble());
-					 * double b = posY + 0.45D + (0.15D * rand.nextDouble());
-					 * double c = posZ - 0.2D + (0.4D * rand.nextDouble());
-					 * EntitySmokeFX smoke = new EntitySmokeFX(worldObj, a,b,c,
-					 * 0D, 0D, 0D); a = 0.3D + (0.15D * rand.nextDouble()); b =
-					 * 0.5D + (0.2D * rand.nextDouble()); c = 0.3D + (0.15D *
-					 * rand.nextDouble()); smoke.setRBGColorF((float)a,
-					 * (float)b, (float)c); MC.effectRenderer.addEffect(smoke);
-					 */
-				}
-
-				if (nameEnabled() && tamed() && hasRuler()) {
-					FairyFactions.proxy.openRenameGUI(this);
+			// only render particles on clients
+			if( worldObj.isRemote ) {
+				if (++particleCount >= FairyConfig.DEF_MAX_PARTICLES) {
+					particleCount = rand.nextInt(FairyConfig.DEF_MAX_PARTICLES >> 1);
+	
+					if (angry() || ( crying() && queen() )) {
+						// anger smoke, queens don't cry :P
+						worldObj.spawnParticle("smoke", posX, boundingBox.maxY, posZ, 0D, 0D, 0D);
+					} else if (crying()) {
+						// crying effect
+						worldObj.spawnParticle("splash", posX, boundingBox.maxY, posZ, 0D, 0D, 0D);
+					}
+	
+					if (liftOff()) {
+						// liftoff effect below feet
+						worldObj.spawnParticle("explode", posX, boundingBox.minY, posZ, 0D, 0D, 0D);
+					}
+	
+					if (withered() || ( rogue() && canHeal() )) {
+						// TODO: more proxying
+						/*
+						 * Offload to proxy for client-side rendering
+						 *
+						 * double a = posX - 0.2D + (0.4D * rand.nextDouble());
+						 * double b = posY + 0.45D + (0.15D * rand.nextDouble());
+						 * double c = posZ - 0.2D + (0.4D * rand.nextDouble());
+						 * EntitySmokeFX smoke = new EntitySmokeFX(worldObj, a,b,c,
+						 * 0D, 0D, 0D); a = 0.3D + (0.15D * rand.nextDouble()); b =
+						 * 0.5D + (0.2D * rand.nextDouble()); c = 0.3D + (0.15D *
+						 * rand.nextDouble()); smoke.setRBGColorF((float)a,
+						 * (float)b, (float)c); MC.effectRenderer.addEffect(smoke);
+						 */
+					}
 				}
 			}
-
+			
+			// not sure why this was inside the check above...
+			if (nameEnabled() && tamed() && hasRuler()) {
+				FairyFactions.proxy.openRenameGUI(this);
+			}
+			
+			// NB: this was only on the client in the original
 			processSwinging();
 		}
 	}// end: onUpdate
@@ -2519,6 +2522,7 @@ public class EntityFairy extends EntityAnimal {
 		setFaction(0);
 		setHearts(!didHearts);
 		cryTime = 200;
+		setNameEnabled(false);	// Leaving this bit set causes strange behavior
 		setTamed(false);
 		setCustomName("");
 		abandonPost();
@@ -2574,6 +2578,7 @@ public class EntityFairy extends EntityAnimal {
 		}
 
 		setFaction(0);
+		setNameEnabled(false);	// Leaving this bit set causes strange behavior
 		setTamed(true);
 		setRulerName(player.getGameProfile().getName());
 		setHearts(!hearts());
