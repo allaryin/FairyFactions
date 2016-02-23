@@ -22,7 +22,6 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityAgeable;
 import net.minecraft.entity.EntityCreature;
 import net.minecraft.entity.EntityFlying;
-import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.entity.ai.attributes.IAttributeInstance;
@@ -444,8 +443,8 @@ public class EntityFairy extends EntityAnimal {
 		double d2 = entity.posZ - posZ;
 		double d1;
 
-		if (entity instanceof EntityLiving) {
-			EntityLiving entityliving = (EntityLiving) entity;
+		if (entity instanceof EntityLivingBase) {
+			EntityLivingBase entityliving = (EntityLivingBase) entity;
 			d1 = ( posY + (double) ( height * 0.85F ) ) - ( entityliving.posY
 					+ (double) entityliving.getEyeHeight() );
 		} else {
@@ -1273,8 +1272,8 @@ public class EntityFairy extends EntityAnimal {
 
 							break;
 						}
-					} else if (entity instanceof EntityLiving && ruler != null
-							&& ( (EntityLiving) entity ) == ruler) {
+					} else if (entity instanceof EntityLivingBase && ruler != null
+							&& ( (EntityLivingBase) entity ) == ruler) {
 						if (ruler.getHealth() > 0
 								&& ruler.getHealth() < ruler.getMaxHealth()) {
 							this.entityHeal = ruler;
@@ -2750,7 +2749,7 @@ public class EntityFairy extends EntityAnimal {
 			attackTime = 20;
 
 			if (flymode() && canFlap() && scout()
-					&& entity instanceof EntityLiving && ridingEntity == null
+					&& entity instanceof EntityLivingBase && ridingEntity == null
 					&& riddenByEntity == null && entity.ridingEntity == null
 					&& entity.riddenByEntity == null
 					&& !( entity instanceof EntityFairy
@@ -2830,7 +2829,7 @@ public class EntityFairy extends EntityAnimal {
 
 		if (flag && getHealth() > 0) {
 			if (entity != null) {
-				if (entity instanceof EntityLiving && !ignoreTarget) {
+				if (entity instanceof EntityLivingBase && !ignoreTarget) {
 					if (entityToAttack == null && cower
 							&& rand.nextInt(2) == 0) {
 						// Cowering fairies will have a chance of becoming
@@ -2889,8 +2888,8 @@ public class EntityFairy extends EntityAnimal {
 		boolean flag = entity.attackEntityFrom(DamageSource.causeMobDamage(this), attackStrength());
 
 		if (flag && rogue() && healTime <= 0 && entity != null
-				&& entity instanceof EntityLiving ) {
-			applyPoison((EntityLiving) entity);
+				&& entity instanceof EntityLivingBase ) {
+			applyPoison((EntityLivingBase) entity);
 		}
 		
 		return flag;
@@ -2909,7 +2908,7 @@ public class EntityFairy extends EntityAnimal {
 		}
 	}
 
-	public void applyPoison(EntityLiving entityliving) {
+	public void applyPoison(EntityLivingBase entityliving) {
 		byte duration = 0;
 		switch (worldObj.difficultySetting) {
 			case NORMAL:
