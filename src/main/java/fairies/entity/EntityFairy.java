@@ -256,7 +256,7 @@ public class EntityFairy extends EntityAnimal {
 		}
 	}
 
-	@SuppressWarnings("unused")
+	//@SuppressWarnings("unused")
 	@Override
 	public void onUpdate() {
 		super.onUpdate();
@@ -393,11 +393,12 @@ public class EntityFairy extends EntityAnimal {
 						 */
 					}
 				}
-			}
-			
-			// not sure why this was inside the check above...
-			if (nameEnabled() && tamed() && hasRuler()) {
-				FairyFactions.proxy.openRenameGUI(this);
+				
+				// not sure why this was inside the check above...
+				if (nameEnabled() && tamed() && hasRuler()) {
+					FairyFactions.LOGGER.info("EntityFairy.onUpdate: calling proxy.openRenameGUI");
+					FairyFactions.proxy.openRenameGUI(this);
+				}
 			}
 			
 			// NB: this was only on the client in the original
@@ -2390,6 +2391,8 @@ public class EntityFairy extends EntityAnimal {
 					return true;
 				} else if (onGround && stack != null
 						&& namingItem(stack.getItem()) && stack.stackSize > 0) {
+					FairyFactions.LOGGER.info("EntityFairy.interract: consuming paper and setting name enabled");
+
 					// right-clicking with paper will open the rename gui
 					stack.stackSize--;
 

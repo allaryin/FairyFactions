@@ -19,6 +19,8 @@ public class GuiName extends GuiScreen
 
     public GuiName(EntityFairy entityfairy)
     {
+		FairyFactions.LOGGER.info("GuiName: constructed");
+
         screenTitle = "Enter custom name or leave blank for default:";
         fairy = entityfairy;
         nameText = "";
@@ -44,6 +46,8 @@ public class GuiName extends GuiScreen
 
         if (fairy != null)
         {
+    		FairyFactions.LOGGER.info("GuiName.onGuiClosed: isRemote = "+fairy.worldObj.isRemote);
+
             if (fairy.worldObj.isRemote)
             {
                 //String s1 = "setfryname " + fairy.getEntityId() + " " + nameText;

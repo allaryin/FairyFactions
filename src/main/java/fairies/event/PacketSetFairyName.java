@@ -28,6 +28,8 @@ public class PacketSetFairyName extends FairyPacket {
 	
 	@Override
 	protected void pack() {
+		FairyFactions.LOGGER.info("PacketSetFairyName.pack");
+
 		final PacketBuffer buf = (PacketBuffer)this.payload();
 		buf.writeInt(this.fairyID);
 		try {
@@ -40,6 +42,8 @@ public class PacketSetFairyName extends FairyPacket {
 	
 	@Override
 	public void init(PacketBuffer buf) {
+		FairyFactions.LOGGER.info("PacketSetFairyName.init");
+		
 		fairyID = buf.readInt();
 		try {
 			name = buf.readStringFromBuffer(MAX_NAME_LENGTH).trim();
@@ -53,6 +57,8 @@ public class PacketSetFairyName extends FairyPacket {
 
 	@Override
 	public void handle(NetworkManager origin) {
+		FairyFactions.LOGGER.info("PacketSetFairyName.handle");
+		
 		final EntityPlayerMP player = ((NetHandlerPlayServer)origin.getNetHandler()).playerEntity;
 		if( player != null ) {
 			final EntityFairy fairy = FairyFactions.getFairy(this.fairyID);
