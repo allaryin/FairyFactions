@@ -874,10 +874,10 @@ public class EntityFairy extends EntityAnimal {
 
 				// Run from entityFear if you can see it and it is close.
 				if (dist < FairyConfig.BEHAVIOR_FEAR_RANGE) {
-					PathEntity doug = roam(getEntityFear(), this, PATH_AWAY);
+					PathEntity dest = roam(getEntityFear(), this, PATH_AWAY);
 
-					if (doug != null) {
-						setPathToEntity(doug);
+					if (dest != null) {
+						setPathToEntity(dest);
 						setCryTime(getCryTime() + 120);
 					}
 				}
@@ -962,16 +962,16 @@ public class EntityFairy extends EntityAnimal {
 				if (scout() && ruler instanceof EntityFairy) {
 					// Scouts stay way out there on the perimeter.
 					if (dist < 12F) {
-						PathEntity doug = roam(ruler, this, (float) Math.PI);
+						PathEntity dest = roam(ruler, this, (float) Math.PI);
 
-						if (doug != null) {
-							setPathToEntity(doug);
+						if (dest != null) {
+							setPathToEntity(dest);
 						}
 					} else if (dist > 24F) {
-						PathEntity doug = roam(ruler, this, 0F);
+						PathEntity dest = roam(ruler, this, 0F);
 
-						if (doug != null) {
-							setPathToEntity(doug);
+						if (dest != null) {
+							setPathToEntity(dest);
 						}
 					}
 				} else {
@@ -983,10 +983,10 @@ public class EntityFairy extends EntityAnimal {
 						teleportToRuler(ruler);
 					} else if (dist > ( ruler instanceof EntityFairy ? 12F
 							: 6F )) {
-						PathEntity doug = roam(ruler, this, 0F);
+						PathEntity dest = roam(ruler, this, 0F);
 
-						if (doug != null) {
-							setPathToEntity(doug);
+						if (dest != null) {
+							setPathToEntity(dest);
 						}
 					}
 				}
@@ -1001,10 +1001,10 @@ public class EntityFairy extends EntityAnimal {
 			if (dist < 10F && canEntityBeSeen(ruler)) {
 				tossSnowball(ruler);
 			} else if (!hasPath() && dist < 16F) {
-				PathEntity doug = roam(ruler, this, 0F);
+				PathEntity dest = roam(ruler, this, 0F);
 
-				if (doug != null) {
-					setPathToEntity(doug);
+				if (dest != null) {
+					setPathToEntity(dest);
 				}
 			}
 		}
@@ -1146,11 +1146,11 @@ public class EntityFairy extends EntityAnimal {
 										&& canEntityBeSeen(scary)) {
 									setCryTime(120);
 									this.setEntityFear(scary);
-									PathEntity doug = roam(entity, this,
+									PathEntity dest = roam(entity, this,
 											(float) Math.PI);
 
-									if (doug != null) {
-										setPathToEntity(doug);
+									if (dest != null) {
+										setPathToEntity(dest);
 									}
 
 									break;
@@ -1158,11 +1158,11 @@ public class EntityFairy extends EntityAnimal {
 									setCryTime(Math.max(fairy.getCryTime() - 60,
 											0));
 									this.setEntityFear(scary);
-									PathEntity doug = roam(entity, this,
+									PathEntity dest = roam(entity, this,
 											(float) Math.PI);
 
-									if (doug != null) {
-										setPathToEntity(doug);
+									if (dest != null) {
+										setPathToEntity(dest);
 									}
 
 									break;
@@ -1194,10 +1194,10 @@ public class EntityFairy extends EntityAnimal {
 					float dist = getDistanceToEntity(entity);
 
 					if (dist < 8F) {
-						PathEntity doug = roam(entity, this, (float) Math.PI);
+						PathEntity dest = roam(entity, this, (float) Math.PI);
 
-						if (doug != null) {
-							setPathToEntity(doug);
+						if (dest != null) {
+							setPathToEntity(dest);
 
 							if (!flymode()) {
 								setFlymode(true);
@@ -1230,11 +1230,11 @@ public class EntityFairy extends EntityAnimal {
 			if (entityHeal.getHealth() <= 0 || entityHeal.isDead) {
 				entityHeal = null;
 			} else if (!hasPath()) {
-				PathEntity doug = worldObj.getPathEntityToEntity(this,
+				PathEntity dest = worldObj.getPathEntityToEntity(this,
 						entityHeal, 16F, false, false, true, true);
 
-				if (doug != null) {
-					setPathToEntity(doug);
+				if (dest != null) {
+					setPathToEntity(dest);
 				} else {
 					entityHeal = null;
 				}
@@ -1242,7 +1242,7 @@ public class EntityFairy extends EntityAnimal {
 				float g = getDistanceToEntity(entityHeal);
 
 				if (g < 2.5F && canEntityBeSeen(entityHeal)) {
-					healThatAss(entityHeal);
+					doHeal(entityHeal);
 					entityHeal = null;
 				}
 			}
@@ -1262,12 +1262,12 @@ public class EntityFairy extends EntityAnimal {
 						if (fairy.getHealth() > 0 && sameTeam(fairy)
 								&& fairy.getHealth() < fairy.getMaxHealth()) {
 							this.entityHeal = fairy;
-							PathEntity doug = worldObj.getPathEntityToEntity(
+							PathEntity dest = worldObj.getPathEntityToEntity(
 									this, entityHeal, 16F, false, false, true,
 									true);
 
-							if (doug != null) {
-								setPathToEntity(doug);
+							if (dest != null) {
+								setPathToEntity(dest);
 							}
 
 							break;
@@ -1277,12 +1277,12 @@ public class EntityFairy extends EntityAnimal {
 						if (ruler.getHealth() > 0
 								&& ruler.getHealth() < ruler.getMaxHealth()) {
 							this.entityHeal = ruler;
-							PathEntity doug = worldObj.getPathEntityToEntity(
+							PathEntity dest = worldObj.getPathEntityToEntity(
 									this, entityHeal, 16F, false, false, true,
 									true);
 
-							if (doug != null) {
-								setPathToEntity(doug);
+							if (dest != null) {
+								setPathToEntity(dest);
 							}
 
 							break;
@@ -1292,7 +1292,7 @@ public class EntityFairy extends EntityAnimal {
 			}
 
 			if (entityHeal == null && getHealth() < getMaxHealth()) {
-				healThatAss(this);
+				doHeal(this);
 			}
 		}
 	}
@@ -1357,8 +1357,7 @@ public class EntityFairy extends EntityAnimal {
 		return j;
 	}
 
-	// TODO: fix childish method name :P
-	private void healThatAss(EntityLivingBase guy) {
+	private void doHeal(EntityLivingBase guy) {
 		armSwing(!didSwing); // Swings arm and heals the specified person.
 		EntityPotion potion = new EntityPotion(worldObj, this,
 				handPotion().getItemDamage());
@@ -1421,11 +1420,11 @@ public class EntityFairy extends EntityAnimal {
 										&& canEntityBeSeen(scary)) {
 									setCryTime(120);
 									this.setEntityFear(scary);
-									PathEntity doug = roam(entity, this,
+									PathEntity dest = roam(entity, this,
 											(float) Math.PI);
 
-									if (doug != null) {
-										setPathToEntity(doug);
+									if (dest != null) {
+										setPathToEntity(dest);
 									}
 
 									break;
@@ -1433,11 +1432,11 @@ public class EntityFairy extends EntityAnimal {
 									setCryTime(Math.max(fairy.getCryTime() - 60,
 											0));
 									this.setEntityFear(scary);
-									PathEntity doug = roam(entity, this,
+									PathEntity dest = roam(entity, this,
 											(float) Math.PI);
 
-									if (doug != null) {
-										setPathToEntity(doug);
+									if (dest != null) {
+										setPathToEntity(dest);
 									}
 
 									break;
@@ -1467,10 +1466,10 @@ public class EntityFairy extends EntityAnimal {
 					float dist = getDistanceToEntity(entity);
 
 					if (dist < 8F) {
-						PathEntity doug = roam(entity, this, (float) Math.PI);
+						PathEntity dest = roam(entity, this, (float) Math.PI);
 
-						if (doug != null) {
-							setPathToEntity(doug);
+						if (dest != null) {
+							setPathToEntity(dest);
 
 							if (!flymode()) {
 								setFlymode(true);
@@ -1614,10 +1613,10 @@ public class EntityFairy extends EntityAnimal {
 			double gg = Math.sqrt(( dd * dd ) + ( ee * ee ) + ( ff * ff ));
 
 			if (gg >= ( farFlag ? 12D : 6D )) {
-				PathEntity doug = roamBlocks(aa, bb, cc, this, 0F);
+				PathEntity dest = roamBlocks(aa, bb, cc, this, 0F);
 
-				if (doug != null) {
-					setPathToEntity(doug);
+				if (dest != null) {
+					setPathToEntity(dest);
 				}
 			}
 		}
@@ -2500,10 +2499,10 @@ public class EntityFairy extends EntityAnimal {
 		snowballin = 0;
 
 		if (ruler != null) {
-			PathEntity doug = roam(ruler, this, (float) Math.PI);
+			PathEntity dest = roam(ruler, this, (float) Math.PI);
 
-			if (doug != null) {
-				setPathToEntity(doug);
+			if (dest != null) {
+				setPathToEntity(dest);
 			}
 
 			if (ruler instanceof EntityPlayer) {
@@ -2769,7 +2768,7 @@ public class EntityFairy extends EntityAnimal {
 				}
 
 				// normal boring strike.
-				smackThatAss(entity);
+				doAttack(entity);
 			}
 		}
 	}
@@ -2836,10 +2835,10 @@ public class EntityFairy extends EntityAnimal {
 						// offensive.
 						cryTime += 120;
 						entityFear = entity;
-						PathEntity doug = roam(entity, this, (float) Math.PI);
+						PathEntity dest = roam(entity, this, (float) Math.PI);
 
-						if (doug != null) {
-							setPathToEntity(doug);
+						if (dest != null) {
+							setPathToEntity(dest);
 						}
 					} else {
 						// Become aggressive - no more screwing around.
@@ -2850,10 +2849,10 @@ public class EntityFairy extends EntityAnimal {
 				} else {
 					// This just makes fairies run from inanimate objects that
 					// hurt them.
-					PathEntity doug = roam(entity, this, (float) Math.PI);
+					PathEntity dest = roam(entity, this, (float) Math.PI);
 
-					if (doug != null) {
-						setPathToEntity(doug);
+					if (dest != null) {
+						setPathToEntity(dest);
 					}
 				}
 			}
@@ -2881,25 +2880,18 @@ public class EntityFairy extends EntityAnimal {
 		return flag;
 	}
 
-	// TODO: rename childish method
-	protected boolean smackThatAss(Entity entity) {
+	protected boolean doAttack(Entity entity) {
 		// Swings arm and attacks.
 		armSwing(!didSwing);
 
-		if (rogue() && healTime <= 0 && entity != null
-				&& entity instanceof EntityLiving) {
-			boolean fred = entity.attackEntityFrom(
-					DamageSource.causeMobDamage(this), attackStrength());
+		boolean flag = entity.attackEntityFrom(DamageSource.causeMobDamage(this), attackStrength());
 
-			if (fred) {
-				applyPoison((EntityLiving) entity);
-			}
-
-			return fred;
+		if (flag && rogue() && healTime <= 0 && entity != null
+				&& entity instanceof EntityLiving ) {
+			applyPoison((EntityLiving) entity);
 		}
-
-		return entity.attackEntityFrom(DamageSource.causeMobDamage(this),
-				attackStrength());
+		
+		return flag;
 	}
 
 	protected int attackStrength() {
