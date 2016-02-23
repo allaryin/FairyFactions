@@ -63,15 +63,16 @@ public class PacketSetFairyName extends FairyPacket {
 		if( player != null ) {
 			final EntityFairy fairy = FairyFactions.getFairy(this.fairyID);
 			if( fairy == null ) {
-				// TODO: ERROR, unable to find fairy in question
+				FairyFactions.LOGGER.warn("Unable to find fairy "+this.fairyID+" to rename.");
 				return;
 			}
 			
 			final String username = player.getGameProfile().getName();
-			if( fairy.nameEnabled() && fairy.rulerName().equals(username) ) {
+			final String rulername = fairy.rulerName();
+			if( fairy.nameEnabled() && rulername.equals(username) ) {
 				fairy.setCustomName(this.name);
 			} else {
-				// WARN: invalid access
+				FairyFactions.LOGGER.warn("Attempt by '"+username+"' to rename fairy owned by '"+rulername+"'");
 			}
 			fairy.setNameEnabled(false);
 		}

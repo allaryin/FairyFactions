@@ -259,6 +259,10 @@ public class EntityFairy extends EntityAnimal {
 	@Override
 	public void onUpdate() {
 		super.onUpdate();
+		
+		if( nameEnabled() ) {
+			_dump_();
+		}
 
 		if (this.createGroup) {
 			
@@ -393,9 +397,13 @@ public class EntityFairy extends EntityAnimal {
 				}
 				
 				// not sure why this was inside the check above...
-				if (nameEnabled() && tamed() && hasRuler()) {
-					FairyFactions.LOGGER.info("EntityFairy.onUpdate: calling proxy.openRenameGUI");
-					FairyFactions.proxy.openRenameGUI(this);
+				if (nameEnabled() && tamed()) {
+					if( !rulerName().equals("") ) {
+						FairyFactions.LOGGER.info("EntityFairy.onUpdate: calling proxy.openRenameGUI");
+						FairyFactions.proxy.openRenameGUI(this);
+					} else {
+						FairyFactions.LOGGER.info("EntityFairy.onUpdate: tame but no ruler...");
+					}
 				}
 			}
 			
@@ -2023,16 +2031,12 @@ public class EntityFairy extends EntityAnimal {
 		return tamed() && rulerName().equals(player.getGameProfile().getName());
 	}
 
-	public boolean hasRuler() {
-		return ruler != null && rulerName() != null;
-	}
-
 	public String rulerName() {
 		final String name = dataWatcher.getWatchableObjectString(S_OWNER);
 		return name;
 	}
-
 	public void setRulerName(String s) {
+		FairyFactions.LOGGER.info("setRulerName: "+this.getEntityId()+" = "+s);
 		dataWatcher.updateObject(S_OWNER, s);
 	}
 
@@ -2042,6 +2046,7 @@ public class EntityFairy extends EntityAnimal {
 	}
 
 	public void setCustomName(String s) {
+		FairyFactions.LOGGER.info("setCustomName: "+this.getEntityId()+" = "+s);
 		dataWatcher.updateObject(S_NAME_REAL, s);
 	}
 
@@ -2305,6 +2310,7 @@ public class EntityFairy extends EntityAnimal {
 
 	@Override
 	public boolean interact(EntityPlayer player) {
+		_dump_();
 		if (!worldObj.isRemote
 				&& ( ridingEntity == null || ridingEntity == player || ridingEntity instanceof EntityMinecart )) {
 			ItemStack stack = player.inventory.getCurrentItem();
