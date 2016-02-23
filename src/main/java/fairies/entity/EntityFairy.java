@@ -1895,7 +1895,7 @@ public class EntityFairy extends EntityAnimal {
 	}
 
 	public String getActualName(int prefix, int suffix) {
-		final String custom = "";// getCustomName();
+		final String custom = getCustomName();
 		if (custom != null && !custom.isEmpty())
 			return custom;
 

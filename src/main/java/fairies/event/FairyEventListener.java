@@ -20,8 +20,8 @@ public class FairyEventListener {
 		SET_FAIRY_NAME(0, PacketSetFairyName.class);
 		
 		public final byte packet_id;
-		protected final Class<?extends IFairyPacket> packet_class;
-		private PacketType(final int id, Class<?extends IFairyPacket> clazz) {
+		protected final Class<?extends FairyPacket> packet_class;
+		private PacketType(final int id, Class<?extends FairyPacket> clazz) {
 			packet_id = (byte)id;
 			packet_class = clazz;
 		}
@@ -36,11 +36,6 @@ public class FairyEventListener {
 				map.put(type.packet_id, type);
 			}
 		}
-	}
-	
-	public interface IFairyPacket {
-		public void init(PacketBuffer buf);
-		public void handle(NetworkManager networkManager);
 	}
 	
 	@SubscribeEvent
@@ -63,7 +58,7 @@ public class FairyEventListener {
 				return;
 			}
 			
-			final IFairyPacket packet;
+			final FairyPacket packet;
 			try {
 				packet = type.packet_class.newInstance();
 			} catch (Exception e) {

@@ -5,13 +5,13 @@ import java.io.IOException;
 import cpw.mods.fml.common.network.internal.FMLProxyPacket;
 import fairies.FairyFactions;
 import fairies.entity.EntityFairy;
-import fairies.event.FairyEventListener.IFairyPacket;
+import io.netty.buffer.Unpooled;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.network.NetHandlerPlayServer;
 import net.minecraft.network.NetworkManager;
 import net.minecraft.network.PacketBuffer;
 
-public class PacketSetFairyName implements IFairyPacket {
+public class PacketSetFairyName extends FairyPacket {
 	
 	public static final int MIN_NAME_LENGTH = 3;
 	public static final int MAX_NAME_LENGTH = 16;
@@ -20,8 +20,22 @@ public class PacketSetFairyName implements IFairyPacket {
 	private String name;
 	
 	public PacketSetFairyName(final EntityFairy fairy, final String name) {
+		super(FairyEventListener.PacketType.SET_FAIRY_NAME);
 		this.fairyID = fairy.getEntityId();
 		this.name = name;
+		pack();
+	}
+	
+	@Override
+	protected void pack() {
+		final PacketBuffer buf = (PacketBuffer)this.payload();
+		buf.writeInt(this.fairyID);
+		try {
+			buf.writeStringToBuffer(this.name);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 	
 	@Override

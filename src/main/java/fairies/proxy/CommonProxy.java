@@ -97,7 +97,7 @@ public class CommonProxy {
 
 	public void sendFairyRename(final EntityFairy fairy, final String name) {
 		final PacketSetFairyName packet = new PacketSetFairyName( fairy, name );
-		//sendToServer( packet );
+		sendToServer( packet );
 	}
 	
 	// Packet that handles fairy mounting.
