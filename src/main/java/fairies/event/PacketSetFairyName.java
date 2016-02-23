@@ -19,8 +19,11 @@ public class PacketSetFairyName extends FairyPacket {
 	private int fairyID;
 	private String name;
 	
-	public PacketSetFairyName(final EntityFairy fairy, final String name) {
+	public PacketSetFairyName() {
 		super(FairyEventListener.PacketType.SET_FAIRY_NAME);
+	}
+	public PacketSetFairyName(final EntityFairy fairy, final String name) {
+		this();
 		this.fairyID = fairy.getEntityId();
 		this.name = name;
 		pack();

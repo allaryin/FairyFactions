@@ -260,10 +260,6 @@ public class EntityFairy extends EntityAnimal {
 	public void onUpdate() {
 		super.onUpdate();
 		
-		if( nameEnabled() ) {
-			_dump_();
-		}
-
 		if (this.createGroup) {
 			
 			createGroup = false;
@@ -2030,13 +2026,13 @@ public class EntityFairy extends EntityAnimal {
 			return false;
 		return tamed() && rulerName().equals(player.getGameProfile().getName());
 	}
-
 	public String rulerName() {
 		final String name = dataWatcher.getWatchableObjectString(S_OWNER);
 		return name;
 	}
 	public void setRulerName(String s) {
-		FairyFactions.LOGGER.info("setRulerName: "+this.getEntityId()+" = "+s);
+		if( !s.isEmpty() )
+			FairyFactions.LOGGER.info("setRulerName: "+this.getEntityId()+" = "+s);
 		dataWatcher.updateObject(S_OWNER, s);
 	}
 
@@ -2044,9 +2040,9 @@ public class EntityFairy extends EntityAnimal {
 	public String getCustomName() {
 		return dataWatcher.getWatchableObjectString(S_NAME_REAL);
 	}
-
 	public void setCustomName(String s) {
-		FairyFactions.LOGGER.info("setCustomName: "+this.getEntityId()+" = "+s);
+		if( !s.isEmpty() )
+			FairyFactions.LOGGER.info("setCustomName: "+this.getEntityId()+" = "+s);
 		dataWatcher.updateObject(S_NAME_REAL, s);
 	}
 
@@ -2054,7 +2050,6 @@ public class EntityFairy extends EntityAnimal {
 	public Item getTempItem() {
 		return Item.getItemById(dataWatcher.getWatchableObjectInt(I_TOOL));
 	}
-
 	public void setTempItem(Item item) {
 		dataWatcher.updateObject(I_TOOL, Item.getIdFromItem(item));
 	}
@@ -2310,7 +2305,7 @@ public class EntityFairy extends EntityAnimal {
 
 	@Override
 	public boolean interact(EntityPlayer player) {
-		_dump_();
+		// _dump_();
 		if (!worldObj.isRemote
 				&& ( ridingEntity == null || ridingEntity == player || ridingEntity instanceof EntityMinecart )) {
 			ItemStack stack = player.inventory.getCurrentItem();

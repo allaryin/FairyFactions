@@ -7,6 +7,7 @@ import com.google.common.collect.Maps;
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 import cpw.mods.fml.common.network.FMLNetworkEvent.ServerCustomPacketEvent;
 import cpw.mods.fml.common.network.internal.FMLProxyPacket;
+import fairies.FairyFactions;
 import fairies.Version;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.entity.player.EntityPlayerMP;
@@ -26,7 +27,7 @@ public class FairyEventListener {
 			packet_class = clazz;
 		}
 		
-		public static PacketType get(final short id) {
+		public static PacketType get(final byte id) {
 			return map.get(id);
 		}
 		
@@ -51,10 +52,10 @@ public class FairyEventListener {
 		if( payload.readableBytes() > 0 ) {
 			final PacketBuffer buf = new PacketBuffer(payload);
 			
-			final short id = buf.readUnsignedByte();
+			final byte id = buf.readByte();
 			final PacketType type = PacketType.get(id);
 			if( type == null ) {
-				// ERROR, unexpected packet type
+				FairyFactions.LOGGER.error("Got unknown packet type "+id);
 				return;
 			}
 			
