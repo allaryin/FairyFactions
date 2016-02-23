@@ -394,7 +394,7 @@ public class EntityFairy extends EntityAnimal {
 				}
 
 				if (nameEnabled() && tamed() && hasRuler()) {
-					// TODO: proxy display rename gui
+					FairyFactions.proxy.openRenameGUI(this);
 				}
 			}
 

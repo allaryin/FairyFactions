@@ -42,8 +42,8 @@ public class GuiName extends GuiScreen
         {
             if (fairy.worldObj.isRemote)
             {
-                String s1 = "setfryname " + fairy.getEntityId() + " " + nameText;
-                FairyFactions.proxy.sendFairyRename(s1);
+                //String s1 = "setfryname " + fairy.getEntityId() + " " + nameText;
+                FairyFactions.proxy.sendFairyRename(fairy, nameText);
             }
             else
             {

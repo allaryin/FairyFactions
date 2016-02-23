@@ -11,6 +11,7 @@ import fairies.Version;
 import fairies.entity.EntityFairy;
 import fairies.entity.FairyEntityFishHook;
 import fairies.event.FairyEventListener;
+import fairies.event.PacketSetFairyName;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityList;
 import net.minecraft.entity.player.EntityPlayer;
@@ -60,7 +61,11 @@ public class CommonProxy {
 	}
 
 	public void initGUI() {
-		// should only ever be implemented on client-side
+		// should only ever be implemented on client
+	}
+	
+	public void openRenameGUI(EntityFairy fairy) {
+		// should only ever be implemented on client
 	}
 
 	public void postInit() {
@@ -90,8 +95,9 @@ public class CommonProxy {
 		}
 	}
 
-	public void sendFairyRename(String name) {
-		// TODO send custom PacketSetFairyName
+	public void sendFairyRename(final EntityFairy fairy, final String name) {
+		final PacketSetFairyName packet = new PacketSetFairyName( fairy, name );
+		//sendToServer( packet );
 	}
 	
 	// Packet that handles fairy mounting.

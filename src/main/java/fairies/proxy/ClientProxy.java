@@ -3,6 +3,7 @@ package fairies.proxy;
 import cpw.mods.fml.client.registry.RenderingRegistry;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
+import fairies.client.gui.GuiName;
 import fairies.client.render.ModelFairy;
 import fairies.client.render.RenderFairy;
 import fairies.client.render.RenderFish;
@@ -33,6 +34,14 @@ public class ClientProxy extends CommonProxy {
     @Override
     public void initGUI() {
     	// TODO: something goes here, probably
+    }
+    
+    @Override
+    public void openRenameGUI(EntityFairy fairy) {
+    	if( fairy.isRuler(getCurrentPlayer()) ) {
+    		fairy.setNameEnabled(false);
+    		Minecraft.getMinecraft().displayGuiScreen(new GuiName(fairy));
+    	}
     }
 	
     @Override

@@ -2,6 +2,7 @@ package fairies.event;
 
 import java.io.IOException;
 
+import cpw.mods.fml.common.network.internal.FMLProxyPacket;
 import fairies.FairyFactions;
 import fairies.entity.EntityFairy;
 import fairies.event.FairyEventListener.IFairyPacket;
@@ -17,6 +18,11 @@ public class PacketSetFairyName implements IFairyPacket {
 
 	private int fairyID;
 	private String name;
+	
+	public PacketSetFairyName(final EntityFairy fairy, final String name) {
+		this.fairyID = fairy.getEntityId();
+		this.name = name;
+	}
 	
 	@Override
 	public void init(PacketBuffer buf) {
