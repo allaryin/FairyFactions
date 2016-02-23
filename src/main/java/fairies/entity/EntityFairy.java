@@ -696,7 +696,8 @@ public class EntityFairy extends EntityAnimal {
 			}
 		}
 
-		if (worldObj.difficultySetting.getDifficultyId() <= 0
+		// fairies run away from players in peaceful
+		if (worldObj.difficultySetting == EnumDifficulty.PEACEFUL
 				&& entityToAttack != null
 				&& entityToAttack instanceof EntityPlayer) {
 			setEntityFear(entityToAttack);
@@ -2410,6 +2411,7 @@ public class EntityFairy extends EntityAnimal {
 					}
 				}
 			} else {
+				// faction members can be tamed in peaceful
 				if (( getFaction() == 0
 						|| worldObj.difficultySetting == EnumDifficulty.PEACEFUL )
 						&& !( ( queen() || posted() ) && tamed() ) && !crying()
@@ -2908,15 +2910,6 @@ public class EntityFairy extends EntityAnimal {
 	}
 
 	public void applyPoison(EntityLiving entityliving) {
-		int effect = rand.nextInt(3);
-		if (effect == 0) {
-			effect = Potion.poison.id;
-		} else if (effect == 1) {
-			effect = Potion.weakness.id;
-		} else {
-			effect = Potion.blindness.id;
-		}
-
 		byte duration = 0;
 		switch (worldObj.difficultySetting) {
 			case NORMAL:
@@ -2925,12 +2918,23 @@ public class EntityFairy extends EntityAnimal {
 			case HARD:
 				duration = 15;
 				break;
+			case PEACEFUL:
+			case EASY:
 			default:
+				// no poison in peaceful or normal
+				return;
 		}
-		if (duration > 0) {
-			( entityliving ).addPotionEffect(
-					new PotionEffect(effect, duration * 20, 0));
+
+		int effect = rand.nextInt(3);
+		if (effect == 0) {
+			effect = Potion.poison.id;
+		} else if (effect == 1) {
+			effect = Potion.weakness.id;
+		} else {
+			effect = Potion.blindness.id;
 		}
+		
+		entityliving.addPotionEffect(new PotionEffect(effect, duration * 20, 0));
 
 		healTime = 100 + rand.nextInt(100);
 		setTarget((Entity) null);
