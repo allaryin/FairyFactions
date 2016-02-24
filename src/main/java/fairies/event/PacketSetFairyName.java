@@ -33,12 +33,7 @@ public class PacketSetFairyName extends FairyPacket {
 
 		final PacketBuffer buf = (PacketBuffer)this.payload();
 		buf.writeInt(this.fairyID);
-		try {
-			buf.writeStringToBuffer(this.name);
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		buf.writeString(this.name);
 	}
 	
 	@Override
@@ -46,12 +41,8 @@ public class PacketSetFairyName extends FairyPacket {
 		FairyFactions.LOGGER.info("PacketSetFairyName.init");
 		
 		fairyID = buf.readInt();
-		try {
-			name = buf.readStringFromBuffer(MAX_NAME_LENGTH).trim();
-			if( name.length() < MIN_NAME_LENGTH ) {
-				name = "";
-			}
-		} catch (IOException e) {
+		name = buf.readStringFromBuffer(MAX_NAME_LENGTH).trim();
+		if( name.length() < MIN_NAME_LENGTH ) {
 			name = "";
 		}
 	}

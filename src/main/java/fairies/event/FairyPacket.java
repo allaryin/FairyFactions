@@ -1,11 +1,11 @@
 package fairies.event;
 
-import cpw.mods.fml.common.network.internal.FMLProxyPacket;
 import fairies.Version;
 import fairies.event.FairyEventListener.PacketType;
 import io.netty.buffer.Unpooled;
 import net.minecraft.network.NetworkManager;
 import net.minecraft.network.PacketBuffer;
+import net.minecraftforge.fml.common.network.internal.FMLProxyPacket;
 
 public abstract class FairyPacket extends FMLProxyPacket {
 

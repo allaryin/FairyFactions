@@ -1,6 +1,6 @@
 package fairies;
 
-import cpw.mods.fml.common.registry.LanguageRegistry;
+import net.minecraftforge.fml.common.registry.LanguageRegistry;
 
 /**
  * Constants for various message localizations as well as shortcut methods

@@ -28,8 +28,7 @@ public class GuiName extends GuiScreen
         }
     }
 
-    @SuppressWarnings("unchecked")
-	@Override
+    @Override
     public void initGui()
     {
         buttonList.clear();

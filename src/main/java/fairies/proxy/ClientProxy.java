@@ -1,8 +1,5 @@
 package fairies.proxy;
 
-import cpw.mods.fml.client.registry.RenderingRegistry;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
 import fairies.FairyFactions;
 import fairies.client.gui.GuiName;
 import fairies.client.render.ModelFairy;
@@ -12,6 +9,9 @@ import fairies.entity.EntityFairy;
 import fairies.entity.FairyEntityFishHook;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraftforge.fml.client.registry.RenderingRegistry;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 @SideOnly(Side.CLIENT)
 public class ClientProxy extends CommonProxy {

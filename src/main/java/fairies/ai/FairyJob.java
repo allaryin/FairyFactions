@@ -3,7 +3,6 @@ package fairies.ai;
 import java.util.ArrayList;
 import java.util.List;
 
-import cpw.mods.fml.relauncher.ReflectionHelper;
 import fairies.entity.EntityFairy;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockCrops;
@@ -25,6 +24,7 @@ import net.minecraft.util.MathHelper;
 import net.minecraft.util.Vec3;
 import net.minecraft.world.World;
 import net.minecraftforge.common.IPlantable;
+import net.minecraftforge.fml.relauncher.ReflectionHelper;
 
 public class FairyJob {
 	public FairyJob( final EntityFairy entityfairy ) {

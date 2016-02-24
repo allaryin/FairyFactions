@@ -2,10 +2,6 @@ package fairies.proxy;
 
 import java.util.List;
 
-import cpw.mods.fml.common.network.FMLEventChannel;
-import cpw.mods.fml.common.network.NetworkRegistry;
-import cpw.mods.fml.common.network.internal.FMLProxyPacket;
-import cpw.mods.fml.common.registry.EntityRegistry;
 import fairies.FairyFactions;
 import fairies.Version;
 import fairies.entity.EntityFairy;
@@ -22,6 +18,10 @@ import net.minecraft.network.play.server.S13PacketDestroyEntities;
 import net.minecraft.network.play.server.S1BPacketEntityAttach;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.ChatComponentText;
+import net.minecraftforge.fml.common.network.FMLEventChannel;
+import net.minecraftforge.fml.common.network.NetworkRegistry;
+import net.minecraftforge.fml.common.network.internal.FMLProxyPacket;
+import net.minecraftforge.fml.common.registry.EntityRegistry;
 
 public class CommonProxy {
 	
