@@ -240,13 +240,13 @@ public class EntityFairy extends EntityAnimal {
 	public double getYOffset() {
 		if (ridingEntity != null) {
 			if (this.worldObj.isRemote) {
-				return yOffset - ( flymode() ? 1.15F : 1.35f );
+				return this.getYOffset() - ( flymode() ? 1.15F : 1.35f );
 			}
 
-			return yOffset + ( flymode() ? 0.65F : 0.55F )
+			return this.getYOffset() + ( flymode() ? 0.65F : 0.55F )
 					- ( ridingEntity instanceof EntityChicken ? 0.0F : 0.15F );
 		} else {
-			return yOffset;
+			return this.getYOffset();
 		}
 	}
 
@@ -259,7 +259,7 @@ public class EntityFairy extends EntityAnimal {
 			
 			createGroup = false;
 			int i = MathHelper.floor_double(posX);
-			int j = MathHelper.floor_double(boundingBox.minY) - 1;
+			int j = MathHelper.floor_double(getEntityBoundingBox().minY) - 1;
 			int k = MathHelper.floor_double(posZ);
 
 			final FairyGroupGenerator group = new FairyGroupGenerator(
@@ -359,15 +359,15 @@ public class EntityFairy extends EntityAnimal {
 	
 					if (angry() || ( crying() && queen() )) {
 						// anger smoke, queens don't cry :P
-						worldObj.spawnParticle("smoke", posX, boundingBox.maxY, posZ, 0D, 0D, 0D);
+						worldObj.spawnParticle("smoke", posX, getEntityBoundingBox().maxY, posZ, 0D, 0D, 0D);
 					} else if (crying()) {
 						// crying effect
-						worldObj.spawnParticle("splash", posX, boundingBox.maxY, posZ, 0D, 0D, 0D);
+						worldObj.spawnParticle("splash", posX, getEntityBoundingBox().maxY, posZ, 0D, 0D, 0D);
 					}
 	
 					if (liftOff()) {
 						// liftoff effect below feet
-						worldObj.spawnParticle("explode", posX, boundingBox.minY, posZ, 0D, 0D, 0D);
+						worldObj.spawnParticle("explode", posX, getEntityBoundingBox().minY, posZ, 0D, 0D, 0D);
 					}
 	
 					if (withered() || ( rogue() && canHeal() )) {
@@ -407,7 +407,7 @@ public class EntityFairy extends EntityAnimal {
 	public float getEyeHeight() {
 		if (!worldObj.isRemote && this.onGround && rand.nextBoolean()) {
 			int a = MathHelper.floor_double(posX);
-			int b = MathHelper.floor_double(boundingBox.minY);
+			int b = MathHelper.floor_double(getEntityBoundingBox().minY);
 			int c = MathHelper.floor_double(posZ);
 
 			if (isAirySpace(a, b, c) && isAirySpace(a, b + 1, c)) {
@@ -447,7 +447,7 @@ public class EntityFairy extends EntityAnimal {
 			d1 = ( posY + (double) ( height * 0.85F ) ) - ( entityliving.posY
 					+ (double) entityliving.getEyeHeight() );
 		} else {
-			d1 = ( entity.boundingBox.minY + entity.boundingBox.maxY ) / 2D
+			d1 = ( entity.getEntityBoundingBox().minY + entity.getEntityBoundingBox().maxY ) / 2D
 					- ( posY + (double) ( height * 0.85F ) );
 		}
 
@@ -482,7 +482,7 @@ public class EntityFairy extends EntityAnimal {
 	protected void updateFallState(double par1, boolean par3) {
 		super.updateFallState(par1 / 6D, par3);
 		int i = MathHelper.floor_double(posX);
-		int j = MathHelper.floor_double(boundingBox.minY) - 1;
+		int j = MathHelper.floor_double(getEntityBoundingBox().minY) - 1;
 		int k = MathHelper.floor_double(posZ);
 
 		if (j > 0 && j < worldObj.getHeight()) {
@@ -491,7 +491,7 @@ public class EntityFairy extends EntityAnimal {
 	}
 
 	@Override
-	protected void fall(float f) {
+	public void fall(float a, float b) {
 		// HAH!
 	}
 
@@ -536,7 +536,7 @@ public class EntityFairy extends EntityAnimal {
 	public void despawnFollowers() {
 		if (queen() && getFaction() > 0) {
 			List<?> list = worldObj.getEntitiesWithinAABB(EntityFairy.class,
-					boundingBox.expand(40D, 40D, 40D));
+					getEntityBoundingBox().expand(40D, 40D, 40D));
 
 			for (int j = 0; j < list.size(); j++) {
 				EntityFairy fairy = (EntityFairy) list.get(j);
@@ -732,7 +732,7 @@ public class EntityFairy extends EntityAnimal {
 		double d = actor.posZ + ( Math.cos(crazy) * 8F );
 
 		int x = MathHelper.floor_double(c);
-		int y = MathHelper.floor_double(actor.boundingBox.minY);
+		int y = MathHelper.floor_double(actor.getEntityBoundingBox().minY);
 		int z = MathHelper.floor_double(d);
 
 		for (int q = 0; q < MAX_PATHING_TRIES; q++) {
@@ -767,8 +767,8 @@ public class EntityFairy extends EntityAnimal {
 		double c = actor.posX + ( Math.sin(crazy) * 8F );
 		double d = actor.posZ + ( Math.cos(crazy) * 8F );
 		int x = MathHelper.floor_double(c);
-		int y = MathHelper.floor_double(actor.boundingBox.minY
-				+ ( rand.nextFloat() * ( u - actor.boundingBox.minY ) ));
+		int y = MathHelper.floor_double(actor.getEntityBoundingBox().minY
+				+ ( rand.nextFloat() * ( u - actor.getEntityBoundingBox().minY ) ));
 		int z = MathHelper.floor_double(d);
 
 		for (int q = 0; q < MAX_PATHING_TRIES; q++) {
@@ -800,7 +800,7 @@ public class EntityFairy extends EntityAnimal {
 	private void teleportToRuler(EntityLivingBase entity) {
 		int i = MathHelper.floor_double(entity.posX) - 2;
 		int j = MathHelper.floor_double(entity.posZ) - 2;
-		int k = MathHelper.floor_double(entity.boundingBox.minY);
+		int k = MathHelper.floor_double(entity.getEntityBoundingBox().minY);
 
 		for (int l = 0; l <= 4; l++) {
 			for (int i1 = 0; i1 <= 4; i1++) {
@@ -904,7 +904,7 @@ public class EntityFairy extends EntityAnimal {
 				}
 
 				List<?> list = worldObj.getEntitiesWithinAABB(EntityFairy.class,
-						boundingBox.expand(d, d, d));
+						getEntityBoundingBox().expand(d, d, d));
 
 				for (int j = 0; j < list.size(); j++) {
 					EntityFairy fairy = (EntityFairy) list.get(j);
@@ -930,7 +930,7 @@ public class EntityFairy extends EntityAnimal {
 			} else if (getFaction() == 0 && tamed()) {
 				// Looking for a player to follow.
 				List<?> list = worldObj.getEntitiesWithinAABB(EntityPlayer.class,
-						boundingBox.expand(16D, 16D, 16D));
+						getEntityBoundingBox().expand(16D, 16D, 16D));
 
 				for (int j = 0; j < list.size(); j++) {
 					EntityPlayer player = (EntityPlayer) list.get(j);
@@ -1021,7 +1021,7 @@ public class EntityFairy extends EntityAnimal {
 				// If a leader has lost her followers
 				flag = true;
 				List<?> list = worldObj.getEntitiesWithinAABB(EntityFairy.class,
-						boundingBox.expand(40D, 40D, 40D));
+						getEntityBoundingBox().expand(40D, 40D, 40D));
 
 				for (int j = 0; j < list.size(); j++) {
 					EntityFairy fairy = (EntityFairy) list.get(j);
@@ -1110,7 +1110,7 @@ public class EntityFairy extends EntityAnimal {
 		}
 
 		List<?> list = worldObj.getEntitiesWithinAABBExcludingEntity(this,
-				boundingBox.expand(16D, 16D, 16D));
+				getEntityBoundingBox().expand(16D, 16D, 16D));
 		Collections.shuffle(list, rand);
 
 		for (int j = 0; j < list.size(); j++) {
@@ -1249,7 +1249,7 @@ public class EntityFairy extends EntityAnimal {
 
 		if (entityHeal == null && healTime <= 0) {
 			List<?> list = worldObj.getEntitiesWithinAABBExcludingEntity(this,
-					boundingBox.expand(16D, 16D, 16D));
+					getEntityBoundingBox().expand(16D, 16D, 16D));
 
 			for (int j = 0; j < list.size(); j++) {
 				Entity entity = (Entity) list.get(j);
@@ -1384,7 +1384,7 @@ public class EntityFairy extends EntityAnimal {
 		}
 
 		List<?> list = worldObj.getEntitiesWithinAABBExcludingEntity(this,
-				boundingBox.expand(16D, 16D, 16D));
+				getEntityBoundingBox().expand(16D, 16D, 16D));
 		Collections.shuffle(list, rand);
 
 		for (int j = 0; j < list.size(); j++) {
@@ -1544,7 +1544,7 @@ public class EntityFairy extends EntityAnimal {
 					&& canEntityBeSeen(ruler)) {
 				// Gets the fairy's relative position
 				int aa = MathHelper.floor_double(posX);
-				int bb = MathHelper.floor_double(boundingBox.minY);
+				int bb = MathHelper.floor_double(getEntityBoundingBox().minY);
 				int cc = MathHelper.floor_double(posZ);
 
 				for (int i = 0; i < 245; i++) {
@@ -1608,7 +1608,7 @@ public class EntityFairy extends EntityAnimal {
 			double bb = (double) postY + 0.5D;
 			double cc = (double) postZ + 0.5D;
 			double dd = posX - aa;
-			double ee = boundingBox.minY - bb;
+			double ee = getEntityBoundingBox().minY - bb;
 			double ff = posZ - cc;
 			double gg = Math.sqrt(( dd * dd ) + ( ee * ee ) + ( ff * ff ));
 
@@ -2116,8 +2116,8 @@ public class EntityFairy extends EntityAnimal {
 
 	private boolean checkGroundBelow() {
 		int a = MathHelper.floor_double(posX);
-		int b = MathHelper.floor_double(boundingBox.minY);
-		int b1 = MathHelper.floor_double(boundingBox.minY - 0.5D);
+		int b = MathHelper.floor_double(getEntityBoundingBox().minY);
+		int b1 = MathHelper.floor_double(getEntityBoundingBox().minY - 0.5D);
 		int c = MathHelper.floor_double(posZ);
 
 		if (!isAirySpace(a, b - 1, c) || !isAirySpace(a, b1 - 1, c)) {
@@ -2205,7 +2205,7 @@ public class EntityFairy extends EntityAnimal {
 
 				if (worldObj.isDaytime()) {
 					int a = MathHelper.floor_double(posX);
-					int b = MathHelper.floor_double(boundingBox.minY);
+					int b = MathHelper.floor_double(getEntityBoundingBox().minY);
 					int c = MathHelper.floor_double(posZ);
 					float f = getBrightness(1.0F);
 
@@ -2227,7 +2227,7 @@ public class EntityFairy extends EntityAnimal {
 		} else {
 			if (witherTime % 10 == 0) {
 				int a = MathHelper.floor_double(posX);
-				int b = MathHelper.floor_double(boundingBox.minY);
+				int b = MathHelper.floor_double(getEntityBoundingBox().minY);
 				int c = MathHelper.floor_double(posZ);
 				float f = getBrightness(1.0F);
 
@@ -2266,7 +2266,7 @@ public class EntityFairy extends EntityAnimal {
 
 	private boolean checkFlyBlocked() {
 		int a = MathHelper.floor_double(posX);
-		int b = MathHelper.floor_double(boundingBox.minY);
+		int b = MathHelper.floor_double(getEntityBoundingBox().minY);
 		int c = MathHelper.floor_double(posZ);
 
 		if (!isAirySpace(a, b + 1, c) || !isAirySpace(a, b + 2, c)) {
@@ -2597,7 +2597,7 @@ public class EntityFairy extends EntityAnimal {
 	public void alertFollowers(Entity entity) {
 		if (queen() && getFaction() > 0) {
 			List<?> list = worldObj.getEntitiesWithinAABB(EntityFairy.class,
-					boundingBox.expand(40D, 40D, 40D));
+					getEntityBoundingBox().expand(40D, 40D, 40D));
 
 			for (int j = 0; j < list.size(); j++) {
 				EntityFairy fairy = (EntityFairy) list.get(j);
@@ -2626,7 +2626,7 @@ public class EntityFairy extends EntityAnimal {
 			EntityFairy queen = ( (EntityFairy) ruler );
 			boolean flag = false;
 			List<?> list = worldObj.getEntitiesWithinAABB(EntityFairy.class,
-					queen.boundingBox.expand(40D, 40D, 40D));
+					queen.getEntityBoundingBox().expand(40D, 40D, 40D));
 
 			for (int j = 0; j < list.size(); j++) {
 				EntityFairy fairy = (EntityFairy) list.get(j);
@@ -2682,9 +2682,9 @@ public class EntityFairy extends EntityAnimal {
 
 	// Don't let that spider bite you, spider bite hurt.
 	public void hydraFairy() {
-		double a = ( boundingBox.minX + boundingBox.maxX ) / 2D;
-		double b = ( boundingBox.minY + (double) yOffset ) - (double) ySize;
-		double c = ( boundingBox.minZ + boundingBox.maxZ ) / 2D;
+		double a = ( getEntitygetEntityBoundingBox()().minX + getEntitygetEntityBoundingBox()().maxX ) / 2D;
+		double b = ( getEntitygetEntityBoundingBox()().minY + (double) this.getYOffset() ) - (double) ySize;
+		double c = ( getEntitygetEntityBoundingBox()().minZ + getEntitygetEntityBoundingBox()().maxZ ) / 2D;
 		motionX = 0D;
 		motionY = -0.1D;
 		motionZ = 0D;
@@ -2696,7 +2696,7 @@ public class EntityFairy extends EntityAnimal {
 		setSitting(true);
 		onGround = true;
 		List<?> list = worldObj.getEntitiesWithinAABB(EntityFairy.class,
-				boundingBox.expand(80D, 80D, 80D));
+				getEntityBoundingBox().expand(80D, 80D, 80D));
 
 		for (int j = 0; j < list.size(); j++) {
 			EntityFairy fairy = (EntityFairy) list.get(j);
@@ -2740,8 +2740,8 @@ public class EntityFairy extends EntityAnimal {
 	@Override
 	protected void attackEntity(Entity entity, float f) {
 		if (attackTime <= 0 && f < ( tamed() ? 2.5F : 2.0F )
-				&& ( ( entity.boundingBox.maxY > boundingBox.minY
-						&& entity.boundingBox.minY < boundingBox.maxY )
+				&& ( ( entity.getEntityBoundingBox().maxY > getEntityBoundingBox().minY
+						&& entity.getEntityBoundingBox().minY < getEntityBoundingBox().maxY )
 						|| f == 0F )) {
 			attackTime = 20;
 
@@ -3073,7 +3073,7 @@ public class EntityFairy extends EntityAnimal {
 					&& biome.temperature >= 0.1F && biome.temperature <= 1.0F
 					&& biome.rainfall > 0.0F && biome.rainfall <= 0.8F) {
 				List<?> list = worldObj.getEntitiesWithinAABB(EntityFairy.class,
-						this.boundingBox.expand(32D, 32D, 32D));
+						this.getEntityBoundingBox().expand(32D, 32D, 32D));
 
 				if (( list == null || list.size() < 1 ) && !worldObj.isRemote) {
 					setJob(0);

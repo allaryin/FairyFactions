@@ -38,7 +38,7 @@ public class FairyJob {
 		}
 
 		final int x = MathHelper.floor_double( fairy.posX );
-		int y = MathHelper.floor_double( fairy.boundingBox.minY );
+		int y = MathHelper.floor_double( fairy.getEntityBoundingBox().minY );
 
 		if ( fairy.flymode() ) {
 			y--;
@@ -61,7 +61,7 @@ public class FairyJob {
 		}
 
 		final int x = MathHelper.floor_double( fairy.posX );
-		int y = MathHelper.floor_double( fairy.boundingBox.minY );
+		int y = MathHelper.floor_double( fairy.getEntityBoundingBox().minY );
 
 		if ( fairy.flymode() ) {
 			y--;
@@ -77,7 +77,7 @@ public class FairyJob {
 	}
 
 	public ArrayList<EntityItem> getGoodies( final World world ) {
-		final List<?> list = world.getEntitiesWithinAABB( EntityItem.class, fairy.boundingBox.expand( 2.5D, 2.5D, 2.5D ) );
+		final List<?> list = world.getEntitiesWithinAABB( EntityItem.class, fairy.getEntityBoundingBox().expand( 2.5D, 2.5D, 2.5D ) );
 		final ArrayList<EntityItem> list2 = new ArrayList<EntityItem>();
 
 		for ( int i = 0; i < list.size(); i++ ) {
@@ -99,7 +99,7 @@ public class FairyJob {
 	}
 
 	public ArrayList<EntityAnimal> getAnimals( final World world ) {
-		final List<?> list = world.getEntitiesWithinAABB( EntityAnimal.class, fairy.boundingBox.expand( 5D, 5D, 5D ) );
+		final List<?> list = world.getEntitiesWithinAABB( EntityAnimal.class, fairy.getEntityBoundingBox().expand( 5D, 5D, 5D ) );
 
 		if ( list.size() < 2 ) {
 			return null;
@@ -133,7 +133,7 @@ public class FairyJob {
 	}
 
 	public ArrayList<EntitySheep> getSheep( final World world ) {
-		final List<?> list = world.getEntitiesWithinAABB( EntitySheep.class, fairy.boundingBox.expand( 5D, 5D, 5D ) );
+		final List<?> list = world.getEntitiesWithinAABB( EntitySheep.class, fairy.getEntityBoundingBox().expand( 5D, 5D, 5D ) );
 
 		if ( list.size() < 1 ) {
 			return null;
