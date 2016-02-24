@@ -74,17 +74,22 @@ public class EntityFairy extends EntityAnimal {
 	private int					loseInterest;
 	private int					loseTeam;
 
-	private int					postX, postY, postZ;						// where is our sign?
+	private int					postX, postY, postZ;	// where is our sign?
 
 	private EntityLivingBase	ruler;
 	private EntityLivingBase	entityHeal;
 	private EntityLivingBase	entityFear;
+	/** NEW - replaces field deprecated since 1.1 that was finally made private in 1.8 */
 	private EntityLivingBase	entityToAttack;
 	public FairyEntityFishHook	fishEntity;
+	
+	/** NEW - replaces field removed in 1.8, any reference is likely broken */
+	@Deprecated
+	public int					attackTime;
 
 	// non-persistent fields
-	public float				sinage;										// what does this mean?
-	//private boolean				flag;									// flagged for what, precisely?
+	public float				sinage;					// what does this mean?
+	//private boolean				flag;				// flagged for what, precisely?
 	private boolean				createGroup;
 	private int					listActions;
 	public int					witherTime;
@@ -1520,8 +1525,7 @@ public class EntityFairy extends EntityAnimal {
 					// If the saved position is not a sign block.
 					abandonPost();
 				} else {
-					TileEntity tileentity = worldObj.getTileEntity(postX, postY,
-							postZ);
+					TileEntity tileentity = worldObj.getTileEntity(new BlockPos(postX, postY, postZ));
 					if (tileentity == null
 							|| !( tileentity instanceof TileEntitySign )) {
 						// Make sure the tile entity is right
@@ -1564,7 +1568,7 @@ public class EntityFairy extends EntityAnimal {
 					if (y >= 0 && y < worldObj.getHeight()) {
 						final Block block = worldObj.getBlockState(new BlockPos(x, y, z)).getBlock();
 						if (block == Blocks.standing_sign || block == Blocks.wall_sign) {
-							TileEntity tileentity = worldObj.getTileEntity(x, y, z);
+							TileEntity tileentity = worldObj.getTileEntity(new BlockPos(x, y, z));
 
 							if (tileentity != null && tileentity instanceof TileEntitySign) {
 								TileEntitySign sign = (TileEntitySign) tileentity;
