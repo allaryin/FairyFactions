@@ -46,6 +46,7 @@ public class CommonProxy {
 	private void registerEntity( int entityID, Class<?extends Entity> entityClass, String entityName ) {
 		EntityRegistry.registerModEntity( entityClass, entityName, entityID, FairyFactions.INSTANCE, 64, 4, true);
 	}
+	@SuppressWarnings("unchecked")
 	private void registerEntity( int entityID, Class<?extends Entity> entityClass, String entityName, int backgroundEggColor, int foregroundEggColor ) {
 		registerEntity( entityID, entityClass, entityName );
 		
@@ -89,6 +90,7 @@ public class CommonProxy {
 		eventChannel.sendToServer( packet );
 	}
 	public void sendToAllPlayers(Packet packet) {
+		@SuppressWarnings("unchecked")
 		List<EntityPlayerMP> players = MinecraftServer.getServer().getConfigurationManager().playerEntityList;
 		for( EntityPlayerMP player : players ) {
 			player.playerNetServerHandler.sendPacket(packet);

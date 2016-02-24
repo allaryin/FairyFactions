@@ -2,10 +2,8 @@ package fairies.event;
 
 import java.io.IOException;
 
-import cpw.mods.fml.common.network.internal.FMLProxyPacket;
 import fairies.FairyFactions;
 import fairies.entity.EntityFairy;
-import io.netty.buffer.Unpooled;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.network.NetHandlerPlayServer;
 import net.minecraft.network.NetworkManager;

@@ -29,7 +29,7 @@ public class FairyGroupGenerator
 
     public boolean generate(final World world, final Random rand, final int i, final int j, final int k)
     {
-        final List list = new ArrayList();
+        final List<int[]> list = new ArrayList<int[]>();
         int halfrad = radius / 2;
         final Block cordial = world.getBlock(i, j, k);
 

@@ -228,8 +228,8 @@ public class RenderFairy extends RenderLiving
     {
         if (Minecraft.isGuiEnabled() && fairy != renderManager.livingPlayer)
         {
-            float f = 1.6F;
-            float f1 = 0.01666667F * f;
+            // float f = 1.6F;
+            // float f1 = 0.01666667F * f;
             float f2 = fairy.getDistanceToEntity(renderManager.livingPlayer);
             float f3 = 12F;
 

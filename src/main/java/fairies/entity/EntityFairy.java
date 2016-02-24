@@ -4,8 +4,6 @@ import java.lang.reflect.Method;
 import java.util.Collections;
 import java.util.List;
 
-import org.apache.logging.log4j.Logger;
-
 import cpw.mods.fml.relauncher.ReflectionHelper;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
@@ -64,8 +62,6 @@ import net.minecraft.world.chunk.EmptyChunk;
 
 public class EntityFairy extends EntityAnimal {
 	
-	private static final Logger LOG = FairyFactions.LOGGER;
-
 	private boolean				cower;
 	public boolean				didHearts;
 	public boolean				didSwing;
@@ -87,7 +83,7 @@ public class EntityFairy extends EntityAnimal {
 
 	// non-persistent fields
 	public float				sinage;										// what does this mean?
-	private boolean				flag;										// flagged for what, precisely?
+	//private boolean				flag;									// flagged for what, precisely?
 	private boolean				createGroup;
 	private int					listActions;
 	public int					witherTime;
@@ -138,6 +134,7 @@ public class EntityFairy extends EntityAnimal {
 		dataWatcher.addObject(I_TOOL, new Integer(0));
 	}
 	
+	@SuppressWarnings("unused")
 	private void _dump_() {
 		StringBuilder sb = new StringBuilder();
 		sb.append(this.getEntityId());
@@ -540,7 +537,7 @@ public class EntityFairy extends EntityAnimal {
 
 	public void despawnFollowers() {
 		if (queen() && getFaction() > 0) {
-			List list = worldObj.getEntitiesWithinAABB(EntityFairy.class,
+			List<?> list = worldObj.getEntitiesWithinAABB(EntityFairy.class,
 					boundingBox.expand(40D, 40D, 40D));
 
 			for (int j = 0; j < list.size(); j++) {
@@ -908,7 +905,7 @@ public class EntityFairy extends EntityAnimal {
 					d = 16D;
 				}
 
-				List list = worldObj.getEntitiesWithinAABB(EntityFairy.class,
+				List<?> list = worldObj.getEntitiesWithinAABB(EntityFairy.class,
 						boundingBox.expand(d, d, d));
 
 				for (int j = 0; j < list.size(); j++) {
@@ -934,7 +931,7 @@ public class EntityFairy extends EntityAnimal {
 				}
 			} else if (getFaction() == 0 && tamed()) {
 				// Looking for a player to follow.
-				List list = worldObj.getEntitiesWithinAABB(EntityPlayer.class,
+				List<?> list = worldObj.getEntitiesWithinAABB(EntityPlayer.class,
 						boundingBox.expand(16D, 16D, 16D));
 
 				for (int j = 0; j < list.size(); j++) {
@@ -1025,7 +1022,7 @@ public class EntityFairy extends EntityAnimal {
 			} else if (queen()) {
 				// If a leader has lost her followers
 				flag = true;
-				List list = worldObj.getEntitiesWithinAABB(EntityFairy.class,
+				List<?> list = worldObj.getEntitiesWithinAABB(EntityFairy.class,
 						boundingBox.expand(40D, 40D, 40D));
 
 				for (int j = 0; j < list.size(); j++) {
@@ -1114,7 +1111,7 @@ public class EntityFairy extends EntityAnimal {
 			return;
 		}
 
-		List list = worldObj.getEntitiesWithinAABBExcludingEntity(this,
+		List<?> list = worldObj.getEntitiesWithinAABBExcludingEntity(this,
 				boundingBox.expand(16D, 16D, 16D));
 		Collections.shuffle(list, rand);
 
@@ -1218,7 +1215,7 @@ public class EntityFairy extends EntityAnimal {
 	}
 
 	public boolean peacefulAnimal(EntityAnimal animal) {
-		Class thing = animal.getClass();
+		Class<? extends EntityAnimal> thing = animal.getClass();
 		return thing == EntityPig.class || thing == EntityCow.class
 				|| thing == EntityChicken.class || thing == EntitySheep.class
 				|| thing == EntityMooshroom.class;
@@ -1253,7 +1250,7 @@ public class EntityFairy extends EntityAnimal {
 		}
 
 		if (entityHeal == null && healTime <= 0) {
-			List list = worldObj.getEntitiesWithinAABBExcludingEntity(this,
+			List<?> list = worldObj.getEntitiesWithinAABBExcludingEntity(this,
 					boundingBox.expand(16D, 16D, 16D));
 
 			for (int j = 0; j < list.size(); j++) {
@@ -1388,7 +1385,7 @@ public class EntityFairy extends EntityAnimal {
 			return;
 		}
 
-		List list = worldObj.getEntitiesWithinAABBExcludingEntity(this,
+		List<?> list = worldObj.getEntitiesWithinAABBExcludingEntity(this,
 				boundingBox.expand(16D, 16D, 16D));
 		Collections.shuffle(list, rand);
 
@@ -1489,6 +1486,7 @@ public class EntityFairy extends EntityAnimal {
 		}
 	}
 
+	@SuppressWarnings("unused")
 	private int postedCount;		// flag for counting posted checks
 	// The AI method which handles post-related activities.
 	private void handlePosted(boolean flag) {
@@ -2600,7 +2598,7 @@ public class EntityFairy extends EntityAnimal {
 
 	public void alertFollowers(Entity entity) {
 		if (queen() && getFaction() > 0) {
-			List list = worldObj.getEntitiesWithinAABB(EntityFairy.class,
+			List<?> list = worldObj.getEntitiesWithinAABB(EntityFairy.class,
 					boundingBox.expand(40D, 40D, 40D));
 
 			for (int j = 0; j < list.size(); j++) {
@@ -2629,7 +2627,7 @@ public class EntityFairy extends EntityAnimal {
 				&& sameTeam((EntityFairy) ruler)) {
 			EntityFairy queen = ( (EntityFairy) ruler );
 			boolean flag = false;
-			List list = worldObj.getEntitiesWithinAABB(EntityFairy.class,
+			List<?> list = worldObj.getEntitiesWithinAABB(EntityFairy.class,
 					queen.boundingBox.expand(40D, 40D, 40D));
 
 			for (int j = 0; j < list.size(); j++) {
@@ -2699,7 +2697,7 @@ public class EntityFairy extends EntityAnimal {
 		setPathToEntity((PathEntity) null);
 		setSitting(true);
 		onGround = true;
-		List list = worldObj.getEntitiesWithinAABB(EntityFairy.class,
+		List<?> list = worldObj.getEntitiesWithinAABB(EntityFairy.class,
 				boundingBox.expand(80D, 80D, 80D));
 
 		for (int j = 0; j < list.size(); j++) {
@@ -3076,7 +3074,7 @@ public class EntityFairy extends EntityAnimal {
 					&& ( biome.rootHeight + biome.heightVariation ) <= 0.5F
 					&& biome.temperature >= 0.1F && biome.temperature <= 1.0F
 					&& biome.rainfall > 0.0F && biome.rainfall <= 0.8F) {
-				List list = worldObj.getEntitiesWithinAABB(EntityFairy.class,
+				List<?> list = worldObj.getEntitiesWithinAABB(EntityFairy.class,
 						this.boundingBox.expand(32D, 32D, 32D));
 
 				if (( list == null || list.size() < 1 ) && !worldObj.isRemote) {

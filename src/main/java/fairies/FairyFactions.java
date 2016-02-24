@@ -23,7 +23,6 @@ import net.minecraft.entity.EnumCreatureType;
 import net.minecraft.world.WorldServer;
 import net.minecraftforge.common.DimensionManager;
 import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.common.config.Configuration;
 
 @Mod(modid = Version.MOD_ID, version = Version.VERSION)
 public class FairyFactions {
@@ -36,15 +35,13 @@ public class FairyFactions {
 
 	public static final Logger		LOGGER	= LogManager.getFormatterLogger(Version.MOD_ID);
 
-	private File					BaseDir;
-	private static FairyConfig		Config;
-
 	private Spawner					fairySpawner;
 
 	@EventHandler
 	public void preInit(FMLPreInitializationEvent event) {
-		BaseDir = new File(event.getModConfigurationDirectory(), Version.MOD_ID);
-		Config = new FairyConfig(event.getSuggestedConfigurationFile());
+		final File BaseDir = new File(event.getModConfigurationDirectory(), Version.MOD_ID);
+		@SuppressWarnings("unused")
+		final FairyConfig Config = new FairyConfig(event.getSuggestedConfigurationFile());
 
 		if (!BaseDir.exists())
 			BaseDir.mkdir();
@@ -100,6 +97,7 @@ public class FairyFactions {
 	public static EntityFairy getFairy(int fairyID) {
 		for( WorldServer dim : DimensionManager.getWorlds() ) {
 			if( dim != null ) {
+				@SuppressWarnings("unchecked")
 				List<Entity> entities = dim.loadedEntityList;
 				if( entities != null && !entities.isEmpty() ) {
 					for( Entity entity : entities ) {

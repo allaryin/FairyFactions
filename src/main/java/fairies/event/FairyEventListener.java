@@ -12,7 +12,6 @@ import fairies.Version;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.network.NetHandlerPlayServer;
-import net.minecraft.network.NetworkManager;
 import net.minecraft.network.PacketBuffer;
 
 public class FairyEventListener {

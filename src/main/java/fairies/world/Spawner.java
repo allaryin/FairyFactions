@@ -40,23 +40,23 @@ public final class Spawner {
 	private int			maxMobs						= 60;
 	private int			maxAquatic					= 10;
 	public BiomeGenBase	standardBiomes[];
-	public List			biomeList;
+	public List<String>			biomeList;
 	public List[]		entityClasses;
 	protected List[]	customMobSpawnList;
 	protected List[]	customCreatureSpawnList;
 	protected List[]	customAquaticSpawnList;
-	private Set			eligibleChunksForSpawning	= new HashSet();
+	private Set<ChunkCoordIntPair>			eligibleChunksForSpawning	= new HashSet<ChunkCoordIntPair>();
 	private List<Class>	vanillaClassList;
 
 	public Spawner() {
-		biomeList = new ArrayList();
+		biomeList = new ArrayList<String>();
 
 		try {
 			Field afield[] = (BiomeGenBase.class).getDeclaredFields();
-			LinkedList linkedlist = new LinkedList();
+			LinkedList<BiomeGenBase> linkedlist = new LinkedList<BiomeGenBase>();
 
 			for (int j = 0; j < afield.length; j++) {
-				Class class1 = afield[j].getType();
+				Class<?> class1 = afield[j].getType();
 
 				if ((afield[j].getModifiers() & 8) != 0 && class1.isAssignableFrom(BiomeGenBase.class)) {
 					BiomeGenBase biomegenbase = (BiomeGenBase) afield[j].get(null);
@@ -92,7 +92,7 @@ public final class Spawner {
 		if( world != null && !world.isRemote 
 				&& world.difficultySetting.getDifficultyId() > 0 
 				&& world.getWorldInfo().getWorldTime() % 300L == 0L ) {
-			final List list = world.playerEntities;
+			final List<?> list = world.playerEntities;
 			if( list != null && list.size() > 0 ) {
 				final int maxNum = 12 + (list.size() * 6);
 				this.setMaxAnimals(maxNum);
@@ -111,18 +111,18 @@ public final class Spawner {
 
 	public void clearLists() {
 		for (int x = 0; x < biomeList.size(); x++) {
-			customCreatureSpawnList[x] = new ArrayList();
-			customMobSpawnList[x] = new ArrayList();
-			customAquaticSpawnList[x] = new ArrayList();
+			customCreatureSpawnList[x] = new ArrayList<Object>();
+			customMobSpawnList[x] = new ArrayList<Object>();
+			customAquaticSpawnList[x] = new ArrayList<Object>();
 		}
 
 		for (int x = 0; x < 3; x++) {
-			entityClasses[x] = new ArrayList();
+			entityClasses[x] = new ArrayList<Object>();
 		}
 	}
 
 	// this one spawns a single mob up to max times
-	public final int doSpecificSpawning(World worldObj, Class myClass, int max, EnumCreatureType enumcreaturetype) {
+	public final int doSpecificSpawning(World worldObj, Class<?> myClass, int max, EnumCreatureType enumcreaturetype) {
 		// boolean flag = false;
 		// this initialises chunks for spawning
 		eligibleChunksForSpawning.clear();
@@ -144,7 +144,7 @@ public final class Spawner {
 
 		countTotal = 0;
 		ChunkCoordinates chunkcoordspawn = worldObj.getSpawnPoint();
-		Iterator iterator = eligibleChunksForSpawning.iterator();
+		Iterator<ChunkCoordIntPair> iterator = eligibleChunksForSpawning.iterator();
 		label113:
 
 		while (iterator.hasNext()) {
@@ -224,6 +224,7 @@ public final class Spawner {
 	}
 
 	// regular spawning with list
+	@SuppressWarnings("unchecked")
 	public final int doCustomSpawning(World worldObj, boolean spawnMobs, boolean spawnAnmls) {
 		if (!spawnMobs && !spawnAnmls) {
 			return 0;
@@ -260,7 +261,7 @@ public final class Spawner {
 																														// /
 																														// 256))
 				{
-					Iterator iterator = eligibleChunksForSpawning.iterator();
+					Iterator<ChunkCoordIntPair> iterator = eligibleChunksForSpawning.iterator();
 					label113:
 
 					while (iterator.hasNext()) {
@@ -271,21 +272,21 @@ public final class Spawner {
 																// chunk is at
 																// i.e. forest,
 																// etc
-						List listspawns = getCustomBiomeSpawnList(getCustomSpawnableList(enumcreaturetype),
+						List<?> listspawns = getCustomBiomeSpawnList(getCustomSpawnableList(enumcreaturetype),
 								biomegenbase);
 
 						if (listspawns != null && !listspawns.isEmpty()) {
 							int var13 = 0;
 							SpawnListEntry spawnlistentry;
 
-							for (Iterator iteratorB = listspawns.iterator(); iteratorB
+							for (Iterator<?> iteratorB = listspawns.iterator(); iteratorB
 									.hasNext(); var13 += spawnlistentry.itemWeight) {
 								spawnlistentry = (SpawnListEntry) iteratorB.next();
 							}
 
 							int var40 = worldObj.rand.nextInt(var13);
 							spawnlistentry = (SpawnListEntry) listspawns.get(0);
-							Iterator iteratorC = listspawns.iterator();
+							Iterator<?> iteratorC = listspawns.iterator();
 
 							while (iteratorC.hasNext()) {
 								SpawnListEntry spawnlistentryA = (SpawnListEntry) iteratorC.next();
@@ -300,7 +301,7 @@ public final class Spawner {
 							int max = spawnlistentry.maxGroupCount;
 
 							if (max > 0) {
-								Class class1 = spawnlistentry.entityClass;
+								Class<?> class1 = spawnlistentry.entityClass;
 
 								if (class1 != null && (max > countEntities(class1, worldObj))) {
 									continue label113;
@@ -389,29 +390,30 @@ public final class Spawner {
 		}
 	}
 
-	public void AddCustomSpawn(Class class1, int i, int max, EnumCreatureType enumcreaturetype) {
+	public void AddCustomSpawn(Class<?> class1, int i, int max, EnumCreatureType enumcreaturetype) {
 		AddCustomSpawn(class1, i, -1, max, enumcreaturetype, null);
 	}
 
-	public void AddCustomSpawn(Class class1, int i, EnumCreatureType enumcreaturetype) {
+	public void AddCustomSpawn(Class<?> class1, int i, EnumCreatureType enumcreaturetype) {
 		AddCustomSpawn(class1, i, -1, -1, enumcreaturetype, null);
 	}
 
-	public void AddCustomSpawn(Class class1, int i, int max, EnumCreatureType enumcreaturetype,
+	public void AddCustomSpawn(Class<?> class1, int i, int max, EnumCreatureType enumcreaturetype,
 			BiomeGenBase abiomegenbase[]) {
 		AddCustomSpawn(class1, i, -1, max, enumcreaturetype, abiomegenbase);
 	}
 
-	public void AddCustomSpawn(Class class1, int i, EnumCreatureType enumcreaturetype, BiomeGenBase abiomegenbase[]) {
+	public void AddCustomSpawn(Class<?> class1, int i, EnumCreatureType enumcreaturetype, BiomeGenBase abiomegenbase[]) {
 		AddCustomSpawn(class1, i, -1, -1, enumcreaturetype, abiomegenbase);
 	}
 
 	// this one adds spawn where biome is not specified
-	public void AddCustomSpawn(Class class1, int i, int j, int k, EnumCreatureType enumcreaturetype) {
+	public void AddCustomSpawn(Class<?> class1, int i, int j, int k, EnumCreatureType enumcreaturetype) {
 		AddCustomSpawn(class1, i, j, k, enumcreaturetype, null);
 	}
 
-	public void AddCustomSpawn(Class class1, int i, int j, int k, EnumCreatureType enumcreaturetype,
+	@SuppressWarnings("unchecked")
+	public void AddCustomSpawn(Class<?> class1, int i, int j, int k, EnumCreatureType enumcreaturetype,
 			BiomeGenBase abiomegenbase[]) {
 		if (class1 == null) {
 			throw new IllegalArgumentException("entityClass cannot be null");
@@ -429,9 +431,9 @@ public final class Spawner {
 		{
 			boolean flag = false;
 
-			for (Iterator iterator = entityClasses[x1].iterator(); iterator.hasNext();) {
+			for (Iterator<?> iterator = entityClasses[x1].iterator(); iterator.hasNext();) {
 				if (iterator != null) {
-					Class class2 = (Class) iterator.next();
+					Class<?> class2 = (Class<?>) iterator.next();
 
 					if (class2 == class1) {
 						flag = true;
@@ -452,7 +454,7 @@ public final class Spawner {
 				int x = biomeList.indexOf(abiomegenbase[l].biomeName);
 				boolean flag = false;
 
-				for (Iterator iterator = fulllist[x].iterator(); iterator.hasNext();) {
+				for (Iterator<?> iterator = fulllist[x].iterator(); iterator.hasNext();) {
 					if (iterator != null) {
 						SpawnListEntry spawnlistentry = (SpawnListEntry) iterator.next();
 
@@ -473,11 +475,11 @@ public final class Spawner {
 		}
 	}
 
-	public void RemoveCustomSpawn(Class class1, EnumCreatureType enumcreaturetype) {
+	public void RemoveCustomSpawn(Class<?> class1, EnumCreatureType enumcreaturetype) {
 		RemoveCustomSpawn(class1, enumcreaturetype, null);
 	}
 
-	public void RemoveCustomSpawn(Class class1, EnumCreatureType enumcreaturetype, BiomeGenBase abiomegenbase[]) {
+	public void RemoveCustomSpawn(Class<?> class1, EnumCreatureType enumcreaturetype, BiomeGenBase abiomegenbase[]) {
 		if (class1 == null) {
 			throw new IllegalArgumentException("entityClass cannot be null");
 		}
@@ -496,7 +498,7 @@ public final class Spawner {
 			if (fulllist != null) {
 				int x = biomeList.indexOf(abiomegenbase[l].biomeName);
 
-				for (Iterator iterator = fulllist[x].iterator(); iterator.hasNext();) {
+				for (Iterator<?> iterator = fulllist[x].iterator(); iterator.hasNext();) {
 					if (iterator != null) {
 						SpawnListEntry spawnlistentry = (SpawnListEntry) iterator.next();
 
@@ -529,11 +531,11 @@ public final class Spawner {
 		int i = getEnumIndex(enumcreaturetype);
 		int finalcount = 0;
 		if( i > -1 ) {
-			boolean flag = false;
+			// boolean flag = false;
 
-			for (Iterator iterator = entityClasses[i].iterator(); iterator.hasNext();) {
+			for (Iterator<?> iterator = entityClasses[i].iterator(); iterator.hasNext();) {
 				if (iterator != null) {
-					Class class1 = (Class) iterator.next();
+					Class<?> class1 = (Class<?>) iterator.next();
 
 					if (class1 != null) {
 						finalcount += world.countEntities(class1);
@@ -560,7 +562,7 @@ public final class Spawner {
 		}
 	}
 
-	private List getCustomBiomeSpawnList(List[] fulllist, BiomeGenBase biomegenbase) {
+	private List<?> getCustomBiomeSpawnList(List[] fulllist, BiomeGenBase biomegenbase) {
 		int x = biomeList.indexOf(biomegenbase.biomeName);
 
 		if (x >= 0) {
@@ -615,7 +617,7 @@ public final class Spawner {
 
 		if (enumcreaturetype.getCreatureMaterial() == Material.water) {
 			final Block block = world.getBlock(i, j, k);
-			final Block blockAbove = world.getBlock(i, j + 1, k);
+			// final Block blockAbove = world.getBlock(i, j + 1, k);
 
 			return block.getMaterial().isLiquid() && !block.isNormalCube();
 		} else {
@@ -665,7 +667,7 @@ public final class Spawner {
 		return 0;
 	}
 
-	public final int countEntities(Class class1, World worldObj) {
+	public final int countEntities(Class<?> class1, World worldObj) {
 		int i = 0;
 
 		for (int j = 0; j < worldObj.loadedEntityList.size(); j++) {
@@ -710,7 +712,7 @@ public final class Spawner {
 	}
 
 	public final int despawnMob(World worldObj, Class... classList) {
-		List<Class> myList = new ArrayList();
+		List<Class> myList = new ArrayList<Class>();
 
 		for (int i = 0; i < classList.length; i++) {
 			myList.add(classList[i]);
@@ -733,9 +735,9 @@ public final class Spawner {
 				continue;
 			}
 
-			for (Iterator iterator = classList.iterator(); iterator.hasNext();) {
+			for (Iterator<Class> iterator = classList.iterator(); iterator.hasNext();) {
 				if (iterator != null) {
-					Class class2 = (Class) iterator.next();
+					Class<?> class2 = (Class<?>) iterator.next();
 
 					if (class2 == entity.getClass()) {
 						count += entityDespawnCheck(worldObj, (EntityLiving) entity);
@@ -747,7 +749,7 @@ public final class Spawner {
 		return count;
 	}
 
-	public final int despawnMobWithMinimum(World worldObj, Class class1, int minimum) {
+	public final int despawnMobWithMinimum(World worldObj, Class<?> class1, int minimum) {
 		int killedcount = 0;
 		int mobcount = countEntities(class1, worldObj);
 

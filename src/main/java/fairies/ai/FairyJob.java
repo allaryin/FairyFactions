@@ -76,9 +76,9 @@ public class FairyJob {
 		getNearbyChest3( x, y, z, world );
 	}
 
-	public ArrayList getGoodies( final World world ) {
-		final List list = world.getEntitiesWithinAABB( EntityItem.class, fairy.boundingBox.expand( 2.5D, 2.5D, 2.5D ) );
-		final ArrayList list2 = new ArrayList();
+	public ArrayList<EntityItem> getGoodies( final World world ) {
+		final List<?> list = world.getEntitiesWithinAABB( EntityItem.class, fairy.boundingBox.expand( 2.5D, 2.5D, 2.5D ) );
+		final ArrayList<EntityItem> list2 = new ArrayList<EntityItem>();
 
 		for ( int i = 0; i < list.size(); i++ ) {
 			final EntityItem entity1 = (EntityItem) list.get( i );
@@ -98,14 +98,14 @@ public class FairyJob {
 		}
 	}
 
-	public ArrayList getAnimals( final World world ) {
-		final List list = world.getEntitiesWithinAABB( EntityAnimal.class, fairy.boundingBox.expand( 5D, 5D, 5D ) );
+	public ArrayList<EntityAnimal> getAnimals( final World world ) {
+		final List<?> list = world.getEntitiesWithinAABB( EntityAnimal.class, fairy.boundingBox.expand( 5D, 5D, 5D ) );
 
 		if ( list.size() < 2 ) {
 			return null;
 		}
 
-		final ArrayList list2 = new ArrayList();
+		final ArrayList<EntityAnimal> list2 = new ArrayList<EntityAnimal>();
 
 		for ( int i = 0; i < list.size(); i++ ) {
 			final EntityAnimal entity1 = (EntityAnimal) list.get( i );
@@ -132,14 +132,14 @@ public class FairyJob {
 		}
 	}
 
-	public ArrayList getSheep( final World world ) {
-		final List list = world.getEntitiesWithinAABB( EntitySheep.class, fairy.boundingBox.expand( 5D, 5D, 5D ) );
+	public ArrayList<EntitySheep> getSheep( final World world ) {
+		final List<?> list = world.getEntitiesWithinAABB( EntitySheep.class, fairy.boundingBox.expand( 5D, 5D, 5D ) );
 
 		if ( list.size() < 1 ) {
 			return null;
 		}
 
-		final ArrayList list2 = new ArrayList();
+		final ArrayList<EntitySheep> list2 = new ArrayList<EntitySheep>();
 
 		for ( int i = 0; i < list.size(); i++ ) {
 			final EntitySheep entity1 = (EntitySheep) list.get( i );
@@ -512,7 +512,7 @@ public class FairyJob {
 
 	// Attempt to breed animals
 	private boolean onBreedingUse( final ItemStack stack, final World world ) {
-		final ArrayList animals = getAnimals( world );
+		final ArrayList<EntityAnimal> animals = getAnimals( world );
 
 		if ( animals == null ) {
 			return false;
@@ -559,7 +559,7 @@ public class FairyJob {
 	}
 
 	private boolean onShearingUse( final ItemStack stack, final World world ) {
-		final ArrayList sheep = getSheep( world );
+		final ArrayList<EntitySheep> sheep = getSheep( world );
 		triedShearing = true;
 
 		if ( sheep == null ) {
@@ -669,6 +669,8 @@ public class FairyJob {
 	}
 
 	// Check if it's a good place to put a sapling down
+	@SuppressWarnings("unused")
+	@Deprecated
 	private int goodPlaceForTrees( final int x, final int y, final int z, final World world ) {
 		final Block i = world.getBlock( x, y, z );
 
@@ -939,5 +941,5 @@ public class FairyJob {
 	// Make sure that shearing is only attempted once per chest.
 	private boolean				triedShearing;
 	// A list of items on the ground.
-	private ArrayList			goodies;
+	private ArrayList<EntityItem>			goodies;
 }

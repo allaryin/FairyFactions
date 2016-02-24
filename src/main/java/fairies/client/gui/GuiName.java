@@ -2,8 +2,6 @@ package fairies.client.gui;
 
 import org.lwjgl.input.Keyboard;
 
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
 import fairies.FairyFactions;
 import fairies.entity.EntityFairy;
 import net.minecraft.client.gui.GuiButton;
@@ -14,7 +12,6 @@ public class GuiName extends GuiScreen
 {
     protected String screenTitle;
     private EntityFairy fairy;
-    private int updateCounter;
     private String nameText;
 
     public GuiName(EntityFairy entityfairy)
@@ -31,7 +28,8 @@ public class GuiName extends GuiScreen
         }
     }
 
-    @Override
+    @SuppressWarnings("unchecked")
+	@Override
     public void initGui()
     {
         buttonList.clear();
@@ -63,8 +61,6 @@ public class GuiName extends GuiScreen
     @Override
     public void updateScreen()
     {
-        updateCounter++;
-
         if (fairy == null || fairy.isDead)
         {
             mc.displayGuiScreen(null);

@@ -14,7 +14,8 @@ import net.minecraft.client.renderer.Tessellator;
 
 public class FairyModelRenderer
 {
-    public FairyModelRenderer(final ModelBase modelbase, final int i, final int j)
+    @SuppressWarnings("unchecked")
+	public FairyModelRenderer(final ModelBase modelbase, final int i, final int j)
     {
         field_35971_a = 64F;
         field_35970_b = 32F;

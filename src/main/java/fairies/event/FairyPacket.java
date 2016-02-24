@@ -3,7 +3,6 @@ package fairies.event;
 import cpw.mods.fml.common.network.internal.FMLProxyPacket;
 import fairies.Version;
 import fairies.event.FairyEventListener.PacketType;
-import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import net.minecraft.network.NetworkManager;
 import net.minecraft.network.PacketBuffer;
