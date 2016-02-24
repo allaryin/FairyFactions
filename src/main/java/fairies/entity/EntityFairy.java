@@ -57,6 +57,7 @@ import net.minecraft.world.biome.BiomeGenBase;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.chunk.EmptyChunk;
 import net.minecraftforge.fml.relauncher.ReflectionHelper;
+import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
 
@@ -487,14 +488,14 @@ public class EntityFairy extends EntityAnimal {
 	}
 
 	@Override
-	protected void updateFallState(double par1, boolean par3) {
-		super.updateFallState(par1 / 6D, par3);
+	protected void updateFallState(double y, boolean onGroundIn, Block blockIn, BlockPos pos) {
+		super.updateFallState(y / 6D, onGroundIn, blockIn, pos);
 		int i = MathHelper.floor_double(posX);
 		int j = MathHelper.floor_double(getEntityBoundingBox().minY) - 1;
 		int k = MathHelper.floor_double(posZ);
 
 		if (j > 0 && j < worldObj.getHeight()) {
-			worldObj.markBlockForUpdate(i, j, k);
+			worldObj.markBlockForUpdate(new BlockPos(i, j, k));
 		}
 	}
 
@@ -703,7 +704,7 @@ public class EntityFairy extends EntityAnimal {
 		}
 
 		// fairies run away from players in peaceful
-		if (worldObj.difficultySetting == EnumDifficulty.PEACEFUL
+		if (worldObj.getDifficulty() == EnumDifficulty.PEACEFUL
 				&& entityToAttack != null
 				&& entityToAttack instanceof EntityPlayer) {
 			setEntityFear(entityToAttack);
@@ -750,12 +751,15 @@ public class EntityFairy extends EntityAnimal {
 
 			if (j > 4 && j < worldObj.getHeight() - 1 && isAirySpace(i, j, k)
 					&& !isAirySpace(i, j - 1, k)) {
-				PathEntity dogs = worldObj.getEntityPathToXYZ(actor, i, j, k,
+				/*
+				PathEntity path = worldObj.getEntityPathToXYZ(actor, i, j, k,
 						FairyConfig.BEHAVIOR_PATH_RANGE, false, false, true, true);
 
-				if (dogs != null) {
-					return dogs;
+				if (path != null) {
+					return path;
 				}
+				*/
+				return this.getNavigator().getPathToXYZ(i, y, k);
 			}
 		}
 
@@ -786,12 +790,15 @@ public class EntityFairy extends EntityAnimal {
 
 			if (j > 4 && j < worldObj.getHeight() - 1 && isAirySpace(i, j, k)
 					&& !isAirySpace(i, j - 1, k)) {
-				PathEntity dogs = worldObj.getEntityPathToXYZ(actor, i, j, k,
+				/*
+				PathEntity path = worldObj.getEntityPathToXYZ(actor, i, j, k,
 						FairyConfig.BEHAVIOR_PATH_RANGE, false, false, true, true);
 
-				if (dogs != null) {
-					return dogs;
+				if (path != null) {
+					return path;
 				}
+				*/
+				return this.getNavigator().getPathToXYZ(i, y, k);
 			}
 		}
 
@@ -882,7 +889,8 @@ public class EntityFairy extends EntityAnimal {
 					PathEntity dest = roam(getEntityFear(), this, PATH_AWAY);
 
 					if (dest != null) {
-						setPathToEntity(dest);
+						// setPathToEntity(dest);
+						this.getNavigator().setPath(dest, this.getAIMoveSpeed());
 						setCryTime(getCryTime() + 120);
 					}
 				}
@@ -957,27 +965,36 @@ public class EntityFairy extends EntityAnimal {
 			// Guards and Queens walk closer to the player (Medic healing?)
 			if (( guard() || queen() ) && canEntityBeSeen(ruler) && dist > 5F
 					&& dist < 16F) {
+				/*
 				PathEntity path = worldObj.getPathEntityToEntity(this, ruler,
 						16F, false, false, true, true);
 
 				if (path != null) {
 					setPathToEntity(path);
 				}
+				*/
+				this.getNavigator().tryMoveToEntityLiving(ruler, this.getAIMoveSpeed());
 			} else {
 				if (scout() && ruler instanceof EntityFairy) {
 					// Scouts stay way out there on the perimeter.
 					if (dist < 12F) {
 						PathEntity dest = roam(ruler, this, (float) Math.PI);
 
+						/*
 						if (dest != null) {
 							setPathToEntity(dest);
 						}
+						*/
+						this.getNavigator().setPath(dest, this.getAIMoveSpeed());
 					} else if (dist > 24F) {
 						PathEntity dest = roam(ruler, this, 0F);
 
+						/*
 						if (dest != null) {
 							setPathToEntity(dest);
 						}
+						*/
+						this.getNavigator().setPath(dest, this.getAIMoveSpeed());
 					}
 				} else {
 					// Regular fairies stay moderately close.
@@ -990,9 +1007,12 @@ public class EntityFairy extends EntityAnimal {
 							: 6F )) {
 						PathEntity dest = roam(ruler, this, 0F);
 
+						/*
 						if (dest != null) {
 							setPathToEntity(dest);
 						}
+						*/
+						this.getNavigator().setPath(dest, this.getAIMoveSpeed());
 					}
 				}
 			}
@@ -1008,9 +1028,12 @@ public class EntityFairy extends EntityAnimal {
 			} else if (!hasPath() && dist < 16F) {
 				PathEntity dest = roam(ruler, this, 0F);
 
+				/*
 				if (dest != null) {
 					setPathToEntity(dest);
 				}
+				*/
+				this.getNavigator().setPath(dest, this.getAIMoveSpeed());
 			}
 		}
 
@@ -1060,7 +1083,8 @@ public class EntityFairy extends EntityAnimal {
 					disband();
 					loseTeam = 0;
 					setCryTime(0);
-					setPathToEntity((PathEntity) null);
+					// setPathToEntity((PathEntity) null);
+					this.getNavigator().clearPathEntity();
 				}
 			} else {
 				loseTeam = 0;
@@ -1129,7 +1153,7 @@ public class EntityFairy extends EntityAnimal {
 					EntityFairy fairy = (EntityFairy) list.get(j);
 
 					if (fairy.getHealth() > 0) {
-						Entity scary = (Entity) null;
+						EntityLivingBase scary = null;
 
 						if (fairy.getEntityFear() != null) {
 							scary = fairy.getEntityFear();
@@ -1151,24 +1175,27 @@ public class EntityFairy extends EntityAnimal {
 										&& canEntityBeSeen(scary)) {
 									setCryTime(120);
 									this.setEntityFear(scary);
-									PathEntity dest = roam(entity, this,
-											(float) Math.PI);
+									PathEntity dest = roam(entity, this, (float) Math.PI);
 
+									/*
 									if (dest != null) {
 										setPathToEntity(dest);
 									}
+									*/
+									this.getNavigator().setPath(dest, this.getAIMoveSpeed());
 
 									break;
 								} else if (fairy.getCryTime() > 60) {
-									setCryTime(Math.max(fairy.getCryTime() - 60,
-											0));
+									setCryTime(Math.max(fairy.getCryTime() - 60, 0));
 									this.setEntityFear(scary);
-									PathEntity dest = roam(entity, this,
-											(float) Math.PI);
+									PathEntity dest = roam(entity, this, (float) Math.PI);
 
+									/*
 									if (dest != null) {
 										setPathToEntity(dest);
 									}
+									*/
+									this.getNavigator().setPath(dest, this.getAIMoveSpeed());
 
 									break;
 								}
@@ -1202,7 +1229,8 @@ public class EntityFairy extends EntityAnimal {
 						PathEntity dest = roam(entity, this, (float) Math.PI);
 
 						if (dest != null) {
-							setPathToEntity(dest);
+							// setPathToEntity(dest);
+							this.getNavigator().setPath(dest, this.getAIMoveSpeed());
 
 							if (!flymode()) {
 								setFlymode(true);
@@ -1235,11 +1263,15 @@ public class EntityFairy extends EntityAnimal {
 			if (entityHeal.getHealth() <= 0 || entityHeal.isDead) {
 				entityHeal = null;
 			} else if (!hasPath()) {
+				/*
 				PathEntity dest = worldObj.getPathEntityToEntity(this,
 						entityHeal, 16F, false, false, true, true);
-
+				*/
+				PathEntity dest = this.getNavigator().getPathToEntityLiving(entityHeal);
+				
 				if (dest != null) {
-					setPathToEntity(dest);
+					// setPathToEntity(dest);
+					this.getNavigator().setPath(dest, this.getAIMoveSpeed());
 				} else {
 					entityHeal = null;
 				}
@@ -1267,6 +1299,7 @@ public class EntityFairy extends EntityAnimal {
 						if (fairy.getHealth() > 0 && sameTeam(fairy)
 								&& fairy.getHealth() < fairy.getMaxHealth()) {
 							this.entityHeal = fairy;
+							/*
 							PathEntity dest = worldObj.getPathEntityToEntity(
 									this, entityHeal, 16F, false, false, true,
 									true);
@@ -1274,6 +1307,8 @@ public class EntityFairy extends EntityAnimal {
 							if (dest != null) {
 								setPathToEntity(dest);
 							}
+							*/
+							this.getNavigator().tryMoveToEntityLiving(this.entityHeal, this.getAIMoveSpeed());
 
 							break;
 						}
@@ -1282,6 +1317,7 @@ public class EntityFairy extends EntityAnimal {
 						if (ruler.getHealth() > 0
 								&& ruler.getHealth() < ruler.getMaxHealth()) {
 							this.entityHeal = ruler;
+							/*
 							PathEntity dest = worldObj.getPathEntityToEntity(
 									this, entityHeal, 16F, false, false, true,
 									true);
@@ -1289,6 +1325,8 @@ public class EntityFairy extends EntityAnimal {
 							if (dest != null) {
 								setPathToEntity(dest);
 							}
+							*/
+							this.getNavigator().tryMoveToEntityLiving(this.entityHeal, this.getAIMoveSpeed());
 
 							break;
 						}
@@ -1378,7 +1416,8 @@ public class EntityFairy extends EntityAnimal {
 			e.printStackTrace();
 		}
 
-		setPathToEntity((PathEntity) null);
+		// setPathToEntity((PathEntity) null);
+		this.getNavigator().clearPathEntity();
 		healTime = 200;
 		setRarePotion(rand.nextInt(4) == 0);
 	}
@@ -1403,7 +1442,7 @@ public class EntityFairy extends EntityAnimal {
 					EntityFairy fairy = (EntityFairy) list.get(j);
 
 					if (fairy.getHealth() > 0) {
-						Entity scary = (Entity) null;
+						EntityLivingBase scary = null;
 
 						if (fairy.getEntityFear() != null) {
 							scary = fairy.getEntityFear();
@@ -1425,24 +1464,27 @@ public class EntityFairy extends EntityAnimal {
 										&& canEntityBeSeen(scary)) {
 									setCryTime(120);
 									this.setEntityFear(scary);
-									PathEntity dest = roam(entity, this,
-											(float) Math.PI);
+									PathEntity dest = roam(entity, this, (float) Math.PI);
 
+									/*
 									if (dest != null) {
 										setPathToEntity(dest);
 									}
+									*/
+									this.getNavigator().setPath(dest, this.getAIMoveSpeed());
 
 									break;
 								} else if (fairy.getCryTime() > 60) {
-									setCryTime(Math.max(fairy.getCryTime() - 60,
-											0));
+									setCryTime(Math.max(fairy.getCryTime() - 60, 0));
 									this.setEntityFear(scary);
-									PathEntity dest = roam(entity, this,
-											(float) Math.PI);
+									PathEntity dest = roam(entity, this, (float) Math.PI);
 
+									/*
 									if (dest != null) {
 										setPathToEntity(dest);
 									}
+									*/
+									this.getNavigator().setPath(dest, this.getAIMoveSpeed());
 
 									break;
 								}
@@ -1474,7 +1516,8 @@ public class EntityFairy extends EntityAnimal {
 						PathEntity dest = roam(entity, this, (float) Math.PI);
 
 						if (dest != null) {
-							setPathToEntity(dest);
+							// setPathToEntity(dest);
+							this.getNavigator().setPath(dest, this.getAIMoveSpeed());
 
 							if (!flymode()) {
 								setFlymode(true);
@@ -1620,9 +1663,12 @@ public class EntityFairy extends EntityAnimal {
 			if (gg >= ( farFlag ? 12D : 6D )) {
 				PathEntity dest = roamBlocks(aa, bb, cc, this, 0F);
 
+				/*
 				if (dest != null) {
 					setPathToEntity(dest);
 				}
+				*/
+				this.getNavigator().setPath(dest, this.getAIMoveSpeed());
 			}
 		}
 
@@ -1645,7 +1691,8 @@ public class EntityFairy extends EntityAnimal {
 			setTempItem(Items.stick);
 			setSitting(true);
 			isJumping = false;
-			setPathToEntity((PathEntity) null);
+			// setPathToEntity((PathEntity) null);
+			this.getNavigator().clearPathEntity();
 			setTarget((Entity) null);
 			entityFear = null;
 		}
@@ -2375,7 +2422,7 @@ public class EntityFairy extends EntityAnimal {
 					setSitting(true);
 					setNameEnabled(true);
 					isJumping = false;
-					setPathToEntity((PathEntity) null);
+					this.getNavigator().clearPathEntity();
 					setTarget((Entity) null);
 					entityFear = null;
 				} else {
@@ -2399,7 +2446,7 @@ public class EntityFairy extends EntityAnimal {
 							// shift-right-clicking otherwise makes fairy sit down
 							setSitting(true);
 							isJumping = false;
-							setPathToEntity((PathEntity) null);
+							this.getNavigator().clearPathEntity();
 							setTarget((Entity) null);
 							entityFear = null;
 						}
@@ -2416,7 +2463,7 @@ public class EntityFairy extends EntityAnimal {
 			} else {
 				// faction members can be tamed in peaceful
 				if (( getFaction() == 0
-						|| worldObj.difficultySetting == EnumDifficulty.PEACEFUL )
+						|| worldObj.getDifficulty() == EnumDifficulty.PEACEFUL )
 						&& !( ( queen() || posted() ) && tamed() ) && !crying()
 						&& !angry() && stack != null
 						&& acceptableFoods(stack.getItem())
@@ -2506,9 +2553,12 @@ public class EntityFairy extends EntityAnimal {
 		if (ruler != null) {
 			PathEntity dest = roam(ruler, this, (float) Math.PI);
 
+			/*
 			if (dest != null) {
 				setPathToEntity(dest);
 			}
+			*/
+			this.getNavigator().setPath(dest, this.getAIMoveSpeed());
 
 			if (ruler instanceof EntityPlayer) {
 				//
@@ -2699,7 +2749,7 @@ public class EntityFairy extends EntityAnimal {
 		isJumping = false;
 		moveForward = 0F;
 		moveStrafing = 0F;
-		setPathToEntity((PathEntity) null);
+		this.getNavigator().clearPathEntity();
 		setSitting(true);
 		onGround = true;
 		List<?> list = worldObj.getEntitiesWithinAABB(EntityFairy.class,
@@ -2722,7 +2772,7 @@ public class EntityFairy extends EntityAnimal {
 				fairy.isJumping = false;
 				fairy.moveForward = 0F;
 				fairy.moveStrafing = 0F;
-				fairy.setPathToEntity((PathEntity) null);
+				fairy.getNavigator().clearPathEntity();
 				fairy.setSitting(true);
 				fairy.onGround = true;
 				// It feels like I'm floating but I'm not
@@ -2839,12 +2889,15 @@ public class EntityFairy extends EntityAnimal {
 						// Cowering fairies will have a chance of becoming
 						// offensive.
 						cryTime += 120;
-						entityFear = entity;
+						entityFear = (EntityLivingBase)entity;
 						PathEntity dest = roam(entity, this, (float) Math.PI);
 
+						/*
 						if (dest != null) {
 							setPathToEntity(dest);
 						}
+						*/
+						this.getNavigator().setPath(dest, this.getAIMoveSpeed());
 					} else {
 						// Become aggressive - no more screwing around.
 						setTarget((Entity) entity);
@@ -2856,9 +2909,12 @@ public class EntityFairy extends EntityAnimal {
 					// hurt them.
 					PathEntity dest = roam(entity, this, (float) Math.PI);
 
+					/*
 					if (dest != null) {
 						setPathToEntity(dest);
 					}
+					*/
+					this.getNavigator().setPath(dest, this.getAIMoveSpeed());
 				}
 			}
 
@@ -2914,7 +2970,7 @@ public class EntityFairy extends EntityAnimal {
 
 	public void applyPoison(EntityLivingBase entityliving) {
 		byte duration = 0;
-		switch (worldObj.difficultySetting) {
+		switch (worldObj.getDifficulty()) {
 			case NORMAL:
 				duration = 7;
 				break;
@@ -3019,11 +3075,11 @@ public class EntityFairy extends EntityAnimal {
 		this.fishEntity = fishEntity;
 	}
 
-	public Entity getEntityFear() {
+	public EntityLivingBase getEntityFear() {
 		return entityFear;
 	}
 
-	public void setEntityFear(Entity entityFear) {
+	public void setEntityFear(EntityLivingBase entityFear) {
 		this.entityFear = entityFear;
 	}
 
