@@ -41,13 +41,19 @@ public final class Spawner {
 	private int			maxAquatic					= 10;
 	public BiomeGenBase	standardBiomes[];
 	public List<String>			biomeList;
+	@SuppressWarnings("rawtypes")
 	public List[]		entityClasses;
+	@SuppressWarnings("rawtypes")
 	protected List[]	customMobSpawnList;
+	@SuppressWarnings("rawtypes")
 	protected List[]	customCreatureSpawnList;
+	@SuppressWarnings("rawtypes")
 	protected List[]	customAquaticSpawnList;
 	private Set<ChunkCoordIntPair>			eligibleChunksForSpawning	= new HashSet<ChunkCoordIntPair>();
+	@SuppressWarnings("rawtypes")
 	private List<Class>	vanillaClassList;
 
+	@SuppressWarnings("rawtypes")
 	public Spawner() {
 		biomeList = new ArrayList<String>();
 
@@ -448,6 +454,7 @@ public final class Spawner {
 		}
 
 		for (int l = 0; l < abiomegenbase.length; l++) {
+			@SuppressWarnings("rawtypes")
 			List[] fulllist = getCustomSpawnableList(enumcreaturetype);
 
 			if (fulllist != null) {
@@ -493,6 +500,7 @@ public final class Spawner {
 		}
 
 		for (int l = 0; l < abiomegenbase.length; l++) {
+			@SuppressWarnings("rawtypes")
 			List[] fulllist = getCustomSpawnableList(enumcreaturetype);
 
 			if (fulllist != null) {
@@ -546,6 +554,7 @@ public final class Spawner {
 		return finalcount;
 	}
 
+	@SuppressWarnings("rawtypes")
 	private List[] getCustomSpawnableList(EnumCreatureType enumcreaturetype) {
 		if (enumcreaturetype == EnumCreatureType.monster) {
 			return customMobSpawnList;
@@ -562,7 +571,7 @@ public final class Spawner {
 		}
 	}
 
-	private List<?> getCustomBiomeSpawnList(List[] fulllist, BiomeGenBase biomegenbase) {
+	private List<?> getCustomBiomeSpawnList(@SuppressWarnings("rawtypes") List[] fulllist, BiomeGenBase biomegenbase) {
 		int x = biomeList.indexOf(biomegenbase.biomeName);
 
 		if (x >= 0) {
@@ -706,11 +715,13 @@ public final class Spawner {
 		return count;
 	}
 
+	@SuppressWarnings("rawtypes")
 	public final int despawnMob(World worldObj) {
 		List<Class> myNullList = null;
 		return despawnMob(worldObj, myNullList);
 	}
 
+	@SuppressWarnings("rawtypes")
 	public final int despawnMob(World worldObj, Class... classList) {
 		List<Class> myList = new ArrayList<Class>();
 
@@ -721,6 +732,7 @@ public final class Spawner {
 		return despawnMob(worldObj, myList);
 	}
 
+	@SuppressWarnings("rawtypes")
 	public final int despawnMob(World worldObj, List<Class> classList) {
 		int count = 0;
 
