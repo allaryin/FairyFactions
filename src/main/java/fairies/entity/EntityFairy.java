@@ -44,8 +44,10 @@ import net.minecraft.potion.Potion;
 import net.minecraft.potion.PotionEffect;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.tileentity.TileEntitySign;
+import net.minecraft.util.BlockPos;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.EntityDamageSourceIndirect;
+import net.minecraft.util.EnumParticleTypes;
 import net.minecraft.util.MathHelper;
 import net.minecraft.util.MovingObjectPosition;
 import net.minecraft.util.ResourceLocation;
@@ -76,7 +78,8 @@ public class EntityFairy extends EntityAnimal {
 
 	private EntityLivingBase	ruler;
 	private EntityLivingBase	entityHeal;
-	private Entity				entityFear;
+	private EntityLivingBase	entityFear;
+	private EntityLivingBase	entityToAttack;
 	public FairyEntityFishHook	fishEntity;
 
 	// non-persistent fields
@@ -359,15 +362,15 @@ public class EntityFairy extends EntityAnimal {
 	
 					if (angry() || ( crying() && queen() )) {
 						// anger smoke, queens don't cry :P
-						worldObj.spawnParticle("smoke", posX, getEntityBoundingBox().maxY, posZ, 0D, 0D, 0D);
+						worldObj.spawnParticle(EnumParticleTypes.SMOKE_NORMAL, posX, getEntityBoundingBox().maxY, posZ, 0D, 0D, 0D);
 					} else if (crying()) {
 						// crying effect
-						worldObj.spawnParticle("splash", posX, getEntityBoundingBox().maxY, posZ, 0D, 0D, 0D);
+						worldObj.spawnParticle(EnumParticleTypes.WATER_SPLASH, posX, getEntityBoundingBox().maxY, posZ, 0D, 0D, 0D);
 					}
 	
 					if (liftOff()) {
 						// liftoff effect below feet
-						worldObj.spawnParticle("explode", posX, getEntityBoundingBox().minY, posZ, 0D, 0D, 0D);
+						worldObj.spawnParticle(EnumParticleTypes.EXPLOSION_NORMAL, posX, getEntityBoundingBox().minY, posZ, 0D, 0D, 0D);
 					}
 	
 					if (withered() || ( rogue() && canHeal() )) {
@@ -428,7 +431,7 @@ public class EntityFairy extends EntityAnimal {
 					posY + (double) super.getEyeHeight() + (double) f1);
 			int l = MathHelper.floor_double(posZ + (double) f2);
 
-			if (worldObj.getBlock(j, k, l).isNormalCube()) {
+			if (worldObj.getBlockState(new BlockPos(j, k, l)).getBlock().isNormalCube()) {
 				return true;
 			}
 		}
@@ -805,11 +808,9 @@ public class EntityFairy extends EntityAnimal {
 		for (int l = 0; l <= 4; l++) {
 			for (int i1 = 0; i1 <= 4; i1++) {
 				if (( l < 1 || i1 < 1 || l > 3 || i1 > 3 )
-						&& worldObj.getBlock(i + l, k - 1, j + i1)
-								.isNormalCube()
-						&& !worldObj.getBlock(i + l, k, j + i1).isNormalCube()
-						&& !worldObj.getBlock(i + l, k + 1, j + i1)
-								.isNormalCube()
+						&& worldObj.getBlockState(new BlockPos(i + l, k - 1, j + i1)).getBlock().isNormalCube()
+						&& !worldObj.getBlockState(new BlockPos(i + l, k, j + i1)).getBlock().isNormalCube()
+						&& !worldObj.getBlockState(new BlockPos(i + l, k + 1, j + i1)).getBlock().isNormalCube()
 						&& isAirySpace(i + l, k, j + i1)) {
 					setLocationAndAngles((float) ( i + l ) + 0.5F, k,
 							(float) ( j + i1 ) + 0.5F, rotationYaw,
@@ -1513,7 +1514,7 @@ public class EntityFairy extends EntityAnimal {
 			Chunk chunk = worldObj.getChunkFromBlockCoords(postX, postZ);
 
 			if (chunk != null && !( chunk instanceof EmptyChunk )) {
-				Block block = worldObj.getBlock(postX, postY, postZ);
+				Block block = worldObj.getBlockState(new BlockPos(postX, postY, postZ)).getBlock();
 
 				if (block == null || !( block instanceof BlockSign )) {
 					// If the saved position is not a sign block.
@@ -1561,7 +1562,7 @@ public class EntityFairy extends EntityAnimal {
 					z += cc;
 
 					if (y >= 0 && y < worldObj.getHeight()) {
-						final Block block = worldObj.getBlock(x, y, z);
+						final Block block = worldObj.getBlockState(new BlockPos(x, y, z)).getBlock();
 						if (block == Blocks.standing_sign || block == Blocks.wall_sign) {
 							TileEntity tileentity = worldObj.getTileEntity(x, y, z);
 
@@ -1835,7 +1836,9 @@ public class EntityFairy extends EntityAnimal {
 		return faction_colors[faction] + "<" + faction_names[faction] + ">";
 	}
 
-	public String getDisplayName() {
+	// NOTE: getDisplayName is now a thing in EntityLivingBase that expects an IChatComponent
+	// public String getDisplayName() {
+	public String getNametagText() {
 		if (getFaction() != 0) {
 			if (queen()) {
 				return getQueenName(getNamePrefix(), getNameSuffix(),
@@ -2128,13 +2131,13 @@ public class EntityFairy extends EntityAnimal {
 	}
 
 	private void showHeartsOrSmokeFX(boolean flag) {
-		final String s = ( flag ? "heart" : "smoke" );
+		final EnumParticleTypes particle = ( flag ? EnumParticleTypes.HEART : EnumParticleTypes.SMOKE_NORMAL );
 
 		for (int i = 0; i < 7; i++) {
 			double d = rand.nextGaussian() * 0.02D;
 			double d1 = rand.nextGaussian() * 0.02D;
 			double d2 = rand.nextGaussian() * 0.02D;
-			worldObj.spawnParticle(s,
+			worldObj.spawnParticle(particle,
 					( posX + (double) ( rand.nextFloat() * width * 2.0F ) )
 							- (double) width,
 					posY + 0.5D + (double) ( rand.nextFloat() * height ),
@@ -2249,7 +2252,7 @@ public class EntityFairy extends EntityAnimal {
 			return false;
 		}
 
-		Block block = worldObj.getBlock(a, b, c);
+		Block block = worldObj.getBlockState(new BlockPos(a, b, c)).getBlock();
 		if (block == null || block == Blocks.air)
 			return true;
 
@@ -2682,9 +2685,9 @@ public class EntityFairy extends EntityAnimal {
 
 	// Don't let that spider bite you, spider bite hurt.
 	public void hydraFairy() {
-		double a = ( getEntitygetEntityBoundingBox()().minX + getEntitygetEntityBoundingBox()().maxX ) / 2D;
-		double b = ( getEntitygetEntityBoundingBox()().minY + (double) this.getYOffset() ) - (double) ySize;
-		double c = ( getEntitygetEntityBoundingBox()().minZ + getEntitygetEntityBoundingBox()().maxZ ) / 2D;
+		double a = ( getEntityBoundingBox().minX + getEntityBoundingBox().maxX ) / 2D;
+		double b = ( getEntityBoundingBox().minY + (double) this.getYOffset() ) - (double) ySize;
+		double c = ( getEntityBoundingBox().minZ + getEntityBoundingBox().maxZ ) / 2D;
 		motionX = 0D;
 		motionY = -0.1D;
 		motionZ = 0D;

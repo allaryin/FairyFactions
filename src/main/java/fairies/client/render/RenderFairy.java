@@ -234,7 +234,7 @@ public class RenderFairy extends RenderLiving
 
             if (f2 < f3)
             {
-                String s = fairy.getDisplayName();
+                String s = fairy.getNametagText();
 
                 if (s != null)
                 {
