@@ -78,7 +78,7 @@ public class FairyFactions {
 		final int maxNum = 18;
 		final int freqNum = 8;
 		fairySpawner.setMaxAnimals(maxNum);
-		fairySpawner.AddCustomSpawn(EntityFairy.class, freqNum, EnumCreatureType.creature);
+		fairySpawner.AddCustomSpawn(EntityFairy.class, freqNum, EnumCreatureType.CREATURE);
 		FMLCommonHandler.instance().bus().register(fairySpawner);
 
         // TODO: register entity localization
@@ -97,7 +97,6 @@ public class FairyFactions {
 	public static EntityFairy getFairy(int fairyID) {
 		for( WorldServer dim : DimensionManager.getWorlds() ) {
 			if( dim != null ) {
-				@SuppressWarnings("unchecked")
 				List<Entity> entities = dim.loadedEntityList;
 				if( entities != null && !entities.isEmpty() ) {
 					for( Entity entity : entities ) {

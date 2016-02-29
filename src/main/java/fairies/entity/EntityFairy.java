@@ -44,6 +44,7 @@ import net.minecraft.potion.Potion;
 import net.minecraft.potion.PotionEffect;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.tileentity.TileEntitySign;
+import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.EntityDamageSourceIndirect;
@@ -571,6 +572,9 @@ public class EntityFairy extends EntityAnimal {
 	public static final float	PATH_TOWARD			= 0F;
 	public static final float	PATH_AWAY			= (float) Math.PI;
 
+	/**
+	 * TODO: Update to new AI archicture
+	 *
 	@Override
 	public void updateEntityActionState() {
 		super.updateEntityActionState();
@@ -722,6 +726,7 @@ public class EntityFairy extends EntityAnimal {
 		
 		// _dump_();
 	}// end: updateEntityActionState
+	 */
 
 	/**
 	 * if griniscule is 0F, entity2 will roam towards entity1. if griniscule is
@@ -1215,8 +1220,11 @@ public class EntityFairy extends EntityAnimal {
 						&& ( !( entity instanceof EntityAnimal )
 								|| ( !peacefulAnimal(
 										(EntityAnimal) entity) ) )) {
-					// Guards proactivley seeking holstile enemies. Will add
+					// Guards proactively seeking hostile enemies. Will add
 					// slimes? Maybe dunno.
+					/**
+					 * TODO: Update AI
+					 *
 					EntityCreature creature = (EntityCreature) entity;
 
 					if (creature.getHealth() > 0
@@ -1225,6 +1233,7 @@ public class EntityFairy extends EntityAnimal {
 						this.setTarget((Entity) creature);
 						break;
 					}
+					 */
 				} else if (entity instanceof EntityTNTPrimed && !hasPath()) {
 					// Running away from lit TNT.
 					float dist = getDistanceToEntity(entity);
@@ -1387,6 +1396,9 @@ public class EntityFairy extends EntityAnimal {
 		}
 	}
 	
+	/**
+	 * TODO: Figure out what this turns into in 1.8
+	 *  
 	@SideOnly(Side.CLIENT)
 	@Override
 	public IIcon getItemIcon(ItemStack itemstack, int i) {
@@ -1403,6 +1415,7 @@ public class EntityFairy extends EntityAnimal {
 
 		return j;
 	}
+	 */
 
 	private void doHeal(EntityLivingBase guy) {
 		armSwing(!didSwing); // Swings arm and heals the specified person.
@@ -1504,6 +1517,9 @@ public class EntityFairy extends EntityAnimal {
 						&& ( !( entity instanceof EntityAnimal )
 								|| ( !peacefulAnimal(
 										(EntityAnimal) entity) ) )) {
+					/**
+					 * TODO: Update AI.
+					 *
 					EntityCreature creature = (EntityCreature) entity;
 
 					if (creature.getHealth() > 0
@@ -1512,6 +1528,7 @@ public class EntityFairy extends EntityAnimal {
 						this.setTarget((Entity) creature);
 						break;
 					}
+					 */
 				} else if (entity instanceof EntityTNTPrimed && !hasPath()) {
 					// Running away from lit TNT.
 					float dist = getDistanceToEntity(entity);
@@ -1561,18 +1578,19 @@ public class EntityFairy extends EntityAnimal {
 				return; // When a the player takes a tamed fairy away, it
 						// automatically cancels the post.
 			}
+			final BlockPos postPos = new BlockPos(postX, postY, postZ);
 
 			// Check to see if the chunk is loaded.
-			Chunk chunk = worldObj.getChunkFromBlockCoords(postX, postZ);
+			Chunk chunk = worldObj.getChunkFromBlockCoords(postPos);
 
 			if (chunk != null && !( chunk instanceof EmptyChunk )) {
-				Block block = worldObj.getBlockState(new BlockPos(postX, postY, postZ)).getBlock();
+				Block block = worldObj.getBlockState(postPos).getBlock();
 
 				if (block == null || !( block instanceof BlockSign )) {
 					// If the saved position is not a sign block.
 					abandonPost();
 				} else {
-					TileEntity tileentity = worldObj.getTileEntity(new BlockPos(postX, postY, postZ));
+					TileEntity tileentity = worldObj.getTileEntity(postPos);
 					if (tileentity == null
 							|| !( tileentity instanceof TileEntitySign )) {
 						// Make sure the tile entity is right
@@ -1611,11 +1629,12 @@ public class EntityFairy extends EntityAnimal {
 					x += aa;
 					y += bb;
 					z += cc;
-
+					
 					if (y >= 0 && y < worldObj.getHeight()) {
-						final Block block = worldObj.getBlockState(new BlockPos(x, y, z)).getBlock();
+						final BlockPos pos = new BlockPos(x, y, z);
+						final Block block = worldObj.getBlockState(pos).getBlock();
 						if (block == Blocks.standing_sign || block == Blocks.wall_sign) {
-							TileEntity tileentity = worldObj.getTileEntity(new BlockPos(x, y, z));
+							TileEntity tileentity = worldObj.getTileEntity(pos);
 
 							if (tileentity != null && tileentity instanceof TileEntitySign) {
 								TileEntitySign sign = (TileEntitySign) tileentity;
@@ -1646,7 +1665,11 @@ public class EntityFairy extends EntityAnimal {
 					 * mod_FairyMod.setPrivateValueBoth( EntityLiving.class,
 					 * this, "currentTarget", "ay", fishEntity );
 					 */
+					/**
+					 * TODO: Update AI
+					 *
 					numTicksToChaseTarget = 10 + this.rand.nextInt(20);
+					 */
 				}
 			} else if (rand.nextInt(2) == 0) {
 				new FairyJob(this).sittingFishing(worldObj);
@@ -1714,7 +1737,7 @@ public class EntityFairy extends EntityAnimal {
 		// loops through for all sign lines
 		for (int i = 0; i < sign.signText.length; i++) {
 			// name just has to be included in full on one of the lines.
-			if (sign.signText[i].contains(mySeq)) {
+			if (sign.signText[i].getUnformattedText().contains(mySeq)) {
 				return true;
 			}
 		}
@@ -2262,12 +2285,13 @@ public class EntityFairy extends EntityAnimal {
 				}
 
 				if (worldObj.isDaytime()) {
-					int a = MathHelper.floor_double(posX);
-					int b = MathHelper.floor_double(getEntityBoundingBox().minY);
-					int c = MathHelper.floor_double(posZ);
-					float f = getBrightness(1.0F);
+					final int a = MathHelper.floor_double(posX);
+					final int b = MathHelper.floor_double(getEntityBoundingBox().minY);
+					final int c = MathHelper.floor_double(posZ);
+					final float f = getBrightness(1.0F);
+					final BlockPos pos = new BlockPos(a, b, c);
 
-					if (f > 0.5F && worldObj.canBlockSeeTheSky(a, b, c)
+					if (f > 0.5F && worldObj.canBlockSeeSky(pos)
 							&& rand.nextFloat() * 5F < ( f - 0.4F ) * 2.0F) {
 						setWithered(false);
 
@@ -2284,12 +2308,13 @@ public class EntityFairy extends EntityAnimal {
 			setWithered(true);
 		} else {
 			if (witherTime % 10 == 0) {
-				int a = MathHelper.floor_double(posX);
-				int b = MathHelper.floor_double(getEntityBoundingBox().minY);
-				int c = MathHelper.floor_double(posZ);
-				float f = getBrightness(1.0F);
+				final int a = MathHelper.floor_double(posX);
+				final int b = MathHelper.floor_double(getEntityBoundingBox().minY);
+				final int c = MathHelper.floor_double(posZ);
+				final float f = getBrightness(1.0F);
+				final BlockPos pos = new BlockPos(a, b, c);
 
-				if (f > 0.05F || worldObj.canBlockSeeTheSky(a, b, c)) {
+				if (f > 0.05F || worldObj.canBlockSeeSky(pos)) {
 					witherTime = rand.nextInt(3);
 				} else if (witherTime >= 900) {
 					setWithered(true);
@@ -2334,15 +2359,22 @@ public class EntityFairy extends EntityAnimal {
 		return false;
 	}
 	
+	/**
+	 * TODO: Update AI 
+	 *
 	// non-consistent method names
 	@Override
+	 */
 	public void setTarget(Entity entity) {
 		if (entity == null || entityToAttack == null
 				|| entity != entityToAttack) {
 			loseInterest = 0;
 		}
 
+		/**
+		 * TODO: Update AI
 		entityToAttack = entity;
+		 */
 	}
 
 	// Checks to see if a fairy is their comrade.
@@ -2743,9 +2775,11 @@ public class EntityFairy extends EntityAnimal {
 
 	// Don't let that spider bite you, spider bite hurt.
 	public void hydraFairy() {
-		double a = ( getEntityBoundingBox().minX + getEntityBoundingBox().maxX ) / 2D;
-		double b = ( getEntityBoundingBox().minY + (double) this.getYOffset() ) - (double) ySize;
-		double c = ( getEntityBoundingBox().minZ + getEntityBoundingBox().maxZ ) / 2D;
+		final AxisAlignedBB bb = getEntityBoundingBox();
+		final double ySize = bb.maxY - bb.minY;
+		final double a = ( bb.minX + bb.maxX ) / 2D;
+		final double b = ( bb.minY + (double) this.getYOffset() ) - ySize;
+		final double c = ( bb.minZ + bb.maxZ ) / 2D;
 		motionX = 0D;
 		motionY = -0.1D;
 		motionZ = 0D;
@@ -2785,6 +2819,9 @@ public class EntityFairy extends EntityAnimal {
 		}
 	}
 	
+	/**
+	 * TODO: Update AI.
+	 *  
     @Override
     protected boolean isMovementCeased() {
         return isSitting();
@@ -2792,13 +2829,17 @@ public class EntityFairy extends EntityAnimal {
         // rotationPitch = 10F;
         // return true;
     }
+     */
 
     @Override
     public boolean isOnLadder() {
         return climbing();
     }
 
+    /**
+     * TODO: Update AI
 	@Override
+	 */
 	protected void attackEntity(Entity entity, float f) {
 		if (attackTime <= 0 && f < ( tamed() ? 2.5F : 2.0F )
 				&& ( ( entity.getEntityBoundingBox().maxY > getEntityBoundingBox().minY
@@ -2868,7 +2909,11 @@ public class EntityFairy extends EntityAnimal {
 					&& isRuler((EntityPlayer)((EntityWolf) entity).getOwner())) {
 				// Protects against ruler-owned wolves.
 				EntityWolf wolf = (EntityWolf) entity;
+				/**
+				 * TODO: Update AI
+				 *
 				wolf.setTarget((Entity) null);
+				 */
 				return false;
 			}
 		}
@@ -2883,7 +2928,11 @@ public class EntityFairy extends EntityAnimal {
 
 		boolean flag = super.attackEntityFrom(damagesource, damage);
 		// Stop them from running really fast
+		/**
+		 * TODO: Update AI
+		 *
 		fleeingTick = 0;
+		 */
 
 		if (flag && getHealth() > 0) {
 			if (entity != null) {
@@ -3130,13 +3179,14 @@ public class EntityFairy extends EntityAnimal {
 	@Override
 	public boolean getCanSpawnHere() {
 		if (super.getCanSpawnHere()) {
-			int x = MathHelper.floor_double(posX);
-			int z = MathHelper.floor_double(posZ);
-			BiomeGenBase biome = worldObj.getBiomeGenForCoords(x, z);
+			final int x = MathHelper.floor_double(posX);
+			final int z = MathHelper.floor_double(posZ);
+			final BlockPos pos = new BlockPos(x, 64, z);
+			final BiomeGenBase biome = worldObj.getBiomeGenForCoords(pos);
 
 			if (biome != null
-					&& ( biome.rootHeight - biome.heightVariation > -0.25F )
-					&& ( biome.rootHeight + biome.heightVariation ) <= 0.5F
+					&& ( biome.minHeight > -0.25F )
+					&& ( biome.maxHeight <= 0.5F )
 					&& biome.temperature >= 0.1F && biome.temperature <= 1.0F
 					&& biome.rainfall > 0.0F && biome.rainfall <= 0.8F) {
 				List<?> list = worldObj.getEntitiesWithinAABB(EntityFairy.class,
