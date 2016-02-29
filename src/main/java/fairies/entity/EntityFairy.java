@@ -113,6 +113,10 @@ public class EntityFairy extends EntityAnimal {
 		this.setCower(rand.nextBoolean());
 		this.postX = this.postY = this.postZ = -1;
 	}
+	
+	// Obfuscated name lookups
+	private static final String[] MCP_ISJUMPING = { "isJumping", "field_70703_bu" };
+	private static final String[] MCP_ONIMPACT = { "onImpact", "func_70184_a" };
 
 	// DataWatcher object indices
 	protected final static int	B_FLAGS		= 17;
@@ -331,7 +335,7 @@ public class EntityFairy extends EntityAnimal {
 					}
 
 					final boolean isJumping = ReflectionHelper.getPrivateValue(EntityLivingBase.class, 
-							(EntityLivingBase)ridingEntity, "isJumping");
+							(EntityLivingBase)ridingEntity, MCP_ISJUMPING);
 					if (isJumping && ridingEntity.motionY < FairyConfig.DEF_FLAP_RATE && canFlap()) {
 						ridingEntity.motionY = FairyConfig.DEF_FLAP_RATE;
 					}
@@ -1370,7 +1374,7 @@ public class EntityFairy extends EntityAnimal {
 		// potion.onImpact(new MovingObjectPosition(guy));
 		try {
 			final Method onImpact = ReflectionHelper.findMethod(
-					EntityPotion.class, potion, new String[] { "onImpact" },
+					EntityPotion.class, potion, MCP_ONIMPACT,
 					MovingObjectPosition.class);
 			onImpact.invoke(potion, new MovingObjectPosition(guy));
 		} catch (Exception e) {
