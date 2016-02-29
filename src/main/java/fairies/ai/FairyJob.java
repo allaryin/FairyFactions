@@ -27,6 +27,11 @@ import net.minecraftforge.common.IPlantable;
 import net.minecraftforge.fml.relauncher.ReflectionHelper;
 
 public class FairyJob {
+	// Obfuscated name lookups
+	private static final String[] MCP_FLEEINGTICK = { "fleeingTick", "field_70788_c" };
+	private static final String[] MCP_BREEDING = { "breeding", "field_70882_e" };
+	private static final String[] MCP_INLOVE = { "inLove", "field_70881_d" };
+	
 	public FairyJob( final EntityFairy entityfairy ) {
 		fairy = entityfairy;
 	}
@@ -110,7 +115,7 @@ public class FairyJob {
 		for ( int i = 0; i < list.size(); i++ ) {
 			final EntityAnimal entity1 = (EntityAnimal) list.get( i );
 
-			final int fleeingTick = ReflectionHelper.getPrivateValue(EntityCreature.class, entity1, "fleeingTick");
+			final int fleeingTick = ReflectionHelper.getPrivateValue(EntityCreature.class, entity1, MCP_FLEEINGTICK);
 			if ( fairy.peacefulAnimal( entity1 ) && fairy.canEntityBeSeen( entity1 ) && entity1.getHealth() > 0
 					&& entity1.getEntityToAttack() == null && fleeingTick <= 0 && !entity1.isInLove()
 					&& entity1.getGrowingAge() == 0 ) {
@@ -144,7 +149,7 @@ public class FairyJob {
 		for ( int i = 0; i < list.size(); i++ ) {
 			final EntitySheep entity1 = (EntitySheep) list.get( i );
 
-			final int fleeingTick = ReflectionHelper.getPrivateValue(EntityCreature.class, entity1, "fleeingTick");
+			final int fleeingTick = ReflectionHelper.getPrivateValue(EntityCreature.class, entity1, MCP_FLEEINGTICK);
 			if ( fairy.canEntityBeSeen( entity1 ) && entity1.getHealth() > 0 && entity1.getEntityToAttack() == null
 					&& fleeingTick <= 0 && entity1.getGrowingAge() >= 0 && !entity1.getSheared() ) {
 				list2.add( entity1 );
@@ -524,7 +529,7 @@ public class FairyJob {
 		for ( int i = 0; i < animals.size() && count < 3 && stack.stackSize > 0; i++ ) {
 			final EntityAnimal entity = (EntityAnimal) animals.get( i );
 
-			int isBreedingCounter = ReflectionHelper.getPrivateValue(EntityAnimal.class, entity, "breeding");
+			int isBreedingCounter = ReflectionHelper.getPrivateValue(EntityAnimal.class, entity, MCP_BREEDING);
 			// skip unbreedable animals
 			if (!entity.isBreedingItem(stack) // can't breed with this item
 					|| entity.getGrowingAge() != 0 // is juvenile (negative) or recently proceated (positive)
@@ -534,8 +539,7 @@ public class FairyJob {
 			triedBreeding = true;
 
 			if ( fairy.getDistanceToEntity( entity ) < 3F ) {
-
-				ReflectionHelper.setPrivateValue(EntityAnimal.class, entity, 600, "inLove");			
+				ReflectionHelper.setPrivateValue(EntityAnimal.class, entity, 600, MCP_INLOVE);			
 				count++;
 				stack.stackSize--;
 			}
