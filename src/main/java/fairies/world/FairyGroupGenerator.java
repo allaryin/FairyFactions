@@ -8,10 +8,18 @@ import fairies.entity.EntityFairy;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
 import net.minecraft.init.Blocks;
+import net.minecraft.util.BlockPos;
 import net.minecraft.world.World;
 
 public class FairyGroupGenerator
 {
+    private final int maxSize;
+    private final int minSize;
+    private final int faction;
+    
+    private static final int RADIUS = 8;
+    private static final int HALFRAD = RADIUS / 2;
+
     public FairyGroupGenerator(int min, int max, final int faction)
     {
         if (max < min)
@@ -24,44 +32,27 @@ public class FairyGroupGenerator
         this.minSize = min;
         this.maxSize = max;
         this.faction = faction;
-        this.radius = 8;
     }
 
-    public boolean generate(final World world, final Random rand, final int i, final int j, final int k)
-    {
+    public boolean generate(final World world, final Random rand, final int i, final int j, final int k) {
         final List<int[]> list = new ArrayList<int[]>();
-        int halfrad = radius / 2;
-        final Block cordial = world.getBlock(i, j, k);
+        final Block cordial = world.getBlockState(new BlockPos(i,j,k)).getBlock();
 
-        if (radius < 1)
-        {
-            radius = 1;
-        }
+        for (int q = 0; q < 128 && list.size() < maxSize; q++) {
+            final int y = j + rand.nextInt(HALFRAD) - rand.nextInt(HALFRAD);
+            if (y < 0 || y > 126) continue;
+            
+            final int x = i + rand.nextInt(RADIUS) - rand.nextInt(RADIUS);
+            final int z = k + rand.nextInt(RADIUS) - rand.nextInt(RADIUS);
+            final BlockPos pos = new BlockPos(x,y,z);
+            final Block block = world.getBlockState(pos).getBlock();
 
-        if (halfrad < 1)
-        {
-            halfrad = 1;
-        }
-
-        for (int q = 0; q < 128 && list.size() < maxSize; q++)
-        {
-            final int x = i + rand.nextInt(radius) - rand.nextInt(radius);
-            final int y = j + rand.nextInt(halfrad) - rand.nextInt(halfrad);
-            final int z = k + rand.nextInt(radius) - rand.nextInt(radius);
-
-            if (y < 0 || y > 126)
-            {
-                continue;
-            }
-
-            if (world.getBlock(x, y, z) == cordial && isAirySpace(world, x, y + 1, z))
-            {
+            if (block == cordial && isAirySpace(block)) {
                 list.add(new int[] {x, y + 1, z});
             }
         }
 
-        if (list.size() < minSize)
-        {
+        if (list.size() < minSize) {
             return false;
         }
 
@@ -72,8 +63,7 @@ public class FairyGroupGenerator
         int medics = (minSize / 5) + (rand.nextInt(maxSize - minSize + 1) < disparity ? 1 : 0);
         int specialFairy = 1; //Random
 
-        for (int q = 0; q < actualSize; q++)
-        {
+        for (int q = 0; q < actualSize; q++) {
             final int coords[] = (int[])list.get(q);
             final int x = coords[0];
             final int y = coords[1];
@@ -122,22 +112,15 @@ public class FairyGroupGenerator
         return true;
     }
 
-    public boolean isAirySpace(final World world, final int a, final int b, final int c)
+    public boolean isAirySpace(Block block)
     {
-        if (b < 0 || b > 127)
-        {
-            return false;
-        }
-
-        final Block s = world.getBlock(a, b, c);
-
-        if (s == Blocks.air)
+        if (block == Blocks.air)
         {
             return true;
         }
         else
         {
-            final Material matt = s.getMaterial();
+            final Material matt = block.getMaterial();
 
             if (matt == null || matt == Material.air || matt == Material.plants || matt == Material.vine ||
                     matt == Material.fire || matt == Material.circuits || matt == Material.snow)
@@ -148,9 +131,4 @@ public class FairyGroupGenerator
 
         return false;
     }
-
-    private final int maxSize;
-    private final int minSize;
-    private final int faction;
-    private int radius;
 }
