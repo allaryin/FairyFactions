@@ -7,6 +7,9 @@ import fairies.entity.EntityFairy;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockCrops;
 import net.minecraft.block.BlockReed;
+import net.minecraft.block.IGrowable;
+import net.minecraft.block.state.BlockState;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.EntityCreature;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.passive.EntityAnimal;
@@ -20,6 +23,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.pathfinding.PathEntity;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.tileentity.TileEntityChest;
+import net.minecraft.util.BlockPos;
 import net.minecraft.util.MathHelper;
 import net.minecraft.util.Vec3;
 import net.minecraft.world.World;
@@ -89,7 +93,7 @@ public class FairyJob {
 			final EntityItem entity1 = (EntityItem) list.get( i );
 
 			final ItemStack stack = entity1.getEntityItem();
-			if ( stack != null && entity1.delayBeforeCanPickup <= 0 ) {
+			if ( stack != null && !entity1.cannotPickup() ) {
 				if ( stack.stackSize > 0 && goodItem( stack.getItem(), stack.getItemDamage() ) ) {
 					list2.add( entity1 );
 				}
@@ -115,9 +119,10 @@ public class FairyJob {
 		for ( int i = 0; i < list.size(); i++ ) {
 			final EntityAnimal entity1 = (EntityAnimal) list.get( i );
 
+			// TODO: track combat correctly
 			final int fleeingTick = ReflectionHelper.getPrivateValue(EntityCreature.class, entity1, MCP_FLEEINGTICK);
 			if ( fairy.peacefulAnimal( entity1 ) && fairy.canEntityBeSeen( entity1 ) && entity1.getHealth() > 0
-					&& entity1.getEntityToAttack() == null && fleeingTick <= 0 && !entity1.isInLove()
+					/*&& entity1.getEntityToAttack() == null*/ && fleeingTick <= 0 && !entity1.isInLove()
 					&& entity1.getGrowingAge() == 0 ) {
 				for ( int j = 0; j < list.size(); j++ ) {
 					final EntityAnimal entity2 = (EntityAnimal) list.get( j );
@@ -149,8 +154,9 @@ public class FairyJob {
 		for ( int i = 0; i < list.size(); i++ ) {
 			final EntitySheep entity1 = (EntitySheep) list.get( i );
 
+			// TODO: track combat correctly
 			final int fleeingTick = ReflectionHelper.getPrivateValue(EntityCreature.class, entity1, MCP_FLEEINGTICK);
-			if ( fairy.canEntityBeSeen( entity1 ) && entity1.getHealth() > 0 && entity1.getEntityToAttack() == null
+			if ( fairy.canEntityBeSeen( entity1 ) && entity1.getHealth() > 0 /*&& entity1.getEntityToAttack() == null*/
 					&& fleeingTick <= 0 && entity1.getGrowingAge() >= 0 && !entity1.getSheared() ) {
 				list2.add( entity1 );
 			}
@@ -174,9 +180,11 @@ public class FairyJob {
 					i = x + a;
 					j = y + b;
 					k = z + c;
+					
+					final BlockPos pos = new BlockPos(i, j, k);
 
-					if ( world.getBlock( i, j, k ) == Blocks.chest ) {
-						final TileEntity tent = world.getTileEntity( i, j, k );
+					if ( world.getBlockState(pos).getBlock() == Blocks.chest ) {
+						final TileEntity tent = world.getTileEntity(pos);
 
 						if ( tent != null && tent instanceof TileEntityChest ) {
 							final TileEntityChest chest = (TileEntityChest) tent;
@@ -214,9 +222,11 @@ public class FairyJob {
 					i = x + a;
 					j = y + b;
 					k = z + c;
+					
+					final BlockPos pos = new BlockPos( i, j, k );
 
-					if ( world.getBlock( i, j, k ) == Blocks.chest ) {
-						final TileEntity tent = world.getTileEntity( i, j, k );
+					if ( world.getBlockState(pos).getBlock() == Blocks.chest ) {
+						final TileEntity tent = world.getTileEntity(pos);
 
 						if ( tent != null && tent instanceof TileEntityChest ) {
 							triedBreeding = false;
@@ -331,13 +341,14 @@ public class FairyJob {
 	// What to do with a hoe
 	private boolean onHoeUse( final ItemStack stack, int x, final int y, int z, final World world ) {
 		for ( int a = 0; a < 3; a++ ) {
-			final Block i = world.getBlock( x, y, z );
+			final BlockPos pos = new BlockPos( x, y, z );
+			final Block i = world.getBlockState(pos).getBlock();
 
-			if ( world.isAirBlock( x, y + 1, z ) && (i == Blocks.grass || i == Blocks.dirt) ) {
+			if ( world.isAirBlock(pos.up()) && (i == Blocks.grass || i == Blocks.dirt) ) {
 				final Block block = Blocks.farmland;
 				world.playSoundEffect( x + 0.5D, y + 0.5D, z + 0.5D, block.stepSound.getBreakSound(),
-						(block.stepSound.getVolume() + 1.0F) / 2.0F, block.stepSound.getPitch() * 0.8F );
-				world.setBlock( x, y, z, block );
+						(block.stepSound.getVolume() + 1.0F) / 2.0F, block.stepSound.getFrequency() * 0.8F );
+				world.setBlockState( pos, block.getDefaultState() );
 				fairy.armSwing( !fairy.didSwing );
 				fairy.setTempItem( stack.getItem() );
 				stack.damageItem( 1, fairy );
@@ -372,15 +383,15 @@ public class FairyJob {
 		} else {
 			throw new NullPointerException("stack doesn't look plantable to me.");
 		}
-		final Block block = plantable.getPlant(world, x, y, z);
+		BlockPos pos = new BlockPos(x,y,z);
+		final Block block = plantable.getPlant(world, pos).getBlock();
 
 		for ( int a = 0; a < 3; a++ ) {
-
-			if ( block.canPlaceBlockAt(world, x, y, z) ) {
+			if ( block.canPlaceBlockAt(world, pos) ) {
 
 				world.playSoundEffect( x + 0.5F, y + 0.5F, z + 0.5F, block.stepSound.getBreakSound(),
-						(block.stepSound.getVolume() + 1.0F) / 2.0F, block.stepSound.getPitch() * 0.8F );
-				world.setBlock( x, y, z, block);
+						(block.stepSound.getVolume() + 1.0F) / 2.0F, block.stepSound.getFrequency() * 0.8F );
+				world.setBlockState( pos, block.getDefaultState() );
 				stack.stackSize--;
 				
 				fairy.armSwing( !fairy.didSwing );
@@ -396,6 +407,7 @@ public class FairyJob {
 
 			x += fairy.getRNG().nextInt( 3 ) - 1;
 			z += fairy.getRNG().nextInt( 3 ) - 1;
+			pos = new BlockPos(x,y,z);
 		}
 
 		return false;
@@ -404,15 +416,15 @@ public class FairyJob {
 	// Use bonemeal to speed up wheat growth
 	private boolean onBonemealUse( final ItemStack stack, int x, final int y, int z, final World world ) {
 		for ( int a = 0; a < 3; a++ ) {
-			final Block i = world.getBlock( x, y + 1, z );
-			final int j = world.getBlockMetadata( x, y + 1, z );
+			final BlockPos pos = new BlockPos(x,y+1,z);
+			final IBlockState state = world.getBlockState(pos);
+			final Block block = state.getBlock();
 
-			if ( i == Blocks.wheat && j < 7 ) {
-				final Block block = Blocks.wheat;
+			if ( block instanceof IGrowable && state.getValue(BlockCrops.AGE) < 7 ) {
 				world.playSoundEffect( x + 0.5F, y + 0.5F, z + 0.5F, block.stepSound.getBreakSound(),
-						(block.stepSound.getVolume() + 1.0F) / 2.0F, block.stepSound.getPitch() * 0.8F );
+						(block.stepSound.getVolume() + 1.0F) / 2.0F, block.stepSound.getFrequency() * 0.8F );
 
-				ItemDye.applyBonemeal(stack, world, x, y, z, null);
+				ItemDye.applyBonemeal(stack, world, pos, null);
 
 				fairy.armSwing( !fairy.didSwing );
 				fairy.setTempItem( stack.getItem() );
@@ -466,14 +478,15 @@ public class FairyJob {
 	}
 	
 	private boolean chopLog( final World world, final int x, final int y, final int z ) {
-		final Block block = world.getBlock( x, y, z );
-		final int meta = world.getBlockMetadata( x, y, z );
+		final BlockPos pos = new BlockPos(x,y,z);		
+		final IBlockState state = world.getBlockState(pos);
+		final Block block = state.getBlock();
 
 		if ( block == Blocks.log || block == Blocks.log2 ) {
 			world.playSoundEffect( x + 0.5F, y + 0.5F, z + 0.5F, block.stepSound.getBreakSound(),
-					(block.stepSound.getVolume() + 1.0F) / 2.0F, block.stepSound.getPitch() * 0.8F );
-			block.dropBlockAsItemWithChance( world, x, y, z, meta, 1.0F, 0 );
-			world.setBlockToAir( x, y, z );
+					(block.stepSound.getVolume() + 1.0F) / 2.0F, block.stepSound.getFrequency() * 0.8F );
+			block.dropBlockAsItemWithChance( world, pos, state, 1.0F, 0 );
+			world.setBlockToAir( pos );
 			return true;
 		} else {
 			return false;
@@ -577,7 +590,7 @@ public class FairyJob {
 				stack.damageItem( 1, fairy );
 				fairy.attackTime = 30;
 
-				one_sheep.entityDropItem(new ItemStack(Item.getItemFromBlock(Blocks.wool), 1, one_sheep.getFleeceColor()), 0.0F);
+				one_sheep.entityDropItem(new ItemStack(Item.getItemFromBlock(Blocks.wool), 1, one_sheep.getFleeceColor().getMetadata()), 0.0F);
 				one_sheep.setSheared(true);
 				break; // shear one at a time... looks better.
 			}
@@ -606,6 +619,7 @@ public class FairyJob {
 		final int a = MathHelper.floor_double( posX );
 		final int b = y;
 		final int c = MathHelper.floor_double( posZ );
+		final BlockPos pos = new BlockPos(a,b,c); 
 
 		for ( int j = -4; j < 0; j++ ) {
 			if ( b + j > 0 && b + j < world.getHeight() - 10 ) {
@@ -613,20 +627,21 @@ public class FairyJob {
 
 				for ( int i = -1; i <= 1 && !flag; i++ ) {
 					for ( int k = -1; k <= 1 && !flag; k++ ) {
-						if ( world.getBlock( a + i, b + j, c + k ) != Blocks.water
-								|| world.getBlock( a + i, b + j + 1, c + k ) != Blocks.air
-								|| world.getBlock( a + i, b + j + 2, c + k ) != Blocks.air
-								|| world.getBlock( a + i, b + j + 3, c + k ) != Blocks.air ) {
+						final BlockPos pos2 = pos.add(i, j, k);
+						if ( world.getBlockState( pos2 ).getBlock() != Blocks.water
+								|| world.getBlockState( pos2.up() ) != Blocks.air
+								|| world.getBlockState( pos2.up(2) ) != Blocks.air
+								|| world.getBlockState( pos2.up(3) ) != Blocks.air ) {
 							flag = true;
 						}
 					}
 				}
 
 				if ( !flag ) {
-					final PathEntity doug = world.getEntityPathToXYZ( fairy, a, b + j, c, 16F, false, false, true,
-							true );
+					// final PathEntity doug = world.getEntityPathToXYZ( fairy, a, b + j, c, 16F, false, false, true, true );
+					final PathEntity path = fairy.getNavigator().getPathToXYZ(a, b+j, c);
 
-					if ( doug != null && canSeeToSpot( posX, posY, posZ, world ) ) {
+					if ( path != null && canSeeToSpot( posX, posY, posZ, world ) ) {
 						fairy.rotationYaw = angle;
 						fairy.castRod();
 						// TODO: player fishing normally damages the rod when the reels something in; should we do that?
@@ -649,11 +664,12 @@ public class FairyJob {
 
 			if ( y > 1 && y < world.getHeight() - 1 ) {
 				if ( fairy.isAirySpace( i, j, k ) && !fairy.isAirySpace( i, j - 1, k )
-						&& world.getBlock( i, j - 1, k ).isBlockNormalCube() ) {
-					final PathEntity doug = world.getEntityPathToXYZ( fairy, i, j, k, 16F, false, false, true, true );
+						&& world.getBlockState( new BlockPos(i, j - 1, k) ).getBlock().isBlockNormalCube() ) {
+					// final PathEntity doug = world.getEntityPathToXYZ( fairy, i, j, k, 16F, false, false, true, true );
+					final PathEntity path = fairy.getNavigator().getPathToXYZ(i, j, k);
 
-					if ( doug != null ) {
-						fairy.setPathToEntity( doug );
+					if ( path != null ) {
+						fairy.getNavigator().setPath(path, 1.0);
 
 						if ( !fairy.flymode() ) {
 							fairy.setFlyTime( 0 );
@@ -668,27 +684,28 @@ public class FairyJob {
 
 	private boolean canSeeToSpot( final double posX, final double posY, final double posZ, final World world ) {
 		return world.rayTraceBlocks(
-				Vec3.createVectorHelper( fairy.posX, fairy.posY + fairy.getEyeHeight(), fairy.posZ ),
-				Vec3.createVectorHelper( posX, posY, posZ ) ) == null;
+				new Vec3( fairy.posX, fairy.posY + fairy.getEyeHeight(), fairy.posZ ),
+				new Vec3( posX, posY, posZ ) ) == null;
 	}
 
 	// Check if it's a good place to put a sapling down
 	@SuppressWarnings("unused")
 	@Deprecated
 	private int goodPlaceForTrees( final int x, final int y, final int z, final World world ) {
-		final Block i = world.getBlock( x, y, z );
+		final BlockPos pos = new BlockPos(x,y,z);
+		final Block i = world.getBlockState(pos).getBlock();
 
 		if ( i == Blocks.sapling ) {
 			return 2;
 		}
 
-		final Block j = world.getBlock( x, y + 1, z );
+		final BlockPos above = pos.up();
+		final Block j = world.getBlockState(above).getBlock();
 
 		if ( j == Blocks.sapling ) {
 			return 2;
 		}
-
-		if ( j == Blocks.air && world.canBlockSeeTheSky( x, y + 1, z ) ) {
+		if ( j == Blocks.air && world.canBlockSeeSky(above) ) {
 			return 0;
 		}
 
@@ -706,18 +723,17 @@ public class FairyJob {
 		for ( int a = 0; a < 9; a++ ) {
 			x = m + (a / 3) - 1;
 			z = n + (a % 3) - 1;
-			final Block i = world.getBlock( x, y, z );
-			final Block above = world.getBlock(x, y + 1, z);
-			final Block below = world.getBlock(x, y - 1, z);
+			final BlockPos pos = new BlockPos(x,y,z);
+			final IBlockState state = world.getBlockState(pos);
+			final Block above = world.getBlockState(pos.up()).getBlock();
+			final Block below = world.getBlockState(pos.down()).getBlock();
 
-			final int j = world.getBlockMetadata( x, y, z );
-
-			if ( breakablePlant( i, j, above, below ) ) {
-				final Block block = i;
+			if ( breakablePlant( state, above, below ) ) {
+				final Block block = state.getBlock();
 				world.playSoundEffect( x + 0.5F, y + 0.5F, z + 0.5F, block.stepSound.getBreakSound(),
-						(block.stepSound.getVolume() + 1.0F) / 2.0F, block.stepSound.getPitch() * 0.8F );
-				block.dropBlockAsItemWithChance( world, x, y, z, j, 1.0F, 0 );
-				world.setBlockToAir(x, y, z);
+						(block.stepSound.getVolume() + 1.0F) / 2.0F, block.stepSound.getFrequency() * 0.8F );
+				block.dropBlockAsItemWithChance( world, pos, state, 1.0F, 0 );
+				world.setBlockToAir(pos);
 				fairy.armSwing( !fairy.didSwing );
 				fairy.attackTime = 30;
 
@@ -746,15 +762,15 @@ public class FairyJob {
 				z += b;
 			}
 
-			final Block i = world.getBlock( x, y, z );
-			final int j = world.getBlockMetadata( x, y, z );
+			final BlockPos pos = new BlockPos(x,y,z);
+			final IBlockState state = world.getBlockState(pos);
 
-			if ( i == Blocks.leaves ) {
-				final Block block = i;
+			final Block block = state.getBlock();
+			if ( block == Blocks.leaves ) {
 				world.playSoundEffect( x + 0.5F, y + 0.5F, z + 0.5F, block.stepSound.getBreakSound(),
-						(block.stepSound.getVolume() + 1.0F) / 2.0F, block.stepSound.getPitch() * 0.8F );
-				block.dropBlockAsItemWithChance( world, x, y, z, j, 1.0F, 0 );
-				world.setBlock( x, y, z, Blocks.air );
+						(block.stepSound.getVolume() + 1.0F) / 2.0F, block.stepSound.getFrequency() * 0.8F );
+				block.dropBlockAsItemWithChance( world, pos, state, 1.0F, 0 );
+				world.setBlockToAir(pos);
 				fairy.armSwing( !fairy.didSwing );
 				fairy.attackTime = 20;
 				return true;
@@ -858,28 +874,29 @@ public class FairyJob {
 	}
 
 	// Is it a plant that should be broken
-	private boolean breakablePlant( final Block i, final int j, final Block above, final Block below ) {
+	private boolean breakablePlant( final IBlockState state, final Block above, final Block below ) {
 		// we're gonna treat this as everything block that should be punched.
 		// cocoa?... hrmmm
 		// mushrooms: tricky, when there are at least 4 other mushrooms of same type in 9x3x9 area.
 		// snow?  maybe?  if there's plants?  if there's no shovel?
 
 		// crops: that should be wheat, carrots and potatoes, when MD level is 7.
-		return (i instanceof BlockCrops && j == 7)
+		final Block block = state.getBlock();
+		return (block instanceof BlockCrops && state.getValue(BlockCrops.AGE) == 7)
 				// not a crop, a bush apparently...
-				|| i == Blocks.nether_wart && j == 3
+				|| block == Blocks.nether_wart && state.getValue(BlockCrops.AGE) == 3
 				// reeds: when above reeds.
-				|| i == Blocks.reeds && below == Blocks.reeds
+				|| block == Blocks.reeds && below == Blocks.reeds
 				// cactus: break only when above sand and below cactus, to prevent losing drops.
-				|| i == Blocks.cactus && above == Blocks.cactus && below != Blocks.cactus
+				|| block == Blocks.cactus && above == Blocks.cactus && below != Blocks.cactus
 				// melons/pumkins... always?
-				|| i == Blocks.melon_block || i == Blocks.pumpkin
+				|| block == Blocks.melon_block || state == Blocks.pumpkin
 				// tallgrass, which drops seeds!
-				|| i == Blocks.tallgrass
+				|| block == Blocks.tallgrass
 				// all other doo-dads? ie bushes and tall plants?
-				|| i == Blocks.yellow_flower
-				|| i == Blocks.red_flower
-				|| i == Blocks.snow;
+				|| block == Blocks.yellow_flower
+				|| block == Blocks.red_flower
+				|| block == Blocks.snow;
 	}
 
 	// TODO: read allowed seeds from config file.
