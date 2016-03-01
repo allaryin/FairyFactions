@@ -82,8 +82,15 @@ public class EntityFairy extends EntityAnimal {
 	private EntityLivingBase	entityHeal;
 	private EntityLivingBase	entityFear;
 	/** NEW - replaces field deprecated since 1.1 that was finally made private in 1.8 */
+	@Deprecated
 	private EntityLivingBase	entityToAttack;
 	public FairyEntityFishHook	fishEntity;
+	
+	// TODO: deal with this in AI rewrite
+	@Deprecated
+	public EntityLivingBase getEntityToAttack() {
+		return entityToAttack;
+	}
 	
 	/** NEW - replaces field removed in 1.8, any reference is likely broken */
 	@Deprecated
@@ -91,7 +98,7 @@ public class EntityFairy extends EntityAnimal {
 
 	// non-persistent fields
 	public float				sinage;					// what does this mean?
-	//private boolean				flag;				// flagged for what, precisely?
+	//private boolean			flag;					// flagged for what, precisely?
 	private boolean				createGroup;
 	private int					listActions;
 	public int					witherTime;

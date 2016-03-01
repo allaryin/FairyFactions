@@ -10,6 +10,8 @@ import net.minecraft.init.Blocks;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.AxisAlignedBB;
+import net.minecraft.util.BlockPos;
+import net.minecraft.util.EnumParticleTypes;
 import net.minecraft.util.MathHelper;
 import net.minecraft.util.MovingObjectPosition;
 import net.minecraft.util.Vec3;
@@ -32,6 +34,11 @@ public class FairyEntityFishHook extends Entity
     public EntityFairy angler;
     private int ticksInGround;
     private int ticksInAir;
+    
+    // TODO: Fix this
+    @SuppressWarnings("unused")
+	@Deprecated
+    private float yOffset;
 
     /** the number of ticks remaining until this fish can no longer be caught */
     private int ticksCatchable;
@@ -101,7 +108,7 @@ public class FairyEntityFishHook extends Entity
         this.angler = fairy;
         this.angler.setFishEntity(this);
         this.setSize(0.25F, 0.25F);
-        this.setLocationAndAngles(fairy.posX, fairy.posY + 1.62D - (double)fairy.yOffset, fairy.posZ, fairy.rotationYaw, 0.25F);
+        this.setLocationAndAngles(fairy.posX, fairy.posY + 1.62D - fairy.getYOffset(), fairy.posZ, fairy.rotationYaw, 0.25F);
         this.posX -= (double)(MathHelper.cos(this.rotationYaw / 180.0F * (float)Math.PI) * 0.16F);
         this.posY -= 0.10000000149011612D;
         this.posZ -= (double)(MathHelper.sin(this.rotationYaw / 180.0F * (float)Math.PI) * 0.16F);
@@ -122,7 +129,7 @@ public class FairyEntityFishHook extends Entity
      */
     public boolean isInRangeToRenderDist(double par1)
     {
-        double var3 = this.boundingBox.getAverageEdgeLength() * 4.0D;
+        double var3 = this.getEntityBoundingBox().getAverageEdgeLength() * 4.0D;
         var3 *= 64.0D;
         return par1 < var3 * var3;
     }
@@ -229,7 +236,7 @@ public class FairyEntityFishHook extends Entity
                     if (!this.bobber.isDead)
                     {
                         this.posX = this.bobber.posX;
-                        this.posY = this.bobber.boundingBox.minY + (double)this.bobber.height * 0.8D;
+                        this.posY = this.bobber.getEntityBoundingBox().minY + (double)this.bobber.height * 0.8D;
                         this.posZ = this.bobber.posZ;
                         return;
                     }
@@ -245,7 +252,7 @@ public class FairyEntityFishHook extends Entity
 
             if (this.inGround)
             {
-                Block var19 = this.worldObj.getBlock(this.xTile, this.yTile, this.zTile);
+                Block var19 = this.worldObj.getBlockState(new BlockPos(this.xTile, this.yTile, this.zTile)).getBlock();
 
                 if (var19 == this.inTile || onGround)
                 {
@@ -271,19 +278,19 @@ public class FairyEntityFishHook extends Entity
                 ++this.ticksInAir;
             }
 
-            Vec3 var20 = Vec3.createVectorHelper(this.posX, this.posY, this.posZ);
-            Vec3 var2 = Vec3.createVectorHelper(this.posX + this.motionX, this.posY + this.motionY, this.posZ + this.motionZ);
+            Vec3 var20 = new Vec3(this.posX, this.posY, this.posZ);
+            Vec3 var2 = new Vec3(this.posX + this.motionX, this.posY + this.motionY, this.posZ + this.motionZ);
             MovingObjectPosition var3 = this.worldObj.rayTraceBlocks(var20, var2);
-            var20 = Vec3.createVectorHelper(this.posX, this.posY, this.posZ);
-            var2 = Vec3.createVectorHelper(this.posX + this.motionX, this.posY + this.motionY, this.posZ + this.motionZ);
+            var20 = new Vec3(this.posX, this.posY, this.posZ);
+            var2 = new Vec3(this.posX + this.motionX, this.posY + this.motionY, this.posZ + this.motionZ);
 
             if (var3 != null)
             {
-                var2 = Vec3.createVectorHelper(var3.hitVec.xCoord, var3.hitVec.yCoord, var3.hitVec.zCoord);
+                var2 = new Vec3(var3.hitVec.xCoord, var3.hitVec.yCoord, var3.hitVec.zCoord);
             }
 
             Entity var4 = null;
-            List<?> var5 = this.worldObj.getEntitiesWithinAABBExcludingEntity(this, this.boundingBox.addCoord(this.motionX, this.motionY, this.motionZ).expand(1.0D, 1.0D, 1.0D));
+            List<?> var5 = this.worldObj.getEntitiesWithinAABBExcludingEntity(this, this.getEntityBoundingBox().addCoord(this.motionX, this.motionY, this.motionZ).expand(1.0D, 1.0D, 1.0D));
             double var6 = 0.0D;
             double var13;
 
@@ -294,7 +301,7 @@ public class FairyEntityFishHook extends Entity
                 if (var9.canBeCollidedWith() && (var9 != this.angler || this.ticksInAir >= 5))
                 {
                     float var10 = 0.3F;
-                    AxisAlignedBB var11 = var9.boundingBox.expand((double)var10, (double)var10, (double)var10);
+                    AxisAlignedBB var11 = var9.getEntityBoundingBox().expand((double)var10, (double)var10, (double)var10);
                     MovingObjectPosition var12 = var11.calculateIntercept(var20, var2);
 
                     if (var12 != null)
@@ -364,12 +371,12 @@ public class FairyEntityFishHook extends Entity
 
                 for (int var29 = 0; var29 < var27; ++var29)
                 {
-                    double var14 = this.boundingBox.minY + (this.boundingBox.maxY - this.boundingBox.minY) * (double)(var29 + 0) / (double)var27 - 0.125D + 0.125D;
-                    double var16 = this.boundingBox.minY + (this.boundingBox.maxY - this.boundingBox.minY) * (double)(var29 + 1) / (double)var27 - 0.125D + 0.125D;
-                    AxisAlignedBB var18 = AxisAlignedBB.getBoundingBox(this.boundingBox.minX, var14, this.boundingBox.minZ, this.boundingBox.maxX, var16, this.boundingBox.maxZ);
+                	final AxisAlignedBB bb = this.getEntityBoundingBox();
+                    double var14 = bb.minY + (bb.maxY - bb.minY) * (double)(var29 + 0) / (double)var27 - 0.125D + 0.125D;
+                    double var16 = bb.minY + (bb.maxY - bb.minY) * (double)(var29 + 1) / (double)var27 - 0.125D + 0.125D;
+                    AxisAlignedBB var18 = new AxisAlignedBB(bb.minX, var14, bb.minZ, bb.maxX, var16, bb.maxZ);
 
-                    if (this.worldObj.isAABBInMaterial(var18, Material.water))
-                    {
+                    if (this.worldObj.isAABBInMaterial(var18, Material.water)) {
                         var26 += 1.0D / (double)var27;
                     }
                 }
@@ -384,7 +391,8 @@ public class FairyEntityFishHook extends Entity
                     {
                         short var28 = 500;
 
-                        if (this.worldObj.canLightningStrikeAt(MathHelper.floor_double(this.posX), MathHelper.floor_double(this.posY) + 1, MathHelper.floor_double(this.posZ)))
+                        final BlockPos pos = new BlockPos(MathHelper.floor_double(this.posX), MathHelper.floor_double(this.posY) + 1, MathHelper.floor_double(this.posZ));
+                        if (this.worldObj.canLightningStrike(pos))
                         {
                             var28 = 300;
                         }
@@ -394,7 +402,7 @@ public class FairyEntityFishHook extends Entity
                             this.ticksCatchable = this.rand.nextInt(30) + 10;
                             this.motionY -= 0.20000000298023224D;
                             this.worldObj.playSoundAtEntity(this, "random.splash", 0.25F, 1.0F + (this.rand.nextFloat() - this.rand.nextFloat()) * 0.4F);
-                            float var30 = (float)MathHelper.floor_double(this.boundingBox.minY);
+                            float var30 = (float)MathHelper.floor_double(this.getEntityBoundingBox().minY);
                             int var15;
                             float var17;
                             float var31;
@@ -403,14 +411,14 @@ public class FairyEntityFishHook extends Entity
                             {
                                 var31 = (this.rand.nextFloat() * 2.0F - 1.0F) * this.width;
                                 var17 = (this.rand.nextFloat() * 2.0F - 1.0F) * this.width;
-                                this.worldObj.spawnParticle("bubble", this.posX + (double)var31, (double)(var30 + 1.0F), this.posZ + (double)var17, this.motionX, this.motionY - (double)(this.rand.nextFloat() * 0.2F), this.motionZ);
+                                this.worldObj.spawnParticle(EnumParticleTypes.WATER_BUBBLE, this.posX + (double)var31, (double)(var30 + 1.0F), this.posZ + (double)var17, this.motionX, this.motionY - (double)(this.rand.nextFloat() * 0.2F), this.motionZ);
                             }
 
                             for (var15 = 0; (float)var15 < 1.0F + this.width * 20.0F; ++var15)
                             {
                                 var31 = (this.rand.nextFloat() * 2.0F - 1.0F) * this.width;
                                 var17 = (this.rand.nextFloat() * 2.0F - 1.0F) * this.width;
-                                this.worldObj.spawnParticle("splash", this.posX + (double)var31, (double)(var30 + 1.0F), this.posZ + (double)var17, this.motionX, this.motionY, this.motionZ);
+                                this.worldObj.spawnParticle(EnumParticleTypes.WATER_SPLASH, this.posX + (double)var31, (double)(var30 + 1.0F), this.posZ + (double)var17, this.motionX, this.motionY, this.motionZ);
                             }
                         }
                     }
