@@ -94,7 +94,7 @@ public final class Spawner {
 	}
 	
 	// Obfuscated name lookups
-	private static final String[] MCP_CREATUREMATERIAL = { "creatureMaterial", "field_70703_bu" };
+	private static final String[] MCP_CREATUREMATERIAL = { "creatureMaterial", "field_75603_f" };
 
 	private Material getCreatureMaterial(EnumCreatureType type) {
 		return ReflectionHelper.getPrivateValue(EnumCreatureType.class, type, MCP_CREATUREMATERIAL);
