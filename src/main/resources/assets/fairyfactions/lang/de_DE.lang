@@ -1,0 +1,57 @@
+entity.FairyFactions.Fairy.name=Fee
+
+text.queen.prefix=Königin
+
+text.faction.1.name=Aviary Army
+text.faction.2.name=Bantam Brawlers
+text.faction.3.name=Charging Cherubs
+text.faction.4.name=Dainty Demons
+text.faction.5.name=Enigmatic Escorts
+text.faction.6.name=Floating Fury
+text.faction.7.name=Graceful Gliders
+text.faction.8.name=Hardy Handmaids
+text.faction.9.name=Iron Imps
+text.faction.10.name=Opulent Order
+text.faction.11.name=Kute Killers
+text.faction.12.name=Lethal Ladies
+text.faction.13.name=Maiden Militia
+text.faction.14.name=Nimble Nymphs
+text.faction.15.name=Petite Pugilists
+
+text.disband.queen.1.message=fühlt sich von eurem Angebot überaus beleidigt.
+text.disband.queen.2.message=nennt euch einen 'Pöbel' und stürmt davon.
+text.disband.other.1.message=wirft es auf den Boden und bekommt einen Wutanfall.
+text.disband.other.2.message=nennt euch einen Idiot und rennt davon.
+text.disband.other.3.message=würde lieber sterben als dieses ekelhafte Zeug zu essen.
+text.disband.other.4.message=entscheidet sich, nicht mehr euer Freund zu sein.
+text.disband.other.5.message=wirft euch einen bösen Blick zu und haut ab.
+text.disband.other.6.message=sagt dass das das ekelhafteste, das sie je gesehen hat.
+
+text.tame.queen.1.message=hat sich widerwillig eurem Gefolge angeschlossen.
+text.tame.queen.2.message=seufzt und schliesst sich euch an.
+text.tame.queen.3.message=schmeckt die glitzernde Melone richtig gut.
+text.tame.other.1.message=fühlte sich irgendwie alleine ohne einen Anführer.
+text.tame.other.2.message=zuckt mit den Schultern und entscheidet sich, euch zu folgen.
+text.tame.other.3.message=lässt die Vergangenheit hinter sich und folgt euch.
+text.tame.other.4.message=hat sich mit diesem leckeren Snack bestechen lassen.
+text.tame.other.5.message=stellt sich euch anstandsgemäß vor.
+text.tame.other.6.message=isst den Snack als gäbe es keinen morgen.
+
+text.tame.fail.prefix=
+text.tame.fail.angry.message=Diese Fee kann nicht gebändigt werden wenn sie wütend ist.
+text.tame.fail.crying.message=Diese Fee kann nicht gebändigt werden wenn sie verärgert ist.
+text.tame.fail.has_followers.message=Eine Feenkönigin kann nur gebändigt werden, wenn ihre Untertanen besiegt sind.
+text.tame.fail.has_queen.message=Diese Fee kann nur gebändigt werden, wenn ihre Königin besiegt wurde.
+text.tame.fail.tame_queen.message=Diese Fee gehört jemand anders und kann nicht gestohlen werden.
+text.tame.fail.posted.message=Diese Fee ist beschäftigt und kann nicht gestohlen werden.
+text.tame.fail.glowstone.message=Du willst dieser Fee nicht wirklich etwas geben, das wie Ihre eigen Innereien aussieht.
+text.tame.fail.not_melon.message=Eine Feenkönigin kann nur mit einem Stück glitzernder Melone gebändigt werden.
+text.tame.fail.not_snack.message=Eine Fee kann nur mit einem süssen Snack gebändigt werden.
+
+text.death.1.message=hat in's Grass gebissen.
+text.death.2.message=ist auf ein paar Probleme gestossen.
+text.death.3.message=ist in den grossen Wald im Himmel gegangen.
+text.death.4.message=musste für 'ne Weile weg.
+text.death.5.message=hat ein gutes Leben gehabt.
+text.death.6.message=ist jetzt an einem besseren Ort.
+text.death.7.message=ist krepiert.

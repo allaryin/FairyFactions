@@ -1,0 +1,57 @@
+entity.FairyFactions.Fairy.name=Fata
+
+text.queen.prefix=Regina
+
+text.faction.1.name=Aviary Army
+text.faction.2.name=Bantam Brawlers
+text.faction.3.name=Charging Cherubs
+text.faction.4.name=Dainty Demons
+text.faction.5.name=Enigmatic Escorts
+text.faction.6.name=Floating Fury
+text.faction.7.name=Graceful Gliders
+text.faction.8.name=Hardy Handmaids
+text.faction.9.name=Iron Imps
+text.faction.10.name=Opulent Order
+text.faction.11.name=Kute Killers
+text.faction.12.name=Lethal Ladies
+text.faction.13.name=Maiden Militia
+text.faction.14.name=Nimble Nymphs
+text.faction.15.name=Petite Pugilists
+
+text.disband.queen.1.message=è stata profondamente offesa dalla tua offerta.
+text.disband.queen.2.message=se n'è andata dandoti del pezzente.
+text.disband.other.1.message=ha buttato via il tuo regalo, indispettita.
+text.disband.other.2.message=ti insulta e corre via.
+text.disband.other.3.message=preferirebbe morire che mangiare questa schifezza.
+text.disband.other.4.message=ha deciso di non essere più tua amica.
+text.disband.other.5.message=se n'è andata guardandoti male.
+text.disband.other.6.message=dice di non aver mai visto nulla di così rivoltante.
+
+text.tame.queen.1.message=si è unita con riluttanza al tuo gruppo.
+text.tame.queen.2.message=decide, esasperata, di seguirti.
+text.tame.queen.3.message=ama molto gustare del melone luccicante.
+text.tame.other.1.message=si sentiva un po' sola senza un leader.
+text.tame.other.2.message=ha deciso di seguirti senza pensarci troppo.
+text.tame.other.3.message=si è lasciata il passato alle spalle e si è unita a te.
+text.tame.other.4.message=è stata facilmente convinta dal tuo snack.
+text.tame.other.5.message=si è presentata cortesemente.
+text.tame.other.6.message=ha divorato il tuo regalo in pochi morsi!
+
+text.tame.fail.prefix=Non puoi
+text.tame.fail.angry.message=addomesticare questa fata, è troppo arrabbiata.
+text.tame.fail.crying.message=addomesticare questa fata, è ancora sconvolta.
+text.tame.fail.has_followers.message=addomesticare una regina finché non sconfiggi le sue seguaci.
+text.tame.fail.has_queen.message=addomesticare questa fata finché non sconfiggi la sua regina.
+text.tame.fail.tame_queen.message=rubare la fata di qualcun altro.
+text.tame.fail.posted.message=rubare una fata a cui è stato assegnato un compito.
+text.tame.fail.glowstone.message=aspettarti che una fata mangi qualcosa che somiglia molto alle sue interiora...
+text.tame.fail.not_melon.message=addomesticare una regina senza una fetta di melone luccicante.
+text.tame.fail.not_snack.message=addomesticare una fata senza qualche tipo di dolciume.
+
+text.death.1.message=ha mangiato la polvere.
+text.death.2.message=ha avuto qualche problemino.
+text.death.3.message=è andata alla grande foresta nel cielo.
+text.death.4.message=aveva proprio bisogno di una pausa.
+text.death.5.message=ha avuto una buona vita.
+text.death.6.message=è in un posto migliore, adesso.
+text.death.7.message=ha tirato le cuoia.
