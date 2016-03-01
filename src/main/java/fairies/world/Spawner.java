@@ -23,8 +23,10 @@ import net.minecraft.entity.passive.EntitySheep;
 import net.minecraft.entity.passive.EntitySquid;
 import net.minecraft.entity.passive.EntityWolf;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.util.BlockPos;
 import net.minecraft.util.MathHelper;
 import net.minecraft.world.ChunkCoordIntPair;
+import net.minecraft.world.EnumDifficulty;
 import net.minecraft.world.World;
 import net.minecraft.world.biome.BiomeGenBase;
 import net.minecraft.world.biome.BiomeGenBase.SpawnListEntry;
@@ -32,6 +34,7 @@ import net.minecraft.world.biome.BiomeGenEnd;
 import net.minecraft.world.biome.BiomeGenHell;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
+import net.minecraftforge.fml.relauncher.ReflectionHelper;
 
 public final class Spawner {
 	private int			maxAnimals					= 40;
@@ -90,11 +93,18 @@ public final class Spawner {
 		}
 	}
 	
+	// Obfuscated name lookups
+	private static final String[] MCP_CREATUREMATERIAL = { "creatureMaterial", "field_70703_bu" };
+
+	private Material getCreatureMaterial(EnumCreatureType type) {
+		return ReflectionHelper.getPrivateValue(EnumCreatureType.class, type, MCP_CREATUREMATERIAL);
+	}
+	
 	@SubscribeEvent
 	public void onTick(TickEvent.WorldTickEvent event) {
 		final World world = event.world;
 		if( world != null && !world.isRemote 
-				&& world.difficultySetting.getDifficultyId() > 0 
+				&& world.getDifficulty() != EnumDifficulty.PEACEFUL 
 				&& world.getWorldInfo().getWorldTime() % 300L == 0L ) {
 			final List<?> list = world.playerEntities;
 			if( list != null && list.size() > 0 ) {
@@ -105,12 +115,11 @@ public final class Spawner {
 		}
 	}
 
-	protected ChunkPosition getRandomSpawningPointInChunk(World world, int i, int j) {
+	protected BlockPos getRandomSpawningPointInChunk(World world, int i, int j) {
 		int k = i + world.rand.nextInt(16);
-		world.getClass();
 		int l = world.rand.nextInt(128);
 		int i1 = j + world.rand.nextInt(16);
-		return new ChunkPosition(k, l, i1);
+		return new BlockPos(k, l, i1);
 	}
 
 	public void clearLists() {
@@ -147,27 +156,27 @@ public final class Spawner {
 		}
 
 		countTotal = 0;
-		ChunkCoordinates chunkcoordspawn = worldObj.getSpawnPoint();
+		BlockPos chunkcoordspawn = worldObj.getSpawnPoint();
 		Iterator<ChunkCoordIntPair> iterator = eligibleChunksForSpawning.iterator();
 		label113:
 
 		while (iterator.hasNext()) {
 			ChunkCoordIntPair var10 = (ChunkCoordIntPair) iterator.next();
-			ChunkPosition chunkpos = getRandomSpawningPointInChunk(worldObj, var10.chunkXPos * 16,
+			BlockPos chunkpos = getRandomSpawningPointInChunk(worldObj, var10.chunkXPos * 16,
 					var10.chunkZPos * 16);
-			int chunkX = chunkpos.chunkPosX;
-			int chunkY = chunkpos.chunkPosY;
-			int chunkZ = chunkpos.chunkPosZ;
+			final int chunkX = chunkpos.getX();
+			final int chunkY = chunkpos.getY();
+			final int chunkZ = chunkpos.getZ();
 
-			final Block block = worldObj.getBlock(chunkX, chunkY, chunkZ);
-			if (!block.isNormalCube() && block.getMaterial() == enumcreaturetype.getCreatureMaterial()) {
+			final Block block = worldObj.getBlockState(chunkpos).getBlock();
+			if (!block.isNormalCube() && block.getMaterial() == getCreatureMaterial(enumcreaturetype)) {
 				int countSpawn = 0;
 
 				for (int var21 = 0; var21 < 3; ++var21) {
 					int tempPosX = chunkX;
 					int tempPosY = chunkY;
 					int tempPosZ = chunkZ;
-					byte var25 = 6;
+					final byte var25 = 6;
 
 					for (int var26 = 0; var26 < 4; ++var26) {
 						tempPosX += worldObj.rand.nextInt(var25) - worldObj.rand.nextInt(var25);
@@ -181,9 +190,9 @@ public final class Spawner {
 
 							if (worldObj.getClosestPlayer((double) finalPosX, (double) finalPosY, (double) finalPosZ,
 									24.0D) == null) {
-								float distSpawnX = finalPosX - (float) chunkcoordspawn.posX;
-								float distSpawnY = finalPosY - (float) chunkcoordspawn.posY;
-								float distSpawnZ = finalPosZ - (float) chunkcoordspawn.posZ;
+								float distSpawnX = finalPosX - (float) chunkcoordspawn.getX();
+								float distSpawnY = finalPosY - (float) chunkcoordspawn.getY();
+								float distSpawnZ = finalPosZ - (float) chunkcoordspawn.getZ();
 								float sqDist = distSpawnX * distSpawnX + distSpawnY * distSpawnY
 										+ distSpawnZ * distSpawnZ;
 
@@ -228,7 +237,6 @@ public final class Spawner {
 	}
 
 	// regular spawning with list
-	@SuppressWarnings("unchecked")
 	public final int doCustomSpawning(World worldObj, boolean spawnMobs, boolean spawnAnmls) {
 		if (!spawnMobs && !spawnAnmls) {
 			return 0;
@@ -251,7 +259,7 @@ public final class Spawner {
 			}
 
 			countTotal = 0;
-			ChunkCoordinates chunkcoordspawn = worldObj.getSpawnPoint();
+			BlockPos chunkcoordspawn = worldObj.getSpawnPoint();
 			EnumCreatureType[] enumcreaturevalues = EnumCreatureType.values();
 			var6 = enumcreaturevalues.length;
 
@@ -270,12 +278,7 @@ public final class Spawner {
 
 					while (iterator.hasNext()) {
 						ChunkCoordIntPair var10 = (ChunkCoordIntPair) iterator.next();
-						BiomeGenBase biomegenbase = worldObj.getWorldChunkManager().getBiomeGenAt(var10.getCenterXPos(),
-								var10.getCenterZPosition()); // gets the kind of
-																// biome the
-																// chunk is at
-																// i.e. forest,
-																// etc
+						BiomeGenBase biomegenbase = worldObj.getWorldChunkManager().getBiomeGenerator(var10.getCenterBlock(64)); // gets the kind of biome the chunk is at i.e. forest, etc
 						List<?> listspawns = getCustomBiomeSpawnList(getCustomSpawnableList(enumcreaturetype),
 								biomegenbase);
 
@@ -312,39 +315,37 @@ public final class Spawner {
 								}
 							}
 
-							ChunkPosition chunkpos = getRandomSpawningPointInChunk(worldObj, var10.chunkXPos * 16,
+							BlockPos chunkpos = getRandomSpawningPointInChunk(worldObj, var10.chunkXPos * 16,
 									var10.chunkZPos * 16);
-							int chunkX = chunkpos.chunkPosX;
-							int chunkY = chunkpos.chunkPosY;
-							int chunkZ = chunkpos.chunkPosZ;
+							final int chunkX = chunkpos.getX();
+							final int chunkY = chunkpos.getY();
+							final int chunkZ = chunkpos.getZ();
 
-							final Block block = worldObj.getBlock(chunkX, chunkY, chunkZ);
+							final Block block = worldObj.getBlockState(chunkpos).getBlock();
 							if (!block.isNormalCube()
-									&& block.getMaterial() == enumcreaturetype.getCreatureMaterial()) {
+									&& block.getMaterial() == getCreatureMaterial(enumcreaturetype)) {
 								int countSpawn = 0;
 
 								for (int var21 = 0; var21 < 3; ++var21) {
 									int tempPosX = chunkX;
 									int tempPosY = chunkY;
 									int tempPosZ = chunkZ;
-									byte var25 = 6;
+									final byte var25 = 6;
 
 									for (int var26 = 0; var26 < 4; ++var26) {
 										tempPosX += worldObj.rand.nextInt(var25) - worldObj.rand.nextInt(var25);
 										tempPosY += worldObj.rand.nextInt(1) - worldObj.rand.nextInt(1);
 										tempPosZ += worldObj.rand.nextInt(var25) - worldObj.rand.nextInt(var25);
 
-										if (canCreatureTypeSpawnAtLocation(enumcreaturetype, worldObj, tempPosX,
-												tempPosY, tempPosZ)) {
+										if (canCreatureTypeSpawnAtLocation(enumcreaturetype, worldObj, tempPosX, tempPosY, tempPosZ)) {
 											float finalPosX = (float) tempPosX + 0.5F;
 											float finalPosY = (float) tempPosY;
 											float finalPosZ = (float) tempPosZ + 0.5F;
 
-											if (worldObj.getClosestPlayer((double) finalPosX, (double) finalPosY,
-													(double) finalPosZ, 24.0D) == null) {
-												float distSpawnX = finalPosX - (float) chunkcoordspawn.posX;
-												float distSpawnY = finalPosY - (float) chunkcoordspawn.posY;
-												float distSpawnZ = finalPosZ - (float) chunkcoordspawn.posZ;
+											if (worldObj.getClosestPlayer((double) finalPosX, (double) finalPosY, (double) finalPosZ, 24.0D) == null) {
+												float distSpawnX = finalPosX - (float) chunkcoordspawn.getX();
+												float distSpawnY = finalPosY - (float) chunkcoordspawn.getY();
+												float distSpawnZ = finalPosZ - (float) chunkcoordspawn.getZ();
 												float sqDist = distSpawnX * distSpawnX + distSpawnY * distSpawnY
 														+ distSpawnZ * distSpawnZ;
 
@@ -394,30 +395,30 @@ public final class Spawner {
 		}
 	}
 
-	public void AddCustomSpawn(Class<?> class1, int i, int max, EnumCreatureType enumcreaturetype) {
+	public void AddCustomSpawn(Class<?extends EntityLiving> class1, int i, int max, EnumCreatureType enumcreaturetype) {
 		AddCustomSpawn(class1, i, -1, max, enumcreaturetype, null);
 	}
 
-	public void AddCustomSpawn(Class<?> class1, int i, EnumCreatureType enumcreaturetype) {
+	public void AddCustomSpawn(Class<?extends EntityLiving> class1, int i, EnumCreatureType enumcreaturetype) {
 		AddCustomSpawn(class1, i, -1, -1, enumcreaturetype, null);
 	}
 
-	public void AddCustomSpawn(Class<?> class1, int i, int max, EnumCreatureType enumcreaturetype,
+	public void AddCustomSpawn(Class<?extends EntityLiving> class1, int i, int max, EnumCreatureType enumcreaturetype,
 			BiomeGenBase abiomegenbase[]) {
 		AddCustomSpawn(class1, i, -1, max, enumcreaturetype, abiomegenbase);
 	}
 
-	public void AddCustomSpawn(Class<?> class1, int i, EnumCreatureType enumcreaturetype, BiomeGenBase abiomegenbase[]) {
+	public void AddCustomSpawn(Class<?extends EntityLiving> class1, int i, EnumCreatureType enumcreaturetype, BiomeGenBase abiomegenbase[]) {
 		AddCustomSpawn(class1, i, -1, -1, enumcreaturetype, abiomegenbase);
 	}
 
 	// this one adds spawn where biome is not specified
-	public void AddCustomSpawn(Class<?> class1, int i, int j, int k, EnumCreatureType enumcreaturetype) {
+	public void AddCustomSpawn(Class<?extends EntityLiving> class1, int i, int j, int k, EnumCreatureType enumcreaturetype) {
 		AddCustomSpawn(class1, i, j, k, enumcreaturetype, null);
 	}
 
 	@SuppressWarnings("unchecked")
-	public void AddCustomSpawn(Class<?> class1, int i, int j, int k, EnumCreatureType enumcreaturetype,
+	public void AddCustomSpawn(Class<?extends EntityLiving> class1, int i, int j, int k, EnumCreatureType enumcreaturetype,
 			BiomeGenBase abiomegenbase[]) {
 		if (class1 == null) {
 			throw new IllegalArgumentException("entityClass cannot be null");
@@ -518,15 +519,15 @@ public final class Spawner {
 	}
 
 	private int getEnumIndex(EnumCreatureType enumcreaturetype) {
-		if (enumcreaturetype == EnumCreatureType.monster) {
+		if (enumcreaturetype == EnumCreatureType.MONSTER) {
 			return 0;
 		}
 
-		if (enumcreaturetype == EnumCreatureType.creature) {
+		if (enumcreaturetype == EnumCreatureType.CREATURE) {
 			return 1;
 		}
 
-		if (enumcreaturetype == EnumCreatureType.waterCreature) {
+		if (enumcreaturetype == EnumCreatureType.WATER_CREATURE) {
 			return 2;
 		} else {
 			return -1;
@@ -554,15 +555,15 @@ public final class Spawner {
 
 	@SuppressWarnings("rawtypes")
 	private List[] getCustomSpawnableList(EnumCreatureType enumcreaturetype) {
-		if (enumcreaturetype == EnumCreatureType.monster) {
+		if (enumcreaturetype == EnumCreatureType.MONSTER) {
 			return customMobSpawnList;
 		}
 
-		if (enumcreaturetype == EnumCreatureType.creature) {
+		if (enumcreaturetype == EnumCreatureType.CREATURE) {
 			return customCreatureSpawnList;
 		}
 
-		if (enumcreaturetype == EnumCreatureType.waterCreature) {
+		if (enumcreaturetype == EnumCreatureType.WATER_CREATURE) {
 			return customAquaticSpawnList;
 		} else {
 			return null;
@@ -580,15 +581,15 @@ public final class Spawner {
 	}
 
 	private int getMax(EnumCreatureType enumcreaturetype) {
-		if (enumcreaturetype == EnumCreatureType.monster) {
+		if (enumcreaturetype == EnumCreatureType.MONSTER) {
 			return getMaxMobs();
 		}
 
-		if (enumcreaturetype == EnumCreatureType.creature) {
+		if (enumcreaturetype == EnumCreatureType.CREATURE) {
 			return getMaxAnimals();
 		}
 
-		if (enumcreaturetype == EnumCreatureType.waterCreature) {
+		if (enumcreaturetype == EnumCreatureType.WATER_CREATURE) {
 			return getMaxAquatic();
 		} else {
 			return -1;
@@ -618,19 +619,21 @@ public final class Spawner {
 	public void setMaxAquatic(int max) {
 		maxAquatic = max;
 	}
-
+	
 	private boolean canCreatureTypeSpawnAtLocation(EnumCreatureType enumcreaturetype, World world, int i, int j,
 			int k) {
 
-		if (enumcreaturetype.getCreatureMaterial() == Material.water) {
-			final Block block = world.getBlock(i, j, k);
+		final BlockPos pos = new BlockPos(i, j, k);
+		
+		if (getCreatureMaterial(enumcreaturetype) == Material.water) {
+			final Block block = world.getBlockState(pos).getBlock();
 			// final Block blockAbove = world.getBlock(i, j + 1, k);
 
 			return block.getMaterial().isLiquid() && !block.isNormalCube();
 		} else {
-			final Block block = world.getBlock(i, j, k);
-			final Block blockAbove = world.getBlock(i, j + 1, k);
-			final Block blockBelow = world.getBlock(i, j - 1, k);
+			final Block block = world.getBlockState(pos).getBlock();
+			final Block blockAbove = world.getBlockState(pos.up()).getBlock();
+			final Block blockBelow = world.getBlockState(pos.down()).getBlock();
 
 			return blockBelow.isNormalCube() && !block.isNormalCube() && !block.getMaterial().isLiquid()
 					&& !blockAbove.isNormalCube();
