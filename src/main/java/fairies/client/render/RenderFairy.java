@@ -13,6 +13,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.entity.RenderLiving;
+import net.minecraft.client.renderer.entity.RenderManager;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.init.Items;
@@ -21,7 +22,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.StringUtils;
 
-public class RenderFairy extends RenderLiving
+public class RenderFairy extends RenderLiving<EntityFairy>
 {
 	/**
 	 * TODO: Move into a more appropriate utility class.
@@ -37,9 +38,9 @@ public class RenderFairy extends RenderLiving
 		}
 	}
 	
-    public RenderFairy(ModelFairy modelfairy, float f)
+    public RenderFairy(RenderManager renderManager, ModelFairy modelfairy, float f)
     {
-        super(modelfairy, f);
+        super(renderManager, modelfairy, f);
         fairyModel = modelfairy;
         fairyModel2 = new ModelFairyProps();
         fairyModel3 = new ModelFairyEyes();
@@ -48,9 +49,8 @@ public class RenderFairy extends RenderLiving
     }
 
     @Override
-    protected void preRenderCallback(EntityLivingBase entityliving, float f)
+    protected void preRenderCallback(EntityFairy fairy, float f)
     {
-        EntityFairy fairy = (EntityFairy)entityliving;
         float f1 = 0.875F;
         fairyModel.sinage = fairy.sinage;
         fairyModel.flymode = fairy.flymode();
@@ -61,14 +61,14 @@ public class RenderFairy extends RenderLiving
         fairyModel.hairType = fairy.hairType();
         GL11.glScalef(f1, f1, f1);
 
-        if (entityliving.isSneaking())
+        if (fairy.isSneaking())
         {
             GL11.glTranslatef(0F, (5F / 16F), 0F);
         }
     }
 
     @Override
-    protected void renderEquippedItems(EntityLivingBase entityliving, float f)
+    protected void renderEquippedItems(EntityFairy entityliving, float f)
     {
         ItemStack itemstack = entityliving.getHeldItem();
 
@@ -126,10 +126,8 @@ public class RenderFairy extends RenderLiving
     }
     
     @Override
-    protected int shouldRenderPass(EntityLivingBase entityliving, int i, float f)
+    protected int shouldRenderPass(EntityFairy fairy, int i, float f)
     {
-    	final EntityFairy fairy = (EntityFairy)entityliving;
-    	
         if (i == 0 && (fairy.withered() || fairy.rogue()))  //Render Withered Skin.
         {
             float transp = 0.7F;
@@ -218,9 +216,9 @@ public class RenderFairy extends RenderLiving
     }
 
     @Override
-    protected void passSpecialRender(EntityLivingBase entityliving, double d, double d1, double d2)
+    public void passSpecialRender(EntityFairy fairy, double d, double d1, double d2)
     {
-        renderFairyName((EntityFairy)entityliving, d, d1, d2);
+        renderFairyName(fairy, d, d1, d2);
     }
 
     protected void renderFairyName(EntityFairy fairy, double d, double d1, double d2)
@@ -267,7 +265,7 @@ public class RenderFairy extends RenderLiving
         GL11.glDisable(GL11.GL_DEPTH_TEST);
         GL11.glEnable(GL11.GL_BLEND);
         GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
-        Tessellator tessellator = Tessellator.instance;
+        Tessellator tessellator = Tessellator.getInstance();
         byte byte0 = 0;
         GL11.glDisable(GL11.GL_TEXTURE_2D);
         tessellator.startDrawingQuads();
@@ -290,11 +288,6 @@ public class RenderFairy extends RenderLiving
     }
     
 	@Override
-	protected ResourceLocation getEntityTexture(Entity entity) {
-		final EntityFairy fairy = (EntityFairy)entity;
-		return getEntityTexture(fairy);
-	}
-	
 	protected ResourceLocation getEntityTexture(EntityFairy fairy) {
 		return fairy.getTexture(fairy.getSkin());
 	}

@@ -26,7 +26,7 @@ public class ClientProxy extends CommonProxy {
 	private void initRenderer() {
 	    // map.put(FRY_EntityFairy.class, new FRY_RenderFairy(new FRY_ModelFairy(), 0.25F));
 	    // map.put(FRY_EntityFishHook.class, new FRY_RenderFish());
-		
+
 		RenderingRegistry.registerEntityRenderingHandler(EntityFairy.class, 
 				new RenderFairy(new ModelFairy(), 0.25f));
 		RenderingRegistry.registerEntityRenderingHandler(FairyEntityFishHook.class, new RenderFish());
