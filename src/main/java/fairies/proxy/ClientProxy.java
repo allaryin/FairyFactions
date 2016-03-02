@@ -8,7 +8,10 @@ import fairies.client.render.RenderFish;
 import fairies.entity.EntityFairy;
 import fairies.entity.FairyEntityFishHook;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.entity.Render;
+import net.minecraft.client.renderer.entity.RenderManager;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraftforge.fml.client.registry.IRenderFactory;
 import net.minecraftforge.fml.client.registry.RenderingRegistry;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
@@ -27,9 +30,22 @@ public class ClientProxy extends CommonProxy {
 	    // map.put(FRY_EntityFairy.class, new FRY_RenderFairy(new FRY_ModelFairy(), 0.25F));
 	    // map.put(FRY_EntityFishHook.class, new FRY_RenderFish());
 
-		RenderingRegistry.registerEntityRenderingHandler(EntityFairy.class, 
-				new RenderFairy(new ModelFairy(), 0.25f));
-		RenderingRegistry.registerEntityRenderingHandler(FairyEntityFishHook.class, new RenderFish());
+		//RenderingRegistry.registerEntityRenderingHandler(EntityFairy.class, 
+		//		new RenderFairy(renderManager, new ModelFairy(), 0.25f));
+		//RenderingRegistry.registerEntityRenderingHandler(FairyEntityFishHook.class, new RenderFish(renderManager));
+		
+		RenderingRegistry.registerEntityRenderingHandler(EntityFairy.class, new IRenderFactory<EntityFairy>() {
+			@Override
+			public Render<? super EntityFairy> createRenderFor(RenderManager manager) {
+				return new RenderFairy(manager, new ModelFairy(), 0.25f);
+			}
+		});
+		RenderingRegistry.registerEntityRenderingHandler(FairyEntityFishHook.class, new IRenderFactory<FairyEntityFishHook>() {
+			@Override
+			public Render<? super FairyEntityFishHook> createRenderFor(RenderManager manager) {
+				return new RenderFish(manager);
+			}
+		});
 	}
 	
     @Override

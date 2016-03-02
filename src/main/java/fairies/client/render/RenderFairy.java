@@ -135,6 +135,11 @@ public class RenderFairy extends RenderLiving<EntityFairy>
     }
      */
     
+    /**
+     * 
+     * TODO: Update to use new LayerRenderer system
+     * 
+     *
     @Override
     protected int shouldRenderPass(EntityFairy fairy, int i, float f)
     {
@@ -224,6 +229,7 @@ public class RenderFairy extends RenderLiving<EntityFairy>
             return -1;
         }
     }
+     */
 
     /*
     @Override
