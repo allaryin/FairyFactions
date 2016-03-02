@@ -261,10 +261,10 @@ public class EntityFairy extends EntityAnimal {
 	public double getYOffset() {
 		if (ridingEntity != null) {
 			if (this.worldObj.isRemote) {
-				return this.getYOffset() - ( flymode() ? 1.15F : 1.35f );
+				return super.getYOffset() - ( flymode() ? 1.15F : 1.35f );
 			}
 
-			return this.getYOffset() + ( flymode() ? 0.65F : 0.55F )
+			return super.getYOffset() + ( flymode() ? 0.65F : 0.55F )
 					- ( ridingEntity instanceof EntityChicken ? 0.0F : 0.15F );
 		} else {
 			return this.getYOffset();
