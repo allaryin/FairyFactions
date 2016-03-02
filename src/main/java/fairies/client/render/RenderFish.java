@@ -11,7 +11,7 @@ import net.minecraft.util.MathHelper;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.Vec3;
 
-public class RenderFish extends Render
+public class RenderFish extends Render<FairyEntityFishHook>
 {
 	protected static final ResourceLocation texture = new ResourceLocation("textures/particle/particles.png");
 	
@@ -27,7 +27,7 @@ public class RenderFish extends Render
         byte var10 = 1;
         byte var11 = 2;
         this.bindTexture(texture);
-        Tessellator var12 = Tessellator.instance;
+        Tessellator var12 = Tessellator.getInstance();
         float var13 = (float)(var10 * 8 + 0) / 128.0F;
         float var14 = (float)(var10 * 8 + 8) / 128.0F;
         float var15 = (float)(var11 * 8 + 0) / 128.0F;
@@ -54,7 +54,7 @@ public class RenderFish extends Render
             double var23 = (double)MathHelper.cos(var20);
             float var25 = par1EntityFishHook.angler.getSwingProgress(par9);
             float var26 = MathHelper.sin(MathHelper.sqrt_float(var25) * (float)Math.PI);
-            Vec3 var27 = Vec3.createVectorHelper(-0.5D, 0.03D, 0.8D);
+            Vec3 var27 = new Vec3(-0.5D, 0.03D, 0.8D);
             var27.rotateAroundX(-(par1EntityFishHook.angler.prevRotationPitch + (par1EntityFishHook.angler.rotationPitch - par1EntityFishHook.angler.prevRotationPitch) * par9) * (float)Math.PI / 180.0F);
             var27.rotateAroundY(-(par1EntityFishHook.angler.prevRotationYaw + (par1EntityFishHook.angler.rotationYaw - par1EntityFishHook.angler.prevRotationYaw) * par9) * (float)Math.PI / 180.0F);
             var27.rotateAroundY(var26 * 0.5F);

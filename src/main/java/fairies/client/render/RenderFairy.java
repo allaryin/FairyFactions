@@ -154,7 +154,7 @@ public class RenderFairy extends RenderLiving<EntityFairy>
             fairyModel4.showCrown = fairy.tamed() || fairy.queen();
             fairyModel4.isSneak = fairy.isSneaking();
             fairyModel4.scoutWings = fairy.scout();
-            fairyModel4.onGround = fairyModel.onGround;
+            fairyModel4.swingProgress = fairyModel.swingProgress;
             fairyModel4.rogueParts = fairy.rogue();
             fairyModel4.hairType = fairy.hairType();
             GL11.glColor4f(0.7F, 0.7F, 0.7F, transp);
@@ -192,7 +192,7 @@ public class RenderFairy extends RenderLiving<EntityFairy>
                 fairyModel5.retract = 0F;
                 fairyModel5.isSneak = fairy.isSneaking();
                 fairyModel5.sinage = fairy.sinage;
-                fairyModel5.onGround = fairyModel.onGround;
+                fairyModel5.swingProgress = fairyModel.swingProgress;
                 fairyModel5.venom = fairy.canHeal();
             }
             else
@@ -203,7 +203,7 @@ public class RenderFairy extends RenderLiving<EntityFairy>
                 fairyModel2.jobType = fairy.getJob() - 1;
                 fairyModel2.isSneak = fairy.isSneaking();
                 fairyModel2.sinage = fairy.sinage;
-                fairyModel2.onGround = fairyModel.onGround;
+                fairyModel2.swingProgress = fairyModel.swingProgress;
             }
 
             return 1;

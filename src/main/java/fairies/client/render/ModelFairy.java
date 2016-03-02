@@ -182,9 +182,9 @@ public class ModelFairy extends ModelBiped
         bipedRightArm.rotateAngleY = 0.0F;
         bipedLeftArm.rotateAngleY = 0.0F;
 
-        if (onGround > -9990F)
+        if (swingProgress > -9990F)
         {
-            float f6 = onGround;
+            float f6 = swingProgress;
             bipedBody.rotateAngleY = MathHelper.sin(MathHelper.sqrt_float(f6) * (float)Math.PI * 2.0F) * 0.2F;
             wingLeft.rotateAngleY = wingRight.rotateAngleY = MathHelper.sin(MathHelper.sqrt_float(f6) * (float)Math.PI * 2.0F) * 0.2F;
             bipedRightArm.rotationPointZ = MathHelper.sin(bipedBody.rotateAngleY) * 5F;
@@ -194,15 +194,15 @@ public class ModelFairy extends ModelBiped
             bipedRightArm.rotateAngleY += bipedBody.rotateAngleY;
             bipedLeftArm.rotateAngleY += bipedBody.rotateAngleY;
             bipedLeftArm.rotateAngleX += bipedBody.rotateAngleY;
-            f6 = 1.0F - onGround;
+            f6 = 1.0F - swingProgress;
             f6 *= f6;
             f6 *= f6;
             f6 = 1.0F - f6;
             final float f8 = MathHelper.sin(f6 * (float)Math.PI);
-            final float f9 = MathHelper.sin(onGround * (float)Math.PI) * -(bipedHead.rotateAngleX - 0.7F) * 0.75F;
+            final float f9 = MathHelper.sin(swingProgress * (float)Math.PI) * -(bipedHead.rotateAngleX - 0.7F) * 0.75F;
             bipedRightArm.rotateAngleX -= f8 * 1.2D + f9;
             bipedRightArm.rotateAngleY += bipedBody.rotateAngleY * 2.0F;
-            bipedRightArm.rotateAngleZ = MathHelper.sin(onGround * (float)Math.PI) * -0.4F;
+            bipedRightArm.rotateAngleZ = MathHelper.sin(swingProgress * (float)Math.PI) * -0.4F;
         }
 
         if (flymode)
@@ -309,6 +309,9 @@ public class ModelFairy extends ModelBiped
         wingRight.rotateAngleZ -= Math.cos(sinage) / (flymode ? 3F : 8F);
     }
 
+    /*
+     * NOTE: Apparently removed in 1.8
+     * 
     @Override
 	public void renderEars(final float f)
     {
@@ -318,6 +321,7 @@ public class ModelFairy extends ModelBiped
 	public void renderCloak(final float f)
     {
     }
+     */
 
     public ModelRenderer strand, strand2, strand3, strand4;
     public ModelRenderer crown;

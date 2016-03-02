@@ -143,9 +143,9 @@ public class ModelFairyProps2 extends ModelBiped
         rogueRightArm.rotateAngleY = 0.0F;
         rogueLeftArm.rotateAngleY = 0.0F;
 
-        if (onGround > -9990F)
+        if (swingProgress > -9990F)
         {
-            float f6 = onGround;
+            float f6 = swingProgress;
             rogueBody.rotateAngleY = MathHelper.sin(MathHelper.sqrt_float(f6) * (float)Math.PI * 2.0F) * 0.2F;
             wingLeft.rotateAngleY = wingRight.rotateAngleY = MathHelper.sin(MathHelper.sqrt_float(f6) * (float)Math.PI * 2.0F) * 0.2F;
             rogueRightArm.rotationPointZ = MathHelper.sin(rogueBody.rotateAngleY) * 5F;
@@ -155,15 +155,15 @@ public class ModelFairyProps2 extends ModelBiped
             rogueRightArm.rotateAngleY += rogueBody.rotateAngleY;
             rogueLeftArm.rotateAngleY += rogueBody.rotateAngleY;
             rogueLeftArm.rotateAngleX += rogueBody.rotateAngleY;
-            f6 = 1.0F - onGround;
+            f6 = 1.0F - swingProgress;
             f6 *= f6;
             f6 *= f6;
             f6 = 1.0F - f6;
             final float f8 = MathHelper.sin(f6 * (float)Math.PI);
-            final float f9 = MathHelper.sin(onGround * (float)Math.PI) * -(rogueHead.rotateAngleX - 0.7F) * 0.75F;
+            final float f9 = MathHelper.sin(swingProgress * (float)Math.PI) * -(rogueHead.rotateAngleX - 0.7F) * 0.75F;
             rogueRightArm.rotateAngleX -= f8 * 1.2D + f9;
             rogueRightArm.rotateAngleY += rogueBody.rotateAngleY * 2.0F;
-            rogueRightArm.rotateAngleZ = MathHelper.sin(onGround * (float)Math.PI) * -0.4F;
+            rogueRightArm.rotateAngleZ = MathHelper.sin(swingProgress * (float)Math.PI) * -0.4F;
         }
 
         if (flymode)
@@ -268,6 +268,9 @@ public class ModelFairyProps2 extends ModelBiped
         rogueBlade1.rotationPointZ = rogueBlade2.rotationPointZ = rogueRightArm.rotationPointZ;
     }
 
+    /*
+     * NOTE: These are apparently removed in 1.8
+     *
     @Override
 	public void renderEars(final float f)
     {
@@ -277,6 +280,7 @@ public class ModelFairyProps2 extends ModelBiped
 	public void renderCloak(final float f)
     {
     }
+     */
 
     public ModelRenderer rogueHead;
     public ModelRenderer rogueBody;

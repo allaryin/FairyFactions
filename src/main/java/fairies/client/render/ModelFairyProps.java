@@ -184,9 +184,9 @@ public class ModelFairyProps extends ModelBiped
         bipedRightArm.rotateAngleY = 0.0F;
         bipedLeftArm.rotateAngleY = 0.0F;
 
-        if (onGround > -9990F)
+        if (swingProgress > -9990F)
         {
-            float f6 = onGround;
+            float f6 = swingProgress;
             bipedBody.rotateAngleY = MathHelper.sin(MathHelper.sqrt_float(f6) * (float)Math.PI * 2.0F) * 0.2F;
             bipedRightArm.rotationPointZ = MathHelper.sin(bipedBody.rotateAngleY) * 5F;
             bipedRightArm.rotationPointX = -MathHelper.cos(bipedBody.rotateAngleY) * 5F + 2.0F;
@@ -195,15 +195,15 @@ public class ModelFairyProps extends ModelBiped
             bipedRightArm.rotateAngleY += bipedBody.rotateAngleY;
             bipedLeftArm.rotateAngleY += bipedBody.rotateAngleY;
             bipedLeftArm.rotateAngleX += bipedBody.rotateAngleY;
-            f6 = 1.0F - onGround;
+            f6 = 1.0F - swingProgress;
             f6 *= f6;
             f6 *= f6;
             f6 = 1.0F - f6;
             final float f8 = MathHelper.sin(f6 * (float)Math.PI);
-            final float f9 = MathHelper.sin(onGround * (float)Math.PI) * -(bipedHead.rotateAngleX - 0.7F) * 0.75F;
+            final float f9 = MathHelper.sin(swingProgress * (float)Math.PI) * -(bipedHead.rotateAngleX - 0.7F) * 0.75F;
             bipedRightArm.rotateAngleX -= f8 * 1.2D + f9;
             bipedRightArm.rotateAngleY += bipedBody.rotateAngleY * 2.0F;
-            bipedRightArm.rotateAngleZ = MathHelper.sin(onGround * (float)Math.PI) * -0.4F;
+            bipedRightArm.rotateAngleZ = MathHelper.sin(swingProgress * (float)Math.PI) * -0.4F;
         }
 
         if (flymode)
@@ -324,9 +324,9 @@ public class ModelFairyProps extends ModelBiped
         scoutRightArm.rotateAngleY = 0.0F;
         scoutLeftArm.rotateAngleY = 0.0F;
 
-        if (onGround > -9990F)
+        if (swingProgress > -9990F)
         {
-            float f6 = onGround;
+            float f6 = swingProgress;
             scoutBody.rotateAngleY = MathHelper.sin(MathHelper.sqrt_float(f6) * (float)Math.PI * 2.0F) * 0.2F;
             wingLeft.rotateAngleY = wingRight.rotateAngleY = MathHelper.sin(MathHelper.sqrt_float(f6) * (float)Math.PI * 2.0F) * 0.2F;
             scoutRightArm.rotationPointZ = MathHelper.sin(scoutBody.rotateAngleY) * 5F;
@@ -336,15 +336,15 @@ public class ModelFairyProps extends ModelBiped
             scoutRightArm.rotateAngleY += scoutBody.rotateAngleY;
             scoutLeftArm.rotateAngleY += scoutBody.rotateAngleY;
             scoutLeftArm.rotateAngleX += scoutBody.rotateAngleY;
-            f6 = 1.0F - onGround;
+            f6 = 1.0F - swingProgress;
             f6 *= f6;
             f6 *= f6;
             f6 = 1.0F - f6;
             final float f8 = MathHelper.sin(f6 * (float)Math.PI);
-            final float f9 = MathHelper.sin(onGround * (float)Math.PI) * -(scoutHead.rotateAngleX - 0.7F) * 0.75F;
+            final float f9 = MathHelper.sin(swingProgress * (float)Math.PI) * -(scoutHead.rotateAngleX - 0.7F) * 0.75F;
             scoutRightArm.rotateAngleX -= f8 * 1.2D + f9;
             scoutRightArm.rotateAngleY += scoutBody.rotateAngleY * 2.0F;
-            scoutRightArm.rotateAngleZ = MathHelper.sin(onGround * (float)Math.PI) * -0.4F;
+            scoutRightArm.rotateAngleZ = MathHelper.sin(swingProgress * (float)Math.PI) * -0.4F;
         }
 
         if (flymode)
@@ -448,9 +448,9 @@ public class ModelFairyProps extends ModelBiped
         medicHead.rotateAngleY = f3 / (180F / (float)Math.PI);
         medicHead.rotateAngleX = f4 / (180F / (float)Math.PI);
 
-        if (onGround > -9990F)
+        if (swingProgress > -9990F)
         {
-            final float f6 = onGround;
+            final float f6 = swingProgress;
             medicBody.rotateAngleY = MathHelper.sin(MathHelper.sqrt_float(f6) * (float)Math.PI * 2.0F) * 0.2F;
         }
 
@@ -471,6 +471,9 @@ public class ModelFairyProps extends ModelBiped
         }
     }
 
+    /*
+     * NOTE: These are apparently removed in 1.8
+     *
     @Override
 	public void renderEars(final float f)
     {
@@ -480,6 +483,7 @@ public class ModelFairyProps extends ModelBiped
 	public void renderCloak(final float f)
     {
     }
+     */
 
     public ModelRenderer scoutHead;
     public ModelRenderer scoutBody;

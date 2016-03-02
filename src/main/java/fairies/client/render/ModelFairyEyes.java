@@ -51,6 +51,9 @@ public class ModelFairyEyes extends ModelBiped
         }
     }
 
+    /*
+     * NOTE: These are apparently removed in 1.8?
+     * 
     @Override
 	public void renderEars(final float f)
     {
@@ -60,6 +63,7 @@ public class ModelFairyEyes extends ModelBiped
 	public void renderCloak(final float f)
     {
     }
+    */
 
     public boolean flymode;
 }
