@@ -3,20 +3,22 @@ package fairies.client.render;
 import org.lwjgl.opengl.GL11;
 
 import net.minecraft.client.model.ModelBase;
+import net.minecraft.client.model.ModelRenderer;
 import net.minecraft.client.model.PositionTextureVertex;
 import net.minecraft.client.model.TexturedQuad;
 import net.minecraft.client.renderer.GLAllocation;
 import net.minecraft.client.renderer.Tessellator;
+import net.minecraft.client.renderer.WorldRenderer;
 
 // Referenced classes of package fairies.old.client:
 //            ModelBase, PositionTextureVertex, TexturedQuad, GLAllocation,
 //            Tessellator
 
-public class FairyModelRenderer
+public class FairyModelRenderer extends ModelRenderer
 {
-    @SuppressWarnings("unchecked")
-	public FairyModelRenderer(final ModelBase modelbase, final int i, final int j)
+    public FairyModelRenderer(final ModelBase modelbase, final int i, final int j)
     {
+    	super(modelbase, j, j);
         field_35971_a = 64F;
         field_35970_b = 32F;
         compiled = false;
@@ -29,14 +31,17 @@ public class FairyModelRenderer
         modelbase.boxList.add(this);
     }
 
-    public void addBox(final float f, final float f1, final float f2, final int i, final int j, final int k)
+    @Override
+    public ModelRenderer addBox(final float offX, final float offY, final float offZ, final int width, final int height, final int depth)
     {
-        addBox(f, f1, f2, i, j, k, 0.0F);
+        addBox(offX, offY, offZ, width, height, depth, 0.0F);
+        return this;
     }
 
-    public void addBox(final float f, final float f1, final float f2, final int i, final int j, final int k, final float f3)
+    @Override
+    public void addBox(final float offX, final float offY, final float offZ, final int width, final int height, final int depth, final float scaleFactor)
     {
-        addBox(f, f1, f2, i, j, k, 0.0F, 0, 0.0F);
+        addBox(offX, offY, offZ, width, height, depth, 0.0F, 0, 0.0F);
     }
 
     public void addBox(float f, float f1, float f2, final int i, final int j, final int k, final float f3, final int carl, float sagan)
@@ -275,11 +280,12 @@ public class FairyModelRenderer
     {
         displayList = GLAllocation.generateDisplayLists(1);
         GL11.glNewList(displayList, GL11.GL_COMPILE);
-        final Tessellator tessellator = Tessellator.instance;
+        final Tessellator tessellator = Tessellator.getInstance();
+        final WorldRenderer worldrenderer = tessellator.getWorldRenderer();
 
         for (int i = 0; i < faces.length; i++)
         {
-            faces[i].draw(tessellator, f);
+            faces[i].draw(worldrenderer, f);
         }
 
         GL11.glEndList();
