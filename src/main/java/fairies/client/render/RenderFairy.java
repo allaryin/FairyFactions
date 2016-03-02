@@ -12,8 +12,11 @@ import net.minecraft.block.Block;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.renderer.Tessellator;
+import net.minecraft.client.renderer.WorldRenderer;
 import net.minecraft.client.renderer.entity.RenderLiving;
 import net.minecraft.client.renderer.entity.RenderManager;
+import net.minecraft.client.renderer.entity.layers.LayerHeldItem;
+import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.init.Items;
@@ -41,6 +44,9 @@ public class RenderFairy extends RenderLiving<EntityFairy>
     public RenderFairy(RenderManager renderManager, ModelFairy modelfairy, float f)
     {
         super(renderManager, modelfairy, f);
+        
+        this.addLayer(new LayerHeldItem(this));
+        
         fairyModel = modelfairy;
         fairyModel2 = new ModelFairyProps();
         fairyModel3 = new ModelFairyEyes();
@@ -67,6 +73,9 @@ public class RenderFairy extends RenderLiving<EntityFairy>
         }
     }
 
+    /*
+     * NOTE: Replaced by LayerHeldItem 
+     *
     @Override
     protected void renderEquippedItems(EntityFairy entityliving, float f)
     {
@@ -124,6 +133,7 @@ public class RenderFairy extends RenderLiving<EntityFairy>
             GL11.glPopMatrix();
         }
     }
+     */
     
     @Override
     protected int shouldRenderPass(EntityFairy fairy, int i, float f)
@@ -215,13 +225,22 @@ public class RenderFairy extends RenderLiving<EntityFairy>
         }
     }
 
+    /*
     @Override
     public void passSpecialRender(EntityFairy fairy, double d, double d1, double d2)
     {
         renderFairyName(fairy, d, d1, d2);
     }
+    */
+    
+    @Override
+    public boolean canRenderName(EntityFairy fairy) {
+    	return true;
+    }
 
-    protected void renderFairyName(EntityFairy fairy, double d, double d1, double d2)
+    // TODO: Switch to using the vanilla implementation if possible
+    @Override
+    public void renderName(EntityFairy fairy, double x, double y, double z)
     {
         if (Minecraft.isGuiEnabled() && fairy != renderManager.livingPlayer)
         {
@@ -236,13 +255,13 @@ public class RenderFairy extends RenderLiving<EntityFairy>
 
                 if (s != null)
                 {
-                    renderLivingLabel(fairy, s, d, d1 - (fairy.flymode() ? 1.125D : 0.825D), d2, NAME_TAG_RANGE);
+                    renderLivingLabel(fairy, s, x, y - (fairy.flymode() ? 1.125D : 0.825D), z, NAME_TAG_RANGE);
                 }
             }
         }
     }
 
-    protected void renderLivingLabel(EntityLivingBase par1EntityLiving, String par2Str, double par3, double par5, double par7, float range)
+    protected void renderLivingLabel(EntityLivingBase par1EntityLiving, String par2Str, double x, double y, double z, float range)
     {
         float f = par1EntityLiving.getDistanceToEntity(renderManager.livingPlayer);
 
@@ -255,7 +274,7 @@ public class RenderFairy extends RenderLiving<EntityFairy>
         float f1 = 1.6F;
         float f2 = 0.01666667F * f1;
         GL11.glPushMatrix();
-        GL11.glTranslatef((float)par3 + 0.0F, (float)par5 + 2.3F, (float)par7);
+        GL11.glTranslatef((float)x + 0.0F, (float)y + 2.3F, (float)z);
         GL11.glNormal3f(0.0F, 1.0F, 0.0F);
         GL11.glRotatef(-renderManager.playerViewY, 0.0F, 1.0F, 0.0F);
         GL11.glRotatef(renderManager.playerViewX, 1.0F, 0.0F, 0.0F);
@@ -266,21 +285,20 @@ public class RenderFairy extends RenderLiving<EntityFairy>
         GL11.glEnable(GL11.GL_BLEND);
         GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
         Tessellator tessellator = Tessellator.getInstance();
-        byte byte0 = 0;
-        GL11.glDisable(GL11.GL_TEXTURE_2D);
-        tessellator.startDrawingQuads();
+        WorldRenderer worldrenderer = tessellator.getWorldRenderer();
         int i = fontrenderer.getStringWidth(StringUtils.stripControlCodes(par2Str)) / 2;
-        tessellator.setColorRGBA_F(0.0F, 0.0F, 0.0F, 0.25F);
-        tessellator.addVertex(-i - 1, -1 + byte0, 0.0D);
-        tessellator.addVertex(-i - 1, 8 + byte0, 0.0D);
-        tessellator.addVertex(i + 1, 8 + byte0, 0.0D);
-        tessellator.addVertex(i + 1, -1 + byte0, 0.0D);
+        GL11.glDisable(GL11.GL_TEXTURE_2D);
+        worldrenderer.begin(7, DefaultVertexFormats.POSITION_COLOR);
+        worldrenderer.pos((double)(-i - 1), -1.0D, 0.0D).color(0.0F, 0.0F, 0.0F, 0.25F).endVertex();
+        worldrenderer.pos((double)(-i - 1), 8.0D, 0.0D).color(0.0F, 0.0F, 0.0F, 0.25F).endVertex();
+        worldrenderer.pos((double)(i + 1), 8.0D, 0.0D).color(0.0F, 0.0F, 0.0F, 0.25F).endVertex();
+        worldrenderer.pos((double)(i + 1), -1.0D, 0.0D).color(0.0F, 0.0F, 0.0F, 0.25F).endVertex();
         tessellator.draw();
         GL11.glEnable(GL11.GL_TEXTURE_2D);
-        fontrenderer.drawString(par2Str, -fontrenderer.getStringWidth(StringUtils.stripControlCodes(par2Str)) / 2, byte0, 0x20ffffff);
+        fontrenderer.drawString(par2Str, -fontrenderer.getStringWidth(StringUtils.stripControlCodes(par2Str)) / 2, 0, 0x20ffffff);
         GL11.glEnable(GL11.GL_DEPTH_TEST);
         GL11.glDepthMask(true);
-        fontrenderer.drawString(par2Str, -fontrenderer.getStringWidth(StringUtils.stripControlCodes(par2Str)) / 2, byte0, -1);
+        fontrenderer.drawString(par2Str, -fontrenderer.getStringWidth(StringUtils.stripControlCodes(par2Str)) / 2, 0, -1);
         GL11.glEnable(GL11.GL_LIGHTING);
         GL11.glDisable(GL11.GL_BLEND);
         GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
