@@ -19,6 +19,13 @@ import net.minecraft.entity.EntityCreature;
 import net.minecraft.entity.EntityFlying;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.SharedMonsterAttributes;
+import net.minecraft.entity.ai.EntityAIAttackOnCollide;
+import net.minecraft.entity.ai.EntityAILeapAtTarget;
+import net.minecraft.entity.ai.EntityAILookIdle;
+import net.minecraft.entity.ai.EntityAIMate;
+import net.minecraft.entity.ai.EntityAISwimming;
+import net.minecraft.entity.ai.EntityAIWander;
+import net.minecraft.entity.ai.EntityAIWatchClosest;
 import net.minecraft.entity.ai.attributes.IAttributeInstance;
 import net.minecraft.entity.item.EntityMinecart;
 import net.minecraft.entity.item.EntityTNTPrimed;
@@ -40,6 +47,7 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.pathfinding.PathEntity;
+import net.minecraft.pathfinding.PathNavigateGround;
 import net.minecraft.potion.Potion;
 import net.minecraft.potion.PotionEffect;
 import net.minecraft.tileentity.TileEntity;
@@ -110,6 +118,32 @@ public class EntityFairy extends EntityAnimal {
 		super(world);
 		this.setSize(0.6F, 0.85F);
 
+		// init ai - starting with the behaviors and priorities from EntityWolf
+        ((PathNavigateGround)this.getNavigator()).setAvoidsWater(true);
+        this.tasks.addTask(1, new EntityAISwimming(this));
+        // this.tasks.addTask(2, this.aiSit);
+        // this.tasks.addTask(3, new EntityAILeapAtTarget(this, 0.4F));
+        this.tasks.addTask(4, new EntityAIAttackOnCollide(this, 1.0D, true));
+        // this.tasks.addTask(5, new EntityAIFollowOwner(this, 1.0D, 10.0F, 2.0F));
+        // this.tasks.addTask(6, new EntityAIMate(this, 1.0D));
+        this.tasks.addTask(7, new EntityAIWander(this, 1.0D));
+        // this.tasks.addTask(8, new EntityAIBeg(this, 8.0F));
+        this.tasks.addTask(9, new EntityAIWatchClosest(this, EntityPlayer.class, 8.0F));
+        this.tasks.addTask(9, new EntityAILookIdle(this));
+        /*
+        this.targetTasks.addTask(1, new EntityAIOwnerHurtByTarget(this));
+        this.targetTasks.addTask(2, new EntityAIOwnerHurtTarget(this));
+        this.targetTasks.addTask(3, new EntityAIHurtByTarget(this, true, new Class[0]));
+        this.targetTasks.addTask(4, new EntityAITargetNonTamed(this, EntityAnimal.class, false, new Predicate<Entity>()
+        {
+            public boolean apply(Entity p_apply_1_)
+            {
+                return p_apply_1_ instanceof EntitySheep || p_apply_1_ instanceof EntityRabbit;
+            }
+        }));
+        this.targetTasks.addTask(5, new EntityAINearestAttackableTarget(this, EntitySkeleton.class, false));
+		*/
+		
 		// fairy-specific init
 		setSkin(rand.nextInt(4));
 		setFaction(0);
@@ -123,7 +157,7 @@ public class EntityFairy extends EntityAnimal {
 		this.setCower(rand.nextBoolean());
 		this.postX = this.postY = this.postZ = -1;
 	}
-	
+		
 	// Obfuscated name lookups
 	private static final String[] MCP_ISJUMPING = { "isJumping", "field_70703_bu" };
 	private static final String[] MCP_ONIMPACT = { "onImpact", "func_70184_a" };
