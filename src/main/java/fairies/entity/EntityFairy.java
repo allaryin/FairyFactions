@@ -61,7 +61,6 @@ import net.minecraftforge.fml.relauncher.ReflectionHelper;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
-
 public class EntityFairy extends EntityAnimal {
 	
 	private boolean				cower;
@@ -370,7 +369,7 @@ public class EntityFairy extends EntityAnimal {
 
 			if (hearts() != didHearts) {
 				didHearts = !didHearts;
-				showHeartsOrSmokeFX(tamed());
+				showHeartsOrSmokeFX(isTamed());
 			}
 
 			// only render particles on clients
@@ -409,7 +408,7 @@ public class EntityFairy extends EntityAnimal {
 				}
 				
 				// not sure why this was inside the check above...
-				if (nameEnabled() && tamed()) {
+				if (nameEnabled() && isTamed()) {
 					if( !rulerName().equals("") ) {
 						FairyFactions.LOGGER.info("EntityFairy.onUpdate: calling proxy.openRenameGUI");
 						FairyFactions.proxy.openRenameGUI(this);
@@ -518,7 +517,7 @@ public class EntityFairy extends EntityAnimal {
 
 	@Override
 	public boolean canDespawn() {
-		return ruler == null && !tamed();
+		return ruler == null && !isTamed();
 	}
 	
 	@Override
@@ -861,7 +860,7 @@ public class EntityFairy extends EntityAnimal {
 					&& !canEntityBeSeen(entityToAttack) )) {
 				++loseInterest;
 
-				if (loseInterest >= ( tamed() ? FairyConfig.BEHAVIOR_AGGRO_TIMER
+				if (loseInterest >= ( isTamed() ? FairyConfig.BEHAVIOR_AGGRO_TIMER
 						: FairyConfig.BEHAVIOR_AGGRO_TIMER * 3 )) {
 					setTarget(null);
 					loseInterest = 0;
@@ -926,7 +925,7 @@ public class EntityFairy extends EntityAnimal {
 
 		if (ruler == null) {
 			// Looking for a queen to follow.
-			if (!tamed() && !queen()) {
+			if (!isTamed() && !queen()) {
 				double d = 40D;
 
 				if (getFaction() == 0) {
@@ -957,7 +956,7 @@ public class EntityFairy extends EntityAnimal {
 						}
 					}
 				}
-			} else if (getFaction() == 0 && tamed()) {
+			} else if (getFaction() == 0 && isTamed()) {
 				// Looking for a player to follow.
 				List<?> list = worldObj.getEntitiesWithinAABB(EntityPlayer.class,
 						getEntityBoundingBox().expand(16D, 16D, 16D));
@@ -1570,7 +1569,7 @@ public class EntityFairy extends EntityAnimal {
 			System.out.println("handlePosted("+flag+") - "+postedCount+" - "+this);
 		}
 		*/
-		if (!tamed() || getFaction() > 0 /*|| postedCount <= ( posted() ? 2 : 5 ) */ ) {
+		if (!isTamed() || getFaction() > 0 /*|| postedCount <= ( posted() ? 2 : 5 ) */ ) {
 			++postedCount;
 			return; // Avoid processing too often or when not necessary.
 		}
@@ -1931,7 +1930,7 @@ public class EntityFairy extends EntityAnimal {
 			} else {
 				return getFactionName(getFaction());
 			}
-		} else if (tamed()) {
+		} else if (isTamed()) {
 			String woosh = getActualName(getNamePrefix(), getNameSuffix());
 
 			if (queen()) {
@@ -2011,7 +2010,7 @@ public class EntityFairy extends EntityAnimal {
 		setFairyFlag(B_FLAGS, FLAG_CAN_FLAP, flag);
 	}
 
-	public boolean tamed() {
+	public boolean isTamed() {
 		return getFairyFlag(B_FLAGS, FLAG_TAMED);
 	}
 	protected void setTamed(boolean flag) {
@@ -2108,7 +2107,7 @@ public class EntityFairy extends EntityAnimal {
 	public boolean isRuler(EntityPlayer player) {
 		if (player == null)
 			return false;
-		return tamed() && rulerName().equals(player.getGameProfile().getName());
+		return isTamed() && rulerName().equals(player.getGameProfile().getName());
 	}
 	public String rulerName() {
 		final String name = dataWatcher.getWatchableObjectString(S_OWNER);
@@ -2302,7 +2301,7 @@ public class EntityFairy extends EntityAnimal {
 							&& rand.nextFloat() * 5F < ( f - 0.4F ) * 2.0F) {
 						setWithered(false);
 
-						if (tamed()) {
+						if (isTamed()) {
 							setHearts(!didHearts);
 						}
 
@@ -2386,8 +2385,8 @@ public class EntityFairy extends EntityAnimal {
 
 	// Checks to see if a fairy is their comrade.
 	private boolean sameTeam(EntityFairy fairy) {
-		if (tamed()) {
-			return fairy.tamed() && fairy.getFaction() == 0
+		if (isTamed()) {
+			return fairy.isTamed() && fairy.getFaction() == 0
 					&& fairy.rulerName().equals(this.rulerName());
 		} else if (getFaction() > 0) {
 			return fairy.getFaction() == this.getFaction();
@@ -2507,7 +2506,7 @@ public class EntityFairy extends EntityAnimal {
 				// faction members can be tamed in peaceful
 				if (( getFaction() == 0
 						|| worldObj.getDifficulty() == EnumDifficulty.PEACEFUL )
-						&& !( ( queen() || posted() ) && tamed() ) && !crying()
+						&& !( ( queen() || posted() ) && isTamed() ) && !crying()
 						&& !angry() && stack != null
 						&& acceptableFoods(stack.getItem())
 						&& stack.stackSize > 0) {
@@ -2532,7 +2531,7 @@ public class EntityFairy extends EntityAnimal {
 						setHearts(!hearts());
 						return true;
 					}
-				} else if (!tamed()) {
+				} else if (!isTamed()) {
 					setHearts(!hearts());
 				}
 
@@ -2548,7 +2547,7 @@ public class EntityFairy extends EntityAnimal {
 	public boolean acceptableFoods(Item i) {
 		if (i == Items.speckled_melon) {
 			return true;
-		} else if (tamed() || !queen()) {
+		} else if (isTamed() || !queen()) {
 			return i == Items.apple || i == Items.melon || i == Items.sugar
 					|| i == Items.cake || i == Items.cookie;
 		}
@@ -2747,7 +2746,7 @@ public class EntityFairy extends EntityAnimal {
 				queen.entityFear = null;
 				// }
 			}
-		} else if (tamed() && ruler != null
+		} else if (isTamed() && ruler != null
 				&& ruler instanceof EntityPlayerMP) {
 			// EntityPlayerMP player = (EntityPlayerMP)ruler;
 			String f = getActualName(getNamePrefix(), getNameSuffix());
@@ -2848,7 +2847,7 @@ public class EntityFairy extends EntityAnimal {
 	@Override
 	 */
 	protected void attackEntity(Entity entity, float f) {
-		if (attackTime <= 0 && f < ( tamed() ? 2.5F : 2.0F )
+		if (attackTime <= 0 && f < ( isTamed() ? 2.5F : 2.0F )
 				&& ( ( entity.getEntityBoundingBox().maxY > getEntityBoundingBox().minY
 						&& entity.getEntityBoundingBox().minY < getEntityBoundingBox().maxY )
 						|| f == 0F )) {
@@ -2902,7 +2901,7 @@ public class EntityFairy extends EntityAnimal {
 			}
 		}
 
-		if (tamed() && !rulerName().equals("") && entity != null) {
+		if (isTamed() && !rulerName().equals("") && entity != null) {
 			if (entity instanceof EntityPlayer
 					&& isRuler((EntityPlayer)entity)) {
 				if (!ignoreTarget && snowballFight(damagesource)) {
@@ -2991,7 +2990,7 @@ public class EntityFairy extends EntityAnimal {
 				FairyFactions.proxy.sendFairyMount(this, ridingEntity);
 			}
 
-			if (queen() && !tamed()) {
+			if (queen() && !isTamed()) {
 				alertFollowers(entity);
 			} else {
 				alertRuler(entity);
@@ -3074,7 +3073,7 @@ public class EntityFairy extends EntityAnimal {
 			} else {
 				s += Loc.TAME_FAIL_HAS_QUEEN;
 			}
-		} else if (tamed() && queen()) {
+		} else if (isTamed() && queen()) {
 			s += Loc.TAME_FAIL_TAME_QUEEN;
 		} else if (posted()) {
 			s += Loc.TAME_FAIL_POSTED;

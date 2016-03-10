@@ -686,7 +686,7 @@ public final class Spawner {
 			if (entity instanceof EntityFairy) {
 				EntityFairy fairy = (EntityFairy) entity;
 
-				if (!fairy.isDead && fairy.getHealth() > 0 && fairy.tamed()) {
+				if (!fairy.isDead && fairy.getHealth() > 0 && fairy.isTamed()) {
 					continue; // I also added this: so tamed fairies don't
 								// prevent more from spawning.
 				}

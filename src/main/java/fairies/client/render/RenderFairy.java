@@ -60,7 +60,7 @@ public class RenderFairy extends RenderLiving<EntityFairy>
         float f1 = 0.875F;
         fairyModel.sinage = fairy.sinage;
         fairyModel.flymode = fairy.flymode();
-        fairyModel.showCrown = fairy.tamed() || fairy.queen();
+        fairyModel.showCrown = fairy.isTamed() || fairy.queen();
         fairyModel.isSneak = fairy.isSneaking();
         fairyModel.scoutWings = fairy.scout();
         fairyModel.rogueParts = fairy.rogue();

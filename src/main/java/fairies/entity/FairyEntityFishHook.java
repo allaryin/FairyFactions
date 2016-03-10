@@ -225,7 +225,7 @@ public class FairyEntityFishHook extends Entity
             if (!this.worldObj.isRemote)
             {
                 if (this.angler == null || !this.angler.isEntityAlive() || this.angler.getEntityToAttack() != null || this.angler.getEntityFear() != null || !this.angler.posted() ||
-                        !this.angler.tamed() || !this.angler.isSitting() || this.angler.getFishEntity() == null || this.getDistanceSqToEntity(this.angler) > 1024.0D)
+                        !this.angler.isTamed() || !this.angler.isSitting() || this.angler.getFishEntity() == null || this.getDistanceSqToEntity(this.angler) > 1024.0D)
                 {
                     this.setDead();
                     return;
