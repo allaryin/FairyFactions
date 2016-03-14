@@ -8,6 +8,7 @@ import fairies.FairyConfig;
 import fairies.FairyFactions;
 import fairies.Loc;
 import fairies.Version;
+import fairies.ai.FairyAIFear;
 import fairies.ai.FairyJob;
 import fairies.world.FairyGroupGenerator;
 import net.minecraft.block.Block;
@@ -105,12 +106,10 @@ public class EntityFairy extends EntityAnimal {
 	public float				sinage;					// what does this mean?
 	//private boolean			flag;					// flagged for what, precisely?
 	private boolean				createGroup;
-	private int					listActions;
 	public int					witherTime;
 	private ItemStack			tempItem;
 	private boolean				isSwinging;
 	private int					particleCount;
-	private boolean				flyBlocked;
 
 	public EntityFairy(World world) {
 		super(world);
@@ -141,6 +140,8 @@ public class EntityFairy extends EntityAnimal {
         }));
         this.targetTasks.addTask(5, new EntityAINearestAttackableTarget(this, EntitySkeleton.class, false));
 		*/
+        
+        this.tasks.addTask(2, new FairyAIFear(this, 2.0D));
 		
 		// fairy-specific init
 		setSkin(rand.nextInt(4));
@@ -917,29 +918,6 @@ public class EntityFairy extends EntityAnimal {
 						fairy.setTarget(null);
 						fairy.setCryTime(100);
 						fairy.setEntityFear(entityToAttack);
-					}
-				}
-			}
-		}
-	}
-
-	private void handleFear() {
-		if (getEntityFear() != null) {
-			if (getEntityFear().isDead) {
-				// Don't fear the dead.
-				setEntityFear(null);
-			} else if (!hasPath() && canEntityBeSeen(getEntityFear())
-					&& willCower()) {
-				float dist = getDistanceToEntity(getEntityFear());
-
-				// Run from entityFear if you can see it and it is close.
-				if (dist < FairyConfig.BEHAVIOR_FEAR_RANGE) {
-					PathEntity dest = roam(getEntityFear(), this, PATH_AWAY);
-
-					if (dest != null) {
-						// setPathToEntity(dest);
-						this.getNavigator().setPath(dest, this.getAIMoveSpeed());
-						setCryTime(getCryTime() + 120);
 					}
 				}
 			}
