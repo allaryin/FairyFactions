@@ -10,6 +10,8 @@ public class FairyConfig extends Configuration {
     public static int		SPAWN_FACTION_MAX_SIZE	= 10;
     
 	public static double	GENERAL_HEALTH_BASE		= 15.0D;
+	public static double	GENERAL_HEALTH_ROGUE	= 10.0D;
+	public static double	GENERAL_HEALTH_QUEEN	= 30.0D;
 	public static float		GENERAL_SPEED_BASE		= 0.9F;
 	public static float		GENERAL_SPEED_SCOUT		= 1.05F;
 	public static float		GENERAL_SPEED_WITHER_MULT	= 0.75F;
@@ -56,6 +58,10 @@ public class FairyConfig extends Configuration {
          */
         GENERAL_HEALTH_BASE = getFloat("health.base", "general", (float)GENERAL_HEALTH_BASE,
         		1.0F, 40.0F, "base maximum health");
+        GENERAL_HEALTH_ROGUE = getFloat("health.rogue", "general", (float)GENERAL_HEALTH_ROGUE,
+        		1.0F, 40.0F, "maximum health for rogues");
+        GENERAL_HEALTH_QUEEN = getFloat("health.queen", "general", (float)GENERAL_HEALTH_QUEEN,
+        		1.0F, 40.0F, "maximum health for queens");
         GENERAL_SPEED_BASE = getFloat("speed.base", "general", GENERAL_SPEED_BASE,
         		0.1F, 2.0F, "base move speed");
         GENERAL_SPEED_SCOUT = getFloat("speed.scout", "general", GENERAL_SPEED_SCOUT,

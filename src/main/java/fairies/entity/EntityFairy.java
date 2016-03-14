@@ -20,9 +20,7 @@ import net.minecraft.entity.EntityFlying;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.entity.ai.EntityAIAttackOnCollide;
-import net.minecraft.entity.ai.EntityAILeapAtTarget;
 import net.minecraft.entity.ai.EntityAILookIdle;
-import net.minecraft.entity.ai.EntityAIMate;
 import net.minecraft.entity.ai.EntityAISwimming;
 import net.minecraft.entity.ai.EntityAIWander;
 import net.minecraft.entity.ai.EntityAIWatchClosest;
@@ -274,21 +272,22 @@ public class EntityFairy extends EntityAnimal {
 	@Override
 	protected void applyEntityAttributes() {
 		super.applyEntityAttributes();
+		
+		final double max_hp;
+		if( this.queen() ) {
+			max_hp = FairyConfig.GENERAL_HEALTH_QUEEN;
+		} else if( this.rogue() ) {
+			max_hp = FairyConfig.GENERAL_HEALTH_ROGUE;
+		} else {
+			max_hp = FairyConfig.GENERAL_HEALTH_BASE;
+		}
 		this.getEntityAttribute(SharedMonsterAttributes.maxHealth)
-				.setBaseValue(FairyConfig.GENERAL_HEALTH_BASE);
+				.setBaseValue(max_hp);
 		this.getEntityAttribute(SharedMonsterAttributes.movementSpeed)
 				.setBaseValue(FairyConfig.GENERAL_SPEED_BASE);
 		// this.getEntityAttribute(SharedMonsterAttributes.attackDamage).setBaseValue(4.0D);
 		// this.getEntityAttribute(SharedMonsterAttributes.followRange).setBaseValue(10.0D);
 	}
-	
-	/*
-	public float getMaxHealth()   //Max Health
-    {
-    	// TODO: figure out where to put this, getMaxHealth is final
-        return queen() ? 30 : rogue() ? 10 : 15;
-    }
-    */
 	
 	@Override
 	public double getYOffset() {
