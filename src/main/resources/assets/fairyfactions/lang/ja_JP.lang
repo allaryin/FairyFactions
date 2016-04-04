@@ -1,0 +1,57 @@
+entity.FairyFactions.Fairy.name=妖精
+
+text.queen.prefix=女王の
+
+text.faction.1.name=Aviary Army
+text.faction.2.name=Bantam Brawlers
+text.faction.3.name=Charging Cherubs
+text.faction.4.name=Dainty Demons
+text.faction.5.name=Enigmatic Escorts
+text.faction.6.name=Floating Fury
+text.faction.7.name=Graceful Gliders
+text.faction.8.name=Hardy Handmaids
+text.faction.9.name=Iron Imps
+text.faction.10.name=Opulent Order
+text.faction.11.name=Kute Killers
+text.faction.12.name=Lethal Ladies
+text.faction.13.name=Maiden Militia
+text.faction.14.name=Nimble Nymphs
+text.faction.15.name=Petite Pugilists
+
+text.disband.queen.1.message=はあなたの申し出によってとても気を害された
+text.disband.queen.2.message=はあなたを汚い小作農と呼び、怒って出て行った
+text.disband.other.1.message=はそれを地面に投げつけ、かんしゃくを起こした
+text.disband.other.2.message=はあなたのことを糞と呼んで、去って行った
+text.disband.other.3.message=はグロいものを食べるより、死にたい
+text.disband.other.4.message=はグロいものを食べるより、死にたい
+text.disband.other.5.message=はあなたをにらみつけて、去っていった
+text.disband.other.6.message=はそれは今までで見た中で一番グロいものだと言った
+
+text.tame.queen.1.message=は嫌々あなたのパーティーに参加した
+text.tame.queen.2.message=はため息をついて、あなたの家来になった
+text.tame.queen.3.message=はとても楽しんで光るメロンを食べた
+text.tame.other.1.message=はリーダーがいない時、少し寂しそうだった
+text.tame.other.2.message=は肩をすくめて、あなたについて行くことを決めた
+text.tame.other.3.message=を過去を考えないようにして、あなたに参加した
+text.tame.other.4.message=は簡単にあのおいしいお菓子によって納得した
+text.tame.other.5.message=は彼女のことをあなたにきちんと紹介した
+text.tame.other.6.message=は明日がないようにそのお菓子を食べた
+
+text.tame.fail.prefix=
+text.tame.fail.angry.message=彼女は今怒ってるから、お前はその妖精を飼いならすことはできない
+text.tame.fail.crying.message=彼女は今動揺してるから、お前はその妖精を飼いならすことはできない
+text.tame.fail.has_followers.message=お前が彼女の家来を倒すまで、妖精の女王を飼いならすことはできない
+text.tame.fail.has_queen.message=tame this fairy until you defeat her queen.
+text.tame.fail.tame_queen.message=お前は他の誰かの妖精の女王を盗むことはできない
+text.tame.fail.posted.message=steal a fairy who's assigned to a post.
+text.tame.fail.glowstone.message=本当に妖精にそんな腸みたいなものを食べさせる気？
+text.tame.fail.not_melon.message=お前は傷のあるメロンなしで妖精を飼いなすことはできない
+text.tame.fail.not_snack.message=お前は甘いお菓子なしで妖精を飼いならすことはできない
+
+text.death.1.message=は死んだ
+text.death.2.message=はトラブルに巻き込まれた
+text.death.3.message=は空高くにある大きな森へと消えて行った
+text.death.4.message=はしばらくの間、去らなければならない
+text.death.5.message=は良き人生を送った
+text.death.6.message=は今とても楽にされている
+text.death.7.message=はくたばった
