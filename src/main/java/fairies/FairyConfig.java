@@ -13,6 +13,9 @@ public class FairyConfig extends Configuration {
 	public static float		GENERAL_SPEED_BASE		= 0.9F;
 	public static float		GENERAL_SPEED_SCOUT		= 1.05F;
 	public static float		GENERAL_SPEED_WITHER_MULT	= 0.75F;
+	
+	public static int		GENERAL_FAIRY_ENTITY_ID		= 110;
+	public static int		GENERAL_FISHHOOK_ENTITY_ID	= 111;
 
 	public static float		BEHAVIOR_PATH_RANGE			= 16F;
 	public static float		BEHAVIOR_PURSUE_RANGE		= BEHAVIOR_PATH_RANGE;
@@ -62,6 +65,12 @@ public class FairyConfig extends Configuration {
         		0.1F, 2.0F, "move speed for scouts");
         GENERAL_SPEED_WITHER_MULT = getFloat("speed.wither_mult", "general", GENERAL_SPEED_WITHER_MULT,
         		0.05F, 0.95F, "multiplier to speed for wither debuff (lower is slower)");
+       
+        /**
+         * Entity ID's
+         */
+        GENERAL_FAIRY_ENTITY_ID = getInt("entity.fairy.id", "general", GENERAL_FAIRY_ENTITY_ID, 0, 255, "entity id for fairies");
+        GENERAL_FISHHOOK_ENTITY_ID = getInt("entity.fishhook.id", "general", GENERAL_FISHHOOK_ENTITY_ID, 0, 255, "entity id for fishhooks");
         
         /**
          * Behavior modifiers

@@ -6,6 +6,7 @@ import cpw.mods.fml.common.network.FMLEventChannel;
 import cpw.mods.fml.common.network.NetworkRegistry;
 import cpw.mods.fml.common.network.internal.FMLProxyPacket;
 import cpw.mods.fml.common.registry.EntityRegistry;
+import fairies.FairyConfig;
 import fairies.FairyFactions;
 import fairies.Version;
 import fairies.entity.EntityFairy;
@@ -38,9 +39,8 @@ public class CommonProxy {
 	}
 
 	public void initEntities() {
-		int entityID = 0;
-		registerEntity( entityID++, EntityFairy.class, "Fairy", 0xea8fde, 0x8658bf );
-		registerEntity( entityID++, FairyEntityFishHook.class, "FairyFishhook" );
+		registerEntity( FairyConfig.GENERAL_FAIRY_ENTITY_ID, EntityFairy.class, "Fairy", 0xea8fde, 0x8658bf );
+		registerEntity( FairyConfig.GENERAL_FISHHOOK_ENTITY_ID, FairyEntityFishHook.class, "FairyFishhook" );
 	}
 	
 	private void registerEntity( int entityID, Class<?extends Entity> entityClass, String entityName ) {
