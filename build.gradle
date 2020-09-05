@@ -1,69 +1,41 @@
 buildscript {
 	repositories {
+		maven { url "http://files.minecraftforge.net/maven" }
+		maven { url "https://oss.sonatype.org/content/repositories/snapshots/" }
 		mavenCentral()
-		maven {
-			name = "forge"
-			url = "http://files.minecraftforge.net/maven"
-		}
-		maven {
-			name = "sonatype"
-			url = "https://oss.sonatype.org/content/repositories/snapshots/"
-		}
+		jcenter()
 	}
 	dependencies {
-		classpath 'net.minecraftforge.gradle:ForgeGradle:1.2-SNAPSHOT'
+		classpath group: 'net.minecraftforge.gradle', name: 'ForgeGradle', version: '3.+', changing: true
 	}
 }
 
-apply plugin: 'forge'
+apply plugin: 'net.minecraftforge.gradle'
 
 version = version_major + "." + version_minor + "." + version_revision
-group   = "fairies"
+group   = "org.mcupdater.fairies"
+archivesBaseName = "fairyfactions"
 
 minecraft {
-	version = project.mcversion + "-" + project.forgeversion + "-" + project.mcversion
-	runDir  = "debug"
-
-	replace '@VERSION@', project.version
-}
-
-jar {
-	// Sets the output directory of the mod's jar file. Can be an absolute
-	// path to your Minecraft mods folder for quicker testing
-	destinationDir = file 'output'
+	mappings channel: 'snapshot', version: '20200514-1.16'
 }
 
 dependencies {
-	// you may put jars on which you depend on in ./libs
-	// or you may define them like so..
-	//compile "some.group:artifact:version:classifier"
-	//compile "some.group:artifact:version"
-		
-	// real examples
-	//compile 'com.mod-buildcraft:buildcraft:6.0.8:dev'	// adds buildcraft to the dev env
-	//compile 'com.googlecode.efficient-java-matrix-library:ejml:0.24' // adds ejml to the dev env
-
-	// for more info...
-	// http://www.gradle.org/docs/current/userguide/artifact_dependencies_tutorial.html
-	// http://www.gradle.org/docs/current/userguide/dependency_management.html
+    // Specify the version of Minecraft to use, If this is any group other then 'net.minecraft' it is assumed
+    // that the dep is a ForgeGradle 'patcher' dependency. And it's patches will be applied.
+    // The userdev artifact is a special name and will get all sorts of transformations applied to it.
+    minecraft 'net.minecraftforge:forge:' + mcversion + '-' + forgeversion
 }
 
-processResources {
-	// this will ensure that this task is redone when the versions change.
-	inputs.property "version", project.version
-	inputs.property "mcversion", project.minecraft.version
-
-	// replace stuff in mcmod.info, nothing else
-	from(sourceSets.main.resources.srcDirs) {
-		include 'mcmod.info'
-				
-		// replace version and mcversion
-		expand 'version':project.version, 'mcversion':project.minecraft.version
-	}
-		
-	// copy everything else, thats not the mcmod.info
-	from(sourceSets.main.resources.srcDirs) {
-		exclude 'mcmod.info'
+jar {
+	manifest {
+		attributes([
+			"Specification-Title": "fairyfactions",
+			"Specification-Vendor": "allaryin",
+			"Specification-Version": "0.6.0",
+			"Implementation-Title": project.name,
+			"Implementation-Version": "${version}",
+			"Implementation-Timestamp": new Date().format("yyyy-MM-dd'T'HH:mm:ssZ")
+		])
 	}
 }
-
