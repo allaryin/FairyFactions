@@ -8,6 +8,7 @@
 /classes/
 /output/
 debug/
+run/
 
 /javadocs/
 *-javadoc/

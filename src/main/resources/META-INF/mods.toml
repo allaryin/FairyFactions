@@ -1,0 +1,30 @@
+modLoader="javafml"
+loaderVersion="[33,)"
+license="Apache-2.0"
+issueTrackerURL="https://github.com/allaryin/FairyFactions/issues"
+showAsResourcePack=false
+
+[[mods]]
+    modId="fairyfactions"
+    version="${file.jarVersion}"
+    displayName="Fairy Factions"
+    displayURL="https://www.curseforge.com/minecraft/mc-mods/fairy-factions"
+    authors="allaryin"
+    credits="KodaichiZero - original mod"
+    description='''
+    Taming tribal fairies for silliness, fun, and profit!
+    '''
+
+    [[dependencies.fairyfactions]]
+        modId="forge"
+        mandatory=true
+        versionRange="[33.0,)"
+        ordering="AFTER"
+        side="BOTH"
+
+    [[dependencies.fairyfactions]]
+        modId="minecraft"
+        mandatory=true
+        versionRange="[1.16.2]"
+        ordering="NONE"
+        side="BOTH"
