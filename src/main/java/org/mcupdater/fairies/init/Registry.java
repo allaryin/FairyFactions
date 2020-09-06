@@ -2,6 +2,7 @@ package org.mcupdater.fairies.init;
 
 import net.minecraft.entity.EntityClassification;
 import net.minecraft.entity.EntityType;
+import net.minecraft.entity.ai.attributes.GlobalEntityTypeAttributes;
 import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
@@ -19,6 +20,7 @@ public class Registry {
 				.setTrackingRange(64).setUpdateInterval(1).size(0.6F, 0.85F)
 				.build(FairyEntity.NAME);
 		FAIRY_ENTITY_TYPE.setRegistryName(FairyFactions.MOD_ID, FairyEntity.NAME);
+		GlobalEntityTypeAttributes.put(FAIRY_ENTITY_TYPE, FairyEntity.getAttributes().func_233813_a_());
 		event.getRegistry().register(FAIRY_ENTITY_TYPE);
 	}
 }
