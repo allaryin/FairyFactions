@@ -8,18 +8,27 @@ import net.minecraft.util.ResourceLocation;
 import org.lwjgl.opengl.GL11;
 import org.mcupdater.fairies.FairyFactions;
 import org.mcupdater.fairies.client.model.ModelFairy;
+import org.mcupdater.fairies.client.model.ModelFairyEyes;
+import org.mcupdater.fairies.client.model.ModelFairyProps;
+import org.mcupdater.fairies.client.model.ModelFairyProps2;
 import org.mcupdater.fairies.entity.FairyEntity;
 
 public class RenderFairy extends MobRenderer<FairyEntity, ModelFairy> {
 
-	protected ModelFairy fairyModel, fairyModel4; //Body and withered overlay
-	//protected ModelFairyProps fairyModel2; //Clothes and stuff
-	//protected ModelFairyEyes fairyModel3; //Eyes
-	//protected ModelFairyProps2 fairyModel5; //Rogue Clothes
+	protected ModelFairy fairyModel, fairyModel4;   //Body and withered overlay
+	protected ModelFairyProps fairyModel2;          //Clothes and stuff
+	protected ModelFairyEyes fairyModel3;           //Eyes
+	protected ModelFairyProps2 fairyModel5;         //Rogue Clothes
 
 	public RenderFairy(EntityRendererManager renderManagerIn, ModelFairy entityModelIn, float shadowSizeIn) {
 		super(renderManagerIn, entityModelIn, shadowSizeIn);
 		this.addLayer(new HeldItemLayer<>(this));
+
+		this.fairyModel = entityModelIn;
+		this.fairyModel2 = new ModelFairyProps();
+		this.fairyModel3 = new ModelFairyEyes();
+		this.fairyModel4 = new ModelFairy(0.015625F);
+		this.fairyModel5 = new ModelFairyProps2();
 	}
 
 	public RenderFairy(EntityRendererManager renderManagerIn) {

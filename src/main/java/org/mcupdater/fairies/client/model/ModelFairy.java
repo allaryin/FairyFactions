@@ -3,14 +3,11 @@ package org.mcupdater.fairies.client.model;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.vertex.IVertexBuilder;
 import net.minecraft.client.renderer.entity.model.BipedModel;
-import net.minecraft.client.renderer.entity.model.EntityModel;
 import net.minecraft.client.renderer.entity.model.IHasArm;
 import net.minecraft.client.renderer.entity.model.IHasHead;
 import net.minecraft.client.renderer.model.ModelRenderer;
 import net.minecraft.util.math.MathHelper;
 import org.mcupdater.fairies.entity.FairyEntity;
-
-import javax.annotation.ParametersAreNonnullByDefault;
 
 public class ModelFairy extends BipedModel<FairyEntity> implements IHasArm, IHasHead {
 	public ModelRenderer strand, strand2, strand3, strand4;
@@ -177,20 +174,15 @@ public class ModelFairy extends BipedModel<FairyEntity> implements IHasArm, IHas
 			}
 		}
 
-		/*
-		 * The original version kept held items as ID's, but I don't know that they ever got set?!
-		 * They probably did - but we'll worry about this later.
-		 *
-		if (heldItemLeft != 0)
+		if (!entityIn.getHeldItemOffhand().isEmpty())
 		{
 			bipedLeftArm.rotateAngleX = bipedLeftArm.rotateAngleX * 0.5F - ((float)Math.PI / 10F);
 		}
 
-		if (heldItemRight != 0)
+		if (!entityIn.getHeldItemMainhand().isEmpty())
 		{
 			bipedRightArm.rotateAngleX = bipedRightArm.rotateAngleX * 0.5F - ((float)Math.PI / 10F);
 		}
-		 */
 
 		bipedRightArm.rotateAngleY = 0.0F;
 		bipedLeftArm.rotateAngleY = 0.0F;
