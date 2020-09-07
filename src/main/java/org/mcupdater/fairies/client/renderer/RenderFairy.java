@@ -3,14 +3,12 @@ package org.mcupdater.fairies.client.renderer;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import net.minecraft.client.renderer.entity.EntityRendererManager;
 import net.minecraft.client.renderer.entity.MobRenderer;
+import net.minecraft.client.renderer.entity.layers.HeadLayer;
 import net.minecraft.client.renderer.entity.layers.HeldItemLayer;
 import net.minecraft.util.ResourceLocation;
 import org.lwjgl.opengl.GL11;
 import org.mcupdater.fairies.FairyFactions;
-import org.mcupdater.fairies.client.model.ModelFairy;
-import org.mcupdater.fairies.client.model.ModelFairyEyes;
-import org.mcupdater.fairies.client.model.ModelFairyProps;
-import org.mcupdater.fairies.client.model.ModelFairyProps2;
+import org.mcupdater.fairies.client.model.*;
 import org.mcupdater.fairies.entity.FairyEntity;
 
 public class RenderFairy extends MobRenderer<FairyEntity, ModelFairy> {
@@ -23,6 +21,8 @@ public class RenderFairy extends MobRenderer<FairyEntity, ModelFairy> {
 	public RenderFairy(EntityRendererManager renderManagerIn, ModelFairy entityModelIn, float shadowSizeIn) {
 		super(renderManagerIn, entityModelIn, shadowSizeIn);
 		this.addLayer(new HeldItemLayer<>(this));
+		//this.addLayer(new HeadLayer<FairyEntity, ModelFairy>(this, 1));
+		this.addLayer(new LayerFairyEyes<>(this));
 
 		this.fairyModel = entityModelIn;
 		this.fairyModel2 = new ModelFairyProps();

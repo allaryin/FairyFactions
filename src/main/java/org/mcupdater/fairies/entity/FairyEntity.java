@@ -5,8 +5,12 @@ import net.minecraft.entity.EntityType;
 import net.minecraft.entity.MobEntity;
 import net.minecraft.entity.ai.attributes.AttributeModifierMap;
 import net.minecraft.entity.ai.attributes.Attributes;
+import net.minecraft.entity.ai.goal.LookAtGoal;
+import net.minecraft.entity.ai.goal.LookRandomlyGoal;
+import net.minecraft.entity.ai.goal.SwimGoal;
 import net.minecraft.entity.ai.goal.WaterAvoidingRandomWalkingGoal;
 import net.minecraft.entity.passive.AnimalEntity;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.world.World;
 import net.minecraft.world.server.ServerWorld;
 import org.mcupdater.fairies.FairyConfig;
@@ -21,13 +25,19 @@ public class FairyEntity extends AnimalEntity {
 	public FairyEntity(EntityType<? extends FairyEntity> fairy, World world) {
 		super(fairy, world);
 
+		// appearance and variety
 		skinVariant = rand.nextInt(4);
 		isQueen = false;
 	}
 
 	@Override
 	protected void registerGoals() {
-		this.goalSelector.addGoal(0, new WaterAvoidingRandomWalkingGoal(this, this.getAIMoveSpeed()));
+		int p = 0;
+		this.goalSelector.addGoal(++p, new SwimGoal(this));
+	//	this.goalSelector.addGoal(++p, new WaterAvoidingRandomWalkingGoal(this, 1.0D));
+
+		this.goalSelector.addGoal(++p, new LookAtGoal(this, PlayerEntity.class, 8.0F));
+		this.goalSelector.addGoal(++p, new LookRandomlyGoal(this));
 	}
 
 	@Override
@@ -45,12 +55,12 @@ public class FairyEntity extends AnimalEntity {
 
 	public static AttributeModifierMap.MutableAttribute getAttributes() {
 		double max_health = 15.0D;
-		double movement_speed = 1.0D;
+		double movement_speed = 0.25D;
 
 		// NOTE: this may not work since the attributes are only got at initial load time?
 		if (FairyConfig.SPEC.isLoaded()) {
 			max_health = FairyConfig.GENERAL.healthBase.get();
-			movement_speed = FairyConfig.GENERAL.speedBase.get();
+			movement_speed *= FairyConfig.GENERAL.speedBase.get();
 		}
 
 		return MobEntity.func_233666_p_()
